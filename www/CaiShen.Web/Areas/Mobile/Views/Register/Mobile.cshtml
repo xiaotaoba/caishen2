@@ -1,0 +1,257 @@
+﻿@model Pannet.Models.UserMobileRegisterVModel
+
+@using Pannet.Models 
+@using Pannet.DAL  
+@using Pannet.DAL.Repository  
+
+@{
+    ViewBag.Title = "注册";
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    SystemInfo sysModel = SystemInfoService.GetModel();
+}
+@section Style{
+    <style>
+        html { background: #f8f8f8!important; }
+        .pc_bottom { display: none; }
+    </style>
+}
+
+@using (Html.BeginForm("RegisterMobile", "Register", FormMethod.Post))
+{ 
+    @Html.ValidationSummary(true)
+    @Html.Raw(ViewBag.MessageInfo)
+    <input type="hidden" name="returnurl" value="@ViewBag.returnurl" />
+    <input type="hidden" name="u" value="" />
+    <input type="hidden" name="Role" value="3" />
+    <div class="box">
+        <div class="u_banner">
+            <img src="@(sysModel.Sys_LogoUrl)" alt="" />
+        </div>
+        <div class="u_content">
+            <div class="u_info">
+                <dl>
+                    <dt><i class="icon iconfont icon-dianhua"></i></dt>
+                    <dd>
+                        <input type="text" placeholder="请输入您的手机号" name="U_Phone" id="U_Phone"><span></span></dd>
+                </dl>
+                <dl class="rr_vCode">
+                    <dt><i class="icon iconfont icon-anquan"></i></dt>
+                    <dd>
+                        <input type="text" placeholder="验证码" name="U_Code" id="U_Code"><input type="button" id="vCodeGet" value="获取验证码"><span></span></dd>
+                </dl>
+                <dl>
+                    <dt><i class="icon iconfont icon-mima1"></i></dt>
+                    <dd>
+                        <input type="password" placeholder="密码：6-20位字母、数字" name="U_Pwd" id="U_Pwd"><span></span></dd>
+                </dl>
+                <dl>
+                    <dt><i class="icon iconfont icon-mima1"></i></dt>
+                    <dd>
+                        <input type="password" placeholder="确认密码" name="U_Pwd2" id="U_Pwd2"><span></span></dd>
+                </dl>
+            </div>
+            <div class="tac">
+                @Html.ValidationMessageFor(Model => Model.U_Phone)
+                @Html.ValidationMessageFor(Model => Model.U_Pwd)
+                @Html.ValidationMessageFor(Model => Model.U_Pwd2)
+                @Html.ValidationMessageFor(Model => Model.U_Code)
+            </div>
+            <div class="u_btn">
+                <div class="tac agreement"><label><input  type="checkbox" />已阅读并同意遵守《<a href="#">用户协议及隐私条款</a>》</label></div>
+                <div class="u_submit">
+                    <input type="submit" value="提交注册" id="btnSubmit">
+                </div>
+                <div class="u_other">
+                    <div class="tac"><a href="@Url.Action("Index", "Login")">登录</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section FootJs{
+    <script>
+        var $username = $("#U_Phone");
+        var $password = $("#U_Pwd");
+        var $passwordAgain = $("#U_Pwd2");
+        var $tcode = $("#U_Code");
+        var $btnGetTCode = $("#vCodeGet");
+        //var $agreement = $("#agreement");
+        //var $btnGetTCodeAgain = $("#btnGetTCodeAgain");
+        var leftSecond = 60;
+        var timeout = null;
+        var regPwd = /^[\w]{6,20}$/
+        var regMobile = /^[\w]{11}$/
+
+        $(function () {
+
+            $("[name='u']").val(localStorage.getItem("u"));
+
+            $("#btnSubmit").click(function () {
+                if ($username.val() == "") {
+                    alert("请输入手机号码！");
+                    return false;
+                }
+                if (!$username.val().match(regMobile)) {
+                    alert("请输入正确的手机号码！");
+                    return false;
+                }
+                //if ($tcode.val() == "") {
+                //    alert("请输入手机验证码！");
+                //    return false;
+                //}
+                //if (!CheckMobileCode()) {
+                //    alert("手机验证码错误！");
+                //    return false;
+                //}
+
+                //if (!$agreement.attr("checked")) {
+                //    alert("只有同意《用户注册协议》才能够继续注册！");
+                //    return false;
+                //}
+                return true;
+                //Register();
+            });
+
+            $btnGetTCode.click(function () {
+
+                if (!CheckUserName()) {
+                    return false;
+                }
+                if ($password.val() == "") {
+                    alert("请输入密码！");
+                    return false;
+                }
+                if (!$password.val().match(regPwd)) {
+                    alert("密码为6-20位数字及字母！");
+                    return false;
+                }
+                if ($password.val().toLowerCase() != $passwordAgain.val().toLowerCase()) {
+                    alert("确认密码不一致！");
+                    return false;
+                }
+                SendMobileCode();
+            });
+        });
+
+
+        function SendMobileCode() {
+            $.ajax({
+                url: "@Url.Action("SendMobileCode", "Register")",
+                type: "GET",
+                async: false,
+                cache: false,
+                data: { mobile: $username.val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")"); //JSON.parse(result);
+                    if (json_rs == null || json_rs.status == "-1") {//返回错误
+                        alert(json_rs.msg);
+                    }
+                    else if (json_rs.status == "success") {
+                        ResetTime();
+                        if (json_rs.msg != "") {
+                            alert(json_rs.msg);
+                        }
+                    }
+                    //location.href = "regTwo.aspx?username=" + encodeURI($("#username").val());
+
+                },
+                error: function (xmlhttp) {
+                    alert(xmlhttp.responseText);
+                }
+            });
+        }
+
+        //验证用户名
+        function CheckUserName() {
+
+            if ($username.val() == "") {
+                alert("请输入手机号码！");
+                return false;
+            }
+            var isExist = false;
+            $.ajax({
+                url: "@Url.Action("ExistMobile", "Register")",
+                type: "GET",
+                async: false,
+                cache: false,
+                data: { mobile: $username.val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")"); //JSON.parse(result);
+                    if (json_rs == null || json_rs.status == "-1") {//返回错误
+                        alert(json_rs.msg);
+                        isExist = true;
+                    }
+                    else if (json_rs.status == "success") {
+                        isExist = false;
+                    }
+                },
+                error: function (xmlhttp) {
+                    alert(xmlhttp.responseText);
+                }
+            });
+            if (isExist) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        //一致true,不一致false
+        function CheckMobileCode() {
+
+            var return_flag = false;
+
+            if ($tcode.val() == "") {
+                return false;
+            }
+            $.ajax({
+                url: "@Url.Action("CheckMobileCode", "Register")",
+                type: "GET",
+                async: false,
+                cache: false,
+                data: { mobile: $username.val(), code: $tcode.val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")"); //JSON.parse(result);
+                    if (json_rs == null || json_rs.status == "-1") {//返回错误
+                        return_flag = false;
+                    }
+                    else if (json_rs.status == "success") {
+                        return_flag = true;
+                    }
+                },
+                error: function (xmlhttp) {
+                    alert(xmlhttp.responseText);
+                }
+            });
+
+            return return_flag;
+        }
+
+        function ResetTime() {
+            if (leftSecond == 0) {
+                clearTimeout(timeout);
+                $btnGetTCode.val("获取验证码");
+                $btnGetTCode.removeAttr("disabled");
+                $btnGetTCode.removeClass("hui");
+                $btnGetTCode.addClass("orange");
+                leftSecond = 60;
+            }
+            else {
+                $btnGetTCode.attr("disabled", "disabled");
+                $btnGetTCode.removeClass("orange");
+                $btnGetTCode.addClass("hui")
+                $btnGetTCode.val("重新获取(" + leftSecond + "s)");
+                leftSecond--;
+                timeout = setTimeout("ResetTime()", 1000);
+            }
+        }
+
+        function setCodeImage() {
+            document.getElementById("codeimage").src = "code.aspx?t=" + new Date().getMilliseconds();
+        }
+
+    </script>
+}

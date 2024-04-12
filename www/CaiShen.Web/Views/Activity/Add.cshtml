@@ -1,0 +1,334 @@
+﻿@model Pannet.Models.Advertisement
+@using Pannet.DAL
+@using Pannet.Models
+
+@{
+    ViewBag.Title = "培训活动管理 ";
+    List<AdvertisementType> listType = ViewBag.AdvertisementType;
+    List<Department> departmentList = ViewBag.Departments;
+}
+@section Style{
+    <style>
+        .tr_wx_line { display: none; }
+    </style>
+}
+@section Js{
+    <script src="~/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript">
+        var editor;
+        KindEditor.ready(function (K) {
+            editor = K.create("#AD_Desc", {
+                //editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#AD_Image').val(),
+                        clickFn: function (url, title) {
+                            K('#AD_Image').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+
+        });
+    </script>
+}
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">培训活动管理 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("Add", "Activity", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        //@Html.HiddenFor(m => m.ID, new { @value = ViewBag.ID })
+
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120">@Html.LabelFor(m => m.AdvertisementTypeID)： </td>
+                    <td>
+                        <select name="AdvertisementTypeID" id="AdvertisementTypeID">
+                            <option value='0'>-请选择类型-</option>
+                            @if (listType != null)
+                            {
+                                foreach (AdvertisementType item in listType)
+                                {
+                                <option @(Model.AdvertisementTypeID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.ADT_Name</option>
+                                }
+                            }
+
+                        </select>
+                        <span id="selectTypeInfo"></span>
+                        @Html.ValidationMessageFor(m => m.AdvertisementTypeID)
+                        <script>
+                            @*   var $AdvertisementTypeID = $("#AdvertisementTypeID");
+                            /*类型相关 */
+                            $(function () {
+                                $AdvertisementTypeID.change(function () {
+                                    GetTypeModelData();
+                                });
+                                GetTypeModelData();
+                            });
+                            function ShowTypeText(dataJson) {
+                                if (dataJson.ADT_Class == 1) {
+                                    $("#selectTypeInfo").html("图文：宽度:" + dataJson.ADT_Width + "px 高度:" + dataJson.ADT_Height + "px");
+                                }
+                                else {
+                                    $("#selectTypeInfo").html("文字类型");
+                                }
+                                IsPhotoAd(dataJson.ADT_Class);
+                            }
+                            function GetTypeModelData() {
+                                var parentid = $AdvertisementTypeID.val();
+
+                                if (parseInt(parentid) == 0) {
+                                    return;
+                                }
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetTypeModelJson", "AdvertisementType")',
+                                    data: { "id": parentid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowTypeText(data);
+                                    }
+                                });
+                            }
+
+                            //是否为图文
+                            function IsPhotoAd(adt_class) {
+                                var isphoto = adt_class;
+                                if (parseInt(isphoto) == 1) {
+                                    $("#tr_image").show();
+                                }
+                                else {
+                                    $("#tr_image").hide();
+                                }
+                            }*@
+                        </script>
+                    </td>
+                </tr>
+                <tr>
+                    <td><font color="red">*</font>@Html.LabelFor(m => m.AD_Title)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.AD_Title, new { @class = "input-text", style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.AD_Title)
+                    </td>
+                </tr>
+
+                <tr id="tr_image">
+                    <td>@Html.LabelFor(m => m.AD_Image)：</td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.AD_Image)" runat="server" width="100" /><br />
+                        @Html.TextBoxFor(m => m.AD_Image, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />
+                        (最佳规格：750*450像素，最大高度750像素)
+                        @Html.ValidationMessageFor(m => m.AD_Image)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_URL)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.AD_URL, new { style = "width:400px;" }) (<span class="red">活动外链时，需要填写的链接</span>)
+                        @Html.ValidationMessageFor(m => m.AD_URL)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_Desc)：</td>
+                    <td>
+                        @Html.TextAreaFor(m => m.AD_Desc, new { style = "width: 800px;height:100px;" })
+                        @Html.ValidationMessageFor(m => m.AD_Desc)
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_BeginTime)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.AD_BeginTime, new { @Value = Model.AD_BeginTime.ToString("yyyy/MM/dd HH:mm:ss"), onfocus = "new WdatePicker({dateFmt:'yyyy/MM/dd HH:mm:ss'})" })
+                        &nbsp;
+                        @Html.LabelFor(m => m.AD_EndTime)：
+                         @Html.TextBoxFor(m => m.AD_EndTime, new { @Value = Model.AD_EndTime.ToString("yyyy/MM/dd HH:mm:ss"), onfocus = "new WdatePicker({dateFmt:'yyyy/MM/dd HH:mm:ss'})" })
+                        @Html.ValidationMessageFor(m => m.AD_BeginTime)
+                        @Html.ValidationMessageFor(m => m.AD_EndTime)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_ActivityBeginTime)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.AD_ActivityBeginTime, new { @Value = Model.AD_ActivityBeginTime.ToString("yyyy/MM/dd HH:mm:ss"), onfocus = "new WdatePicker({dateFmt:'yyyy/MM/dd HH:mm:ss'})" })
+                        &nbsp;
+                        @Html.LabelFor(m => m.AD_ActivityEndTime)：
+                         @Html.TextBoxFor(m => m.AD_ActivityEndTime, new { @Value = Model.AD_ActivityEndTime.ToString("yyyy/MM/dd HH:mm:ss"), onfocus = "new WdatePicker({dateFmt:'yyyy/MM/dd HH:mm:ss'})" })
+                        @Html.ValidationMessageFor(m => m.AD_ActivityBeginTime)
+                        @Html.ValidationMessageFor(m => m.AD_ActivityEndTime)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_Click)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.AD_Click, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.AD_Click)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_IsEnable)： </td>
+                    <td>
+                        <select name="AD_IsEnable" id="AD_IsEnable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.AD_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.AD_IsEnable)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.AD_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.AD_Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_State)： </td>
+                    <td>
+                        <select name="AD_State" id="AD_State">
+                            @foreach (var item in DataConfig.AdvertisementState)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.AD_State.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.AD_State)
+                    </td>
+                </tr>
+                <tr>
+                    <td>参与部门： </td>
+                    <td>
+                        <select name="AD_DepartmentID" id="AD_DepartmentID">
+                            <option value="0">所有人</option>
+                            @if (departmentList != null)
+                            {
+                                foreach (Department item in departmentList.Where(m => m.Dep_FollowID == 0))
+                                {
+                                <option  value="@item.ID" @(Model != null && item.ID == Model.AD_DepartmentID ? " selected='selected'" : "")>@item.Dep_Name</option>
+                                    foreach (Department itemSub in departmentList.Where(m => m.Dep_FollowID == item.ID))
+                                    {
+                                <option  value="@itemSub.ID" @(Model != null && itemSub.ID == Model.AD_DepartmentID ? " selected='selected'" : "")>|----@itemSub.Dep_Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>是否发送微信消息：</td>
+                    <td>
+                        <label>
+                            <input type="checkbox" name="isSendWxMessage" value="1" @(Model != null && 1 == Model.AD_IsSendWxMessage ? " checked='checked'" : "")/></label>
+                        <script>
+                            $(function () {
+                                $("[name='isSendWxMessage']").click(function () {
+                                    showWxField();
+                                });
+                                showWxField();
+                            });
+                            function showWxField() {
+                                if ($("[name='isSendWxMessage']").is(":checked")) {
+                                    $(".tr_wx_line").show();
+                                }
+                                else {
+                                    $(".tr_wx_line").hide();
+                                }
+                            }
+                        </script>
+
+                    </td>
+                </tr>
+                <tr class="tr_wx_line">
+                    <td>导语：</td>
+                    <td>
+                        <input name="first" type="text" style="width: 400px;" value="@(string.IsNullOrEmpty(Model.AD_WX_First) ? "新一期培训活动报名开始了，请大家积极参与！" : Model.AD_WX_First)" />
+                    </td>
+                </tr>
+                <tr class="tr_wx_line">
+                    <td>培训地点：</td>
+                    <td>
+                        <input name="address" type="text" style="width: 400px;" value="@(Model.AD_WX_Address)" />
+                    </td>
+                </tr>
+                <tr class="tr_wx_line">
+                    <td>培训内容(简介)：</td>
+                    <td>
+                        <input name="content" type="text" style="width: 400px;" value="@(Model.AD_WX_Content)" />
+                    </td>
+                </tr>
+                <tr class="tr_wx_line">
+                    <td>结束语：</td>
+                    <td>
+                        <input name="remark" type="text" style="width: 400px;"  value="@(string.IsNullOrEmpty(Model.AD_WX_Remark) ? "详情咨询区域经理" : Model.AD_WX_Remark)" />
+                    </td>
+                </tr>
+                <tr class="tr_wx_line" id="tr_department">
+                    <td>发送对象所属部门： </td>
+                    <td>
+                        <select name="DepartmentID" id="DepartmentID">
+                            <option value="0">所有人</option>
+                            @if (departmentList != null)
+                            {
+                                foreach (Department item in departmentList.Where(m => m.Dep_FollowID == 0))
+                                {
+                                <option  value="@item.ID" @(Model != null && item.ID == Model.AD_WX_DepartmentID ? " selected='selected'" : "")>@item.Dep_Name</option>
+                                    foreach (Department itemSub in departmentList.Where(m => m.Dep_FollowID == item.ID))
+                                    {
+                                <option  value="@itemSub.ID" @(Model != null && itemSub.ID == Model.AD_WX_DepartmentID ? " selected='selected'" : "")>|----@itemSub.Dep_Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.AD_CreateTime)：</td>
+                    <td>
+                        @Html.DisplayFor(m => m.AD_CreateTime)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                        (<span class="red">
+                    编辑保存不会发送微信模板消息</span>)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

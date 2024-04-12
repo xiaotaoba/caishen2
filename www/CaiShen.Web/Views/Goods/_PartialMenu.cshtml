@@ -1,0 +1,32 @@
+﻿<ul class="nav nav-tabs padding-18 tab-size-bigger">
+    <li class="@(ViewBag.Action == "Edit" ? "active" : "")">
+        <a href="@Url.Action("Edit", new { ID = ViewBag.GoodsID })">
+            <i class="blue icon-info bigger-120"></i>
+            商品信息
+        </a>
+    </li>
+  @*  <li class="@(ViewBag.Action == "GoodsArticle" ? "active" : "")">
+        <a href="@Url.Action("GoodsArticle", new { GoodsID = ViewBag.GoodsID })">
+            <i class="blue icon-dropbox bigger-120"></i>
+            商品目录
+        </a>
+    </li>
+    <li class="@(ViewBag.Action == "Question" ? "active" : "")">
+        <a href="@Url.Action("Question", new { GoodsID = ViewBag.GoodsID })">
+            <i class="blue icon-dropbox bigger-120"></i>
+            商品试题
+        </a>
+    </li>
+    <li class="@(ViewBag.Action == "QuestionAdd" ? "active" : "")">
+        <a href="@Url.Action("QuestionAdd", new { GoodsID = ViewBag.GoodsID })">
+            <i class="blue icon-plus bigger-120"></i>
+            新增试题
+        </a>
+    </li>*@
+     <li class="@(ViewBag.Action == "EditPhotos" ? "active" : "")">
+        <a href="@Url.Action("EditPhotos", new { GoodsID = ViewBag.GoodsID })">
+            <i class="blue icon-picture bigger-120"></i>
+            商品相册
+        </a>
+    </li>
+</ul>

@@ -1,0 +1,20 @@
+﻿<ul class="nav nav-tabs padding-18 tab-size-bigger">
+    <li class="@(ViewBag.Action == "Edit" ? "active" : "")">
+        <a href="@Url.Action("Add", new { ID = ViewBag.Quest_ID })">
+            <i class="blue icon-info bigger-120"></i>
+            问卷调查信息
+        </a>
+    </li>
+    <li class="@(ViewBag.Action == "Question" ? "active" : "")">
+        <a href="@Url.Action("Question", new { Quest_ID = ViewBag.Quest_ID })">
+            <i class="blue icon-dropbox bigger-120"></i>
+            问卷调查试题
+        </a>
+    </li>
+    <li class="@(ViewBag.Action == "QuestionAdd" ? "active" : "")">
+        <a href="@Url.Action("QuestionAdd", new { Quest_ID = ViewBag.Quest_ID })">
+            <i class="blue icon-plus bigger-120"></i>
+            新增试题
+        </a>
+    </li>
+</ul>

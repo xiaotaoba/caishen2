@@ -1,0 +1,102 @@
+﻿@model Pannet.Models.User
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.Utility
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "会员中心";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css?v=0528" rel="stylesheet" />
+    <style>
+        /*#footer, .footer_block { display: block; }*/
+    </style>
+}
+
+<!--主区域-->
+<div id="container">
+    <ul class="home_user">
+        <li>
+            <a href="@Url.Action("Info", "Member")">
+                <span class="user_img">
+                    <img src="@(UserService.GetThumbnail(Model.U_Thumbnail))" />
+                </span>
+                <div class="user_info">
+                    <span class="user_name">@Model.U_NickName</span>
+                    <span class="user_role">@Model.U_UserName</span>
+                    @*<span class="user_level">@(UserLevelService.GetModel(Model.UserLevelID).Level_Name)</span>*@
+                    <i class="iconfont icon-jiantou"></i>
+                    @*  <span class="user_link">
+                        <a href="@Url.Action("Info", "Member")">个人信息设置</a>
+                        <a href="@Url.Action("Address", "Member")">编辑收货地址</a>
+                    </span>*@
+                </div>
+            </a>
+        </li>
+    </ul>
+    <ul class="home_order">
+        <li class="order_status">
+            <span>
+                <a href="#"><i class="iconfont">
+                    <img src="/Areas/Mobile/images/member/ico_score.png" /></i>积分:<em class="count">@Model.U_Score</em></a>
+            </span>
+            <span>
+                <a href="@Url.Action("ScoreSign", "Member")"><i class="iconfont">
+                    <img src="/Areas/Mobile/images/member/ico_date.png" /></i>签到<em class="count"></em></a>
+            </span>
+            <span>
+                <a href="#"><i class="iconfont">
+                    <img src="/Areas/Mobile/images/member/ico_level.png" /></i>@(UserLevelService.GetModel(Model.UserLevelID).Level_Name)<em class="count"></em></a>
+            </span>
+        </li>
+    </ul>
+    <ul class="home_menu">
+        <li>
+            <a href="@Url.Action("Index", "Goods")">
+                <span class="ico">
+                    <img src="/Areas/Mobile/images/member/ico_equi.png" /></span>智能设备
+	                <i class="iconfont icon-jiantou"></i>
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("InfoSet", "Member")">
+                <span class="ico">
+                    <img src="/Areas/Mobile/images/member/ico_set.png" /></span>基础设置
+	                <i class="iconfont icon-jiantou"></i>
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("TiaoZhan", "Member")">
+                <span class="ico">
+                    <img src="/Areas/Mobile/images/member/ico_vs.png" /></span>积分挑战
+	                <i class="iconfont icon-jiantou"></i>
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("Info", "Member", new { ID = 6 })">
+                <span class="ico">
+                    <img src="/Areas/Mobile/images/member/ico_weight.png" /></span>体重计
+	                <i class="iconfont icon-jiantou"></i>
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("Index", "Member")">
+                <span class="ico">
+                    <img src="/Areas/Mobile/images/member/ico_share.png" /></span>分享
+	                <i class="iconfont icon-jiantou"></i>
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("Logout", "Login")">
+                <span class="ico">
+                    <img src="/Areas/Mobile/images/member/ico_exit.png" /></span>退出登录
+	                <i class="iconfont icon-jiantou"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+<!--/container-->

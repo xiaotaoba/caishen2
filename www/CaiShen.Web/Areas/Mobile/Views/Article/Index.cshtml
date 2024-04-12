@@ -1,0 +1,54 @@
+﻿@model PagedList.PagedList<Pannet.Models.Article>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "康复课堂";
+    User LoginUser = ViewBag.LoginUser;
+    ArticleType typeModel = ViewBag.ArticleTypeParent;
+    if (typeModel != null)
+    {
+        ViewBag.Title = typeModel.AT_Name;
+    }
+}
+
+<div class="box">
+    <div class="car_nav">
+        <a href="@Url.Action("Index", "Article", new { ViewBag.ID, ViewBag.keyword, order = "tj" })" class="@(ViewBag.order=="tj"?"carnav_sel":"")">推荐文章</a>
+        <a href="@Url.Action("Index", "Article", new { ViewBag.ID, ViewBag.keyword, order = "new" })" class="@(ViewBag.order=="new"?"carnav_sel":"")">最新文章</a>
+    </div>
+    <div class="car_content rx_article page">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (Article item in Model)
+            {
+            <dl>
+                <a href="@Url.Action("Detail", new { item.ID })">
+                    <dt>
+                        <img src="@item.Art_Image" alt="@item.Art_Title" /></dt>
+                    <dd>
+                        <h3>@item.Art_Title</h3>
+                        <p>
+                            @(string.IsNullOrEmpty(item.Art_Description) ? UtilityClass.Left(UtilityClass.HtmlFilter(item.Art_Content), 50) : item.Art_Description)
+                        </p>
+                        <i>@item.Art_CreateTime.ToString("yyyy-MM-dd")</i>
+                        <span><i class="iconfont icon-guankan"></i>@item.Art_ShowTimes</span>
+                    </dd>
+                </a>
+            </dl>
+            }
+        }
+        else
+        {
+            <div class="nothing">暂无数据.</div>
+        }
+
+        <div class="clear"></div>
+        <div class="fenye">
+        </div>
+    </div>
+</div>

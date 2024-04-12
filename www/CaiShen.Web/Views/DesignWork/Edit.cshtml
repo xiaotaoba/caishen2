@@ -1,0 +1,337 @@
+﻿@model Pannet.Models.DesignWork
+
+@using Pannet.DAL
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using Pannet.Utility
+
+@{
+    ViewBag.Title = "团队管理 ";
+    List<Tag> DesignTypes = ViewBag.DesignTypes;
+    List<Tag> DesignStyles = ViewBag.DesignStyles;
+    List<Tag> DesignTags = ViewBag.DesignTags;
+}
+@section Js{
+    <script type="text/javascript">
+        var editor;
+        KindEditor.ready(function (K) {
+            editor = K.create('#DW_Desc', {
+                //editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#DW_Image').val(),
+                        clickFn: function (url, title) {
+                            K('#DW_Image').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+
+        });
+    </script>
+}
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">团队管理 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+    <ul class="nav nav-tabs padding-18 tab-size-bigger">
+        <li class="active">
+            <a href="@Url.Action("Edit", new { ID = ViewBag.ID })">
+                <i class="blue icon-info bigger-120"></i>
+                团队信息
+            </a>
+        </li>
+      @*  <li class="">
+            <a href="@Url.Action("Photos", new { DesignWorkID = ViewBag.ID })">
+                <i class="green icon-user bigger-120"></i>
+                团队相册
+            </a>
+        </li>*@
+    </ul>
+
+    @using (Html.BeginForm("Edit", "DesignWork", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120"><font color="red">*</font>@Html.LabelFor(m => m.DW_Name)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.DW_Name, new { @class = "input-text", style = "width:300px;" })
+                        @Html.ValidationMessageFor(m => m.DW_Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_Number)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.DW_Number, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.DW_Number)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_Type)： </td>
+                    <td>
+                        <select name="DW_Type">
+                            @foreach (var item in DesignTypes)
+                            {
+                                <option value="@item.ID" @Html.Raw(Model.DW_Type == item.ID ? " selected='selected'" : "")>@(item.T_Name)</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_Style)： </td>
+                    <td>
+                        <select name="DW_Style">
+                            @foreach (var item in DesignStyles)
+                            {
+                                <option value="@item.ID" @Html.Raw(Model.DW_Style == item.ID ? " selected='selected'" : "")>@(item.T_Name)</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_TypeTags)： </td>
+                    <td>
+                        @foreach (var item in DesignTags)
+                        {
+                            bool select = !string.IsNullOrEmpty(Model.DW_TypeTags) && Model.DW_TypeTags.Split(',').Contains(item.ID.ToString());
+                            
+                            <label>
+                                <input type="checkbox" name="DW_TypeTags" value="@item.ID" @Html.Raw(select ? " checked='checked'" : "")/>@(item.T_Name)
+                            </label>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_Image)：</td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.DW_Image)" runat="server" width="100" /><br />
+                        @Html.TextBoxFor(m => m.DW_Image, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />
+                        (最佳规格：750像素宽，高度不大于750像素，规格统一)
+                        @Html.ValidationMessageFor(m => m.DW_Image)
+                    </td>
+                </tr>
+                <tr style="display: none">
+                    <td>@Html.LabelFor(m => m.DW_URL)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.DW_URL, new { @class = "input-text", style = "width:400px;" }) （如果是外链，请填写以http(s)://开头的完整链接）
+                        @Html.ValidationMessageFor(m => m.DW_URL)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.UserID)： </td>
+                    <td>
+                        @* <select name="UserID">
+                            @if (ViewBag.ShopUser != null)
+                            {
+                                foreach (User item in ViewBag.ShopUser)
+                                {
+                                <option value="@item.ID" @Html.Raw(Model.UserID == item.ID ? " selected='selected'" : "")>@(item.U_UserName)/@(item.U_RealName)</option>
+                                }
+                            }
+                        </select>
+                        <a class="btn btn-xs btn-info" href="@Url.Action("MemberAdd", "User", new { roleID = Convert.ToInt16(DataConfig.RoleEnum.加盟店) })">新增会员账号</a>
+                        @Html.ValidationMessageFor(m => m.UserID)*@
+                    </td>
+                </tr>
+                <tr style="display: none">
+                    <td>@Html.LabelFor(m => m.DW_Author)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.DW_Author, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.DW_Author)
+                    </td>
+                </tr>
+                <tr>
+                    <td>所在地区： </td>
+                    <td>
+                        <select name="DW_Province" id="DW_Province">
+                            <option value="0">-请选择省份-</option>
+                            @if (ViewBag.Provinces != null)
+                            {
+                                foreach (var item in ViewBag.Provinces)
+                                {
+                                <option @(Model.DW_Province == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                }
+                            }
+                        </select>
+                        <select name="DW_City" id="DW_City">
+                            <option value="0">-请选择城市-</option>
+                            @if (ViewBag.Citys != null)
+                            {
+                                foreach (var item in ViewBag.Citys)
+                                {
+                                <option @(Model.DW_City == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                }
+                            }
+                        </select>
+                        <select name="DW_Region" id="DW_Region" style="display: none;">
+                            <option value="0">-请选择地区-</option>
+                            @if (ViewBag.Regions != null)
+                            {
+                                foreach (var item in ViewBag.Regions)
+                                {
+                                <option @(Model.DW_Region == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                }
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.DW_Province)
+                        @Html.ValidationMessageFor(m => m.DW_City)
+                        @Html.ValidationMessageFor(m => m.DW_Region)
+                        <script>
+
+                            $(function () {
+                                $("#DW_Province").change(function () {
+                                    var provinceid = $("#DW_Province").val();
+                                    if (parseInt(provinceid) != 0) {
+                                        GetCityData();
+                                        GetRegionData();
+                                    }
+                                });
+                                $("#DW_City").change(function () {
+                                    var cityid = $("#DW_City").val();
+                                    if (parseInt(cityid) != 0) {
+                                        GetRegionData();
+                                    }
+                                });
+                            });
+
+                            function ShowCityHtml(cityJson) {
+                                var cityHtml = "<option value='0'>-请选择城市-</option>";
+                                //alert(cityJson);
+                                $.each(cityJson, function (index, data) {
+                                    cityHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                });
+                                $("#DW_City").html(cityHtml);
+                            }
+                            function ShowRegionHtml(regionJson) {
+                                var regionHtml = "<option value='0'>-请选择地区-</option>";
+                                //alert(regionJson);
+                                $.each(regionJson, function (index, data) {
+                                    regionHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                });
+                                $("#DW_Region").html(regionHtml);
+                            }
+                            function GetCityData() {
+                                var provinceid = $("#DW_Province").val();
+                                if (parseInt(provinceid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": provinceid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowCityHtml(data);
+                                    }
+                                });
+                            }
+                            function GetRegionData() {
+                                var cityid = $("#DW_City").val();
+                                if (parseInt(cityid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": cityid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowRegionHtml(data);
+                                    }
+                                });
+                            }
+                        </script>
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.DW_Star)： </td>
+                    <td>
+                        <select name="DW_Star" id="DW_Star">
+                            @foreach (var item in DataConfig.ShopStars)
+                            {
+                                <option @(Model.DW_Star.ToString() == item.Value ? "selected='selected'" : "") value="@item.Value">@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_Desc)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.DW_Desc, new { style = "width:750px;height:200px;" })
+                        @Html.ValidationMessageFor(m => m.DW_Desc)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_Is_Enable)： </td>
+                    <td>
+                        <select name="DW_Is_Enable" id="DW_Is_Enable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.DW_Is_Enable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_IsRecommend)： </td>
+                    <td>
+                        <select name="DW_IsRecommend" id="DW_IsRecommend">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.DW_IsRecommend.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_Sort)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.DW_Sort)
+                        @Html.ValidationMessageFor(m => m.DW_Sort)  (大->小排序)
+                      
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.DW_CreateTime)： </td>
+                    <td>
+                        @Html.DisplayFor(m => m.DW_CreateTime)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

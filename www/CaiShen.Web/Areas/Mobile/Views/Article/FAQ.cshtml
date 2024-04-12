@@ -1,0 +1,46 @@
+﻿@model PagedList.PagedList<Pannet.Models.Article>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "常见设备问题";
+}
+@section Style
+{
+}
+@section Js{
+}
+<div id="container">
+    <div class="head_menu">
+        <ul>
+            <li class="active"><a href="/article/faq">常见设备问题</a></li>
+            <li><a href="/message/feedback">意见反馈</a></li>
+        </ul>
+    </div>
+    <div class="faq">
+        <ul>
+            @foreach (var item in Model)
+            {
+                <li>
+                    <a href="@Url.Action("Detail", "Article", new { ID = item.ID })">
+                        <span class="faq_img">
+                            <img src="@item.Art_Image" /></span>
+                        <div class="faq_r">
+                            <b>@item.Art_Title</b>
+                            <p>
+                                <span class="time">@item.Art_CreateTime.ToString("yyyy-MM-dd")</span>
+                                <span class="visit_count">阅读：@item.Art_ShowTimes</span>
+                            </p>
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
+        <div id="page_nav">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { page, ID = ViewBag.ID }))
+        </div>
+    </div>
+</div>

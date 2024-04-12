@@ -1,0 +1,225 @@
+﻿@model Pannet.Models.Advertisement
+
+@using Pannet.Models
+@using Pannet.Utility
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = Model.AD_Title;
+    User LoginUser = ViewBag.LoginUser;
+    Department userDepartment = ViewBag.Department;
+    if (LoginUser == null)
+    {
+        LoginUser = new User();
+    }
+}
+
+<div class="box">
+    @{
+        ViewBag.TopAction = "list";
+        Html.RenderPartial("_TopNavHD");
+    }
+
+    <div class="abs_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle">@Model.AD_Title</div>
+            <div class="tad_hText">
+                <span>发布时间：@Model.AD_CreateTime.ToString("yyyy-MM-dd")</span>
+                <span>浏览：@Model.AD_Click</span>
+            </div>
+        </div>
+        <div class="bsd_content">
+            @Html.Raw(Model.AD_Desc)
+        </div>
+        <div class="tad_submitBox">
+            @{
+                string stateName = AdvertisementService.GetState(Model);
+                if (stateName == "报名中")
+                {
+                    if (Model.AD_DepartmentID != 0 && LoginUser != null && userDepartment != null && userDepartment.ID != Model.AD_DepartmentID && userDepartment.Dep_FollowID != Model.AD_DepartmentID)
+                    {
+                        //活动限制部门，用户登录且不在活动允许参与部门
+                        <div class="tad_subHeader" style="background: #f6cc20;">@stateName</div>
+                        <br />
+                    }
+                    else
+                    {
+                <div class="tad_subHeader">我要报名</div>
+                <div class="tad_subContent">
+                    <div class="tad_subCon_info">
+                        <dl>
+                            <dd>姓名：</dd>
+                            <dd>
+                                <input type="text" name="username" id="username" value=""></dd>
+                        </dl>
+                        <dl>
+                            <dd>手机：</dd>
+                            <dd>
+                                <input type="text" name="tel" id="tel" maxlength="12" value=""></dd>
+                        </dl>
+                        <dl>
+                            <dd>职位：</dd>
+                            <dd>
+                                <input type="text" name="zhiwei" id="zhiwei" maxlength="12"></dd>
+                        </dl>
+                        <dl>
+                            <dd>所在地</dd>
+                            <dd>
+                                <select name="Province" id="Province">
+                                    <option value="0">-省份-</option>
+                                    @if (ViewBag.Provinces != null)
+                                    {
+                                        foreach (var item in ViewBag.Provinces)
+                                        {
+                                        <option value="@item.ID">@item.Area_Name</option>
+                                        }
+                                    }
+                                </select>
+                                <select name="City" id="City">
+                                    <option value="0">-城市-</option>
+                                    @if (ViewBag.Citys != null)
+                                    {
+                                        foreach (var item in ViewBag.Citys)
+                                        {
+                                        <option value="@item.ID">@item.Area_Name</option>
+                                        }
+                                    }
+                                </select>
+                                <script>
+
+                                    $(function () {
+                                        $("#Province").change(function () {
+                                            var provinceid = $("#Province").val();
+                                            if (parseInt(provinceid) != 0) {
+                                                GetCityData();
+                                                GetRegionData();
+                                            }
+                                        });
+                                        $("#City").change(function () {
+                                            var cityid = $("#City").val();
+                                            if (parseInt(cityid) != 0) {
+                                                //GetRegionData();
+                                            }
+                                        });
+                                    });
+
+                                    function ShowCityHtml(cityJson) {
+                                        var cityHtml = "<option value='0'>-请选择城市-</option>";
+                                        //alert(cityJson);
+                                        $.each(cityJson, function (index, data) {
+                                            cityHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                        });
+                                        $("#City").html(cityHtml);
+                                    }
+
+                                    function GetCityData() {
+                                        var provinceid = $("#Province").val();
+                                        if (parseInt(provinceid) == 0)
+                                            return null;
+
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: '@Url.Action("GetAreaJson", "Area")',
+                                            data: { "parentid": provinceid },
+                                            dataType: "json",
+                                            async: false,
+                                            success: function (data) {
+                                                ShowCityHtml(data);
+                                            }
+                                        });
+                                    }
+
+                                </script>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="tad_subCon_btn">
+                        <input type="button" value="确认提交" id="btnSubmit">
+                    </div>
+                </div>
+                    }
+                }
+                else
+                {
+                <div class="tad_subHeader" style="background: #f6cc20;">@stateName</div>
+                <br />
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Js{
+
+    <script type="text/javascript">
+        var ad_id = parseInt('@Model.ID');
+
+
+        $(function () {
+            //确认提交
+            $("#btnSubmit").click(function () {
+                var username = $("#username").val();
+                var tel = $("#tel").val();
+                var regm = /^1[3|5|8|6|7|2|9][0-9]\d{8}$/;
+                var city = $("#City").val();
+                var province = $("#Province").val();
+                var zhiwei = $("#zhiwei").val();
+                var address = $("#Province").find("option:selected").text() + $("#City").find("option:selected").text();
+
+
+                if (username == "undefined" || username == "") {
+                    alert("请输入您的姓名");
+                    return false;
+                }
+                if (tel == "undefined" || tel == null || tel == "") {
+                    alert("请输入手机号码!");
+                    return false;
+                } else if (!regm.exec(tel)) {
+                    alert("请输入正确的手机号码");
+                    return false;
+                }
+                if (province == "0") {
+                    alert("请选择省份");
+                    return false;
+                }
+                if (city == "0") {
+                    alert("请选择城市");
+                    return false;
+                }
+
+                SaveRecordMessage(username, tel, zhiwei, address);
+
+                //alert("预约成功！");
+            });
+        });
+        //保存咨询
+        function SaveRecordMessage(username, tel, zhiwei, address) {
+            $.ajax({
+                url: "/Mobile/Activity/AdvertisementRecordAdd",
+                type: "POST",
+                async: true,
+                cache: false,
+                data: { "username": username, "tel": tel, "ad_id": ad_id, "zhiwei": zhiwei, "address": address },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")");
+                    if (json_rs == null || json_rs.status == null) {//返回错误
+                        alert("操作错误！");
+                    }
+                    else if (json_rs.status == "success") {
+                        alert(json_rs.msg);
+                        $("#username").val("");
+                        $("#tel").val("");
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                },
+                error: function (xmlhttp) {
+                    alert("操作错误！<br/>" + xmlhttp.responseText);
+                }
+            });
+        }
+    </script>
+}

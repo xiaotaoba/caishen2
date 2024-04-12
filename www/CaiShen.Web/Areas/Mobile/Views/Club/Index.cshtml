@@ -1,0 +1,98 @@
+﻿@model PagedList.PagedList<Pannet.Models.Goods>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "社区";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <style>
+        /*#footer, .footer_block { display: block; }*/
+    </style>
+}
+<form action="" id="dn_form">
+    <div class="box">
+        @{
+            ViewBag.TopAction = "club";
+            Html.RenderPartial("_TopNavSQ");
+        }
+        <div class="bsb_box">
+            <div class="dn_location">
+                <dl>
+                    <dt><i class="icon iconfont icon-dingwei"></i></dt>
+                    <dd>当前定位：浙江省——杭州市</dd>
+                </dl>
+            </div>
+            <div class="dn_content">
+                <div class="dn_conhoose">
+                    <dl>
+                        <dd>选择其他城市</dd>
+                        <dd>
+                            <div class="dn_conC_th">
+                                <select name="" id="">
+                                    <option value="">选择省</option>
+                                </select>
+                                <select name="" id="">
+                                    <option value="">选择市</option>
+                                </select>
+                            </div>
+                            <div class="dn_conC_btn">
+                                <input type="submit" value="确认">
+                            </div>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dd>选择装修风格</dd>
+                        <dd>
+                            <ul>
+                                <li class="dn_liSel"><a href="#">
+                                    <div class="dn_conC_black">欧式</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                                <li><a href="#">
+                                    <div class="dn_conC_black">中式</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                                <li><a href="#">
+                                    <div class="dn_conC_black">时尚</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                            </ul>
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dd>选择空间户型</dd>
+                        <dd>
+                            <ul>
+                                <li class="dn_liSel"><a href="#">
+                                    <div class="dn_conC_black">2客厅</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                                <li><a href="#">
+                                    <div class="dn_conC_black">2餐厅</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                                <li><a href="#">
+                                    <div class="dn_conC_black">2过道</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                            </ul>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="dn_conShow"></div>
+            </div>
+            <div class="bsb_conMore">
+                <a href="#">
+                    <p>加载更多活动</p>
+                    <i class="icon iconfont icon-xiala"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</form>

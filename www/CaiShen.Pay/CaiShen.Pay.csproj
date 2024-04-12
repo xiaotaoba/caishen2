@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{006C7D90-249C-4901-BD7F-471C32347784}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pannet.Pay</RootNamespace>
+    <AssemblyName>Pannet.Pay</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="LitJSON">
+      <HintPath>bin\LitJSON.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="alipayAPI\AlipayConfig.cs" />
+    <Compile Include="alipayAPI\AlipayCore.cs" />
+    <Compile Include="alipayAPI\AlipayNotify.cs" />
+    <Compile Include="alipayAPI\AlipaySubmit.cs" />
+    <Compile Include="alipayAPI\MD5.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WxPayAPI\business\DownloadBill.cs" />
+    <Compile Include="WxPayAPI\business\JsApiPay.cs" />
+    <Compile Include="WxPayAPI\business\MicroPay.cs" />
+    <Compile Include="WxPayAPI\business\NativeNotify.cs" />
+    <Compile Include="WxPayAPI\business\NativePay.cs" />
+    <Compile Include="WxPayAPI\business\OrderQuery.cs" />
+    <Compile Include="WxPayAPI\business\Refund.cs" />
+    <Compile Include="WxPayAPI\business\RefundQuery.cs" />
+    <Compile Include="WxPayAPI\business\ResultNotify.cs" />
+    <Compile Include="WxPayAPI\lib\Config.cs" />
+    <Compile Include="WxPayAPI\lib\Data.cs" />
+    <Compile Include="WxPayAPI\lib\Exception.cs" />
+    <Compile Include="WxPayAPI\lib\HttpService.cs" />
+    <Compile Include="WxPayAPI\lib\Log.cs" />
+    <Compile Include="WxPayAPI\lib\Notify.cs" />
+    <Compile Include="WxPayAPI\lib\WxPayApi.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CaiShen.DAL\CaiShen.DAL.csproj">
+      <Project>{a8bf18ae-2f47-4293-a7f1-a71e132ebcc7}</Project>
+      <Name>CaiShen.DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CaiShen.Models\CaiShen.Models.csproj">
+      <Project>{de8d836b-c762-4f56-bdca-607c3e74d17e}</Project>
+      <Name>CaiShen.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CaiShen.Utility\CaiShen.Utility.csproj">
+      <Project>{5ea34284-8f35-4089-87e7-ac23925935e6}</Project>
+      <Name>CaiShen.Utility</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

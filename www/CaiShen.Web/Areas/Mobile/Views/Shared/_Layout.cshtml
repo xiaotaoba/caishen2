@@ -1,0 +1,111 @@
+﻿@using Pannet.DAL.Repository
+@using Pannet.Models
+@using Pannet.DAL 
+@using Pannet.Utility
+@*@using StackExchange.Profiling;
+@MiniProfiler.RenderIncludes();*@
+@{
+    SystemInfo sysModel = SystemInfoService.GetModel();
+    User LoginUser = ViewBag.LoginUser;// ViewBag.LoginUser;
+    int cartCount = 0;
+    if (LoginUser != null)
+    {
+        cartCount = CartService.GetCount(LoginUser.ID, UserShopService.GetCurrentShopID());
+    }
+    var title = "五福财神";
+    if (ViewBag.Title != null && !string.IsNullOrEmpty(ViewBag.Title))
+    {
+        title = ViewBag.Title;
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="target-densitydpi=device-dpi,width=750,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>@title</title>
+    <meta name="keywords" content="@sysModel.Sys_WebKeywords">
+    <meta name="description" content="@sysModel.Sys_WebDescription">
+    <link rel="stylesheet" href="~/Areas/Mobile/css/validation.css" />
+    <link rel="stylesheet" href="~/Areas/Mobile/css/demo.css?v=1008.3"" />
+    <link rel="stylesheet" href="~/Areas/Mobile/css/animate.min.css" />
+    <link rel="stylesheet" href="~/Areas/Mobile/css/iconfont.css" />
+    <link rel="stylesheet" href="~/Areas/Mobile/css/index.css?v=20190325.3" />
+
+    @RenderSection("Style", false)
+    <script src="~/Areas/Mobile/js/jquery-1.8.3.min.js"></script>
+    <script src="~/Areas/Mobile/js/wow.min.js"></script>
+    <script src="/Content/js/jquery.validate.min.js"></script>
+    @if (ViewBag.Referrer != null && Convert.ToString(ViewBag.Referrer) != "")
+    { 
+        <script>localStorage.setItem("u", "@ViewBag.Referrer");</script>
+    }
+    @RenderSection("Js", false)
+</head>
+<body>
+    <link href="~/Areas/Mobile/css/layer_mobile/need/layer.css?v=0710.2" rel="stylesheet" />
+    @{
+        string url = Request.Url.ToString().ToLower();
+        if (url.Contains("home"))
+        {
+            ViewBag.PageAction = "home";
+        }
+        else if (url.Contains("health"))
+        {
+            ViewBag.PageAction = "health";
+        }
+        else if (url.Contains("goods"))
+        {
+            ViewBag.PageAction = "goods";
+        }
+        
+    }
+    @RenderBody()
+
+    <div class="pc_bottom" style="display:none;">
+        <div class="pc_bottomBox">
+            <div class="pc_bOption">
+                <ul>
+                    <li class="@(ViewBag.PageAction == "home" ? "pc_bOp_sel" : "")"><a href="/shen/">
+                        <dl>
+                            <dt><i class="icon iconfont icon-zhuye"></i></dt>
+                            <dd>首页</dd>
+                        </dl>
+                    </a></li>
+                  @*  <li class="@(ViewBag.PageAction == "health" ? "pc_bOp_sel" : "")"><a href="/Mobile/Health">
+                        <dl>
+                            <dt><i class="icon iconfont icon-kangfuliliaoke"></i></dt>
+                            <dd>康复</dd>
+                        </dl>
+                    </a></li>*@
+                    <li></li>
+                  @*  <li class="@(ViewBag.PageAction == "goods" ? "pc_bOp_sel" : "")"><a href="/Mobile/Goods">
+                        <dl>
+                            <dt><i class="icon iconfont icon-iconfont"></i></dt>
+                            <dd>商城</dd>
+                        </dl>
+                    </a></li>*@
+                    <li class="@(ViewBag.PageAction == "Member" ? "pc_bOp_sel" : "")"><a href="/Mobile/Member">
+                        <dl>
+                            <dt><i class="icon iconfont icon-yonghu1"></i></dt>
+                            <dd>我的</dd>
+                        </dl>
+                    </a></li>
+                </ul>
+            </div>
+            <div class="pc_bBtn">
+                <a href="/Mobile/Member">
+                    <img src="@(LoginUser!=null && !string.IsNullOrEmpty(LoginUser.U_Thumbnail) ?LoginUser.U_Thumbnail:!string.IsNullOrEmpty(CookieHelper.GetValue("wx_headimgurl"))?CookieHelper.GetValue("wx_headimgurl"): "/Areas/Mobile/images/default_logo.jpg")" alt="" /></a>
+            </div>
+        </div>
+    </div>
+
+    @*<script src="~/Scripts/layer/layer.js"></script>*@
+    <script src="~/Areas/Mobile/css/layer_mobile/layer.js"></script>
+    @RenderSection("FootJs", false)
+    <script src="~/Areas/Mobile/js/index.js?v=0107.2"></script>
+</body>
+</html>

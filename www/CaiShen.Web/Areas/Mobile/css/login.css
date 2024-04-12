@@ -1,0 +1,52 @@
+#login {overflow: hidden;margin: 50px; }
+#login h3 {font-size:36px;margin-bottom: 40px; }
+#login .l {}
+#login ul li { margin-top: 10px; }
+#login ul li label.col { display: block; }
+#login ul li .tbox { width: 100%; height: 80px; border: 1px solid #e2e2e2;padding:0 10px; }
+#login ul li .tbox:active,
+#login ul li .tbox:focus,
+#login ul li .tcbox:focus,
+#login ul li .tcbox:active {border: 1px solid #17AEE6; }
+#login ul li.pwd { margin-top: 20px; }
+#login ul li.submit { margin-top: 20px; }
+#login ul li.autoLogin { line-height: 50px;}
+#login ul li.autoLogin label { display: inline; float: left; }
+#login ul li.autoLogin input {width: 36px;height: 25px;vertical-align:middle;float:left;margin-top:12px; }
+#login ul li.autoLogin a { float: right; margin-right: 5px; }
+#login input[type="radio"] { margin-right: 0; }
+#login .font12 {  }
+.reg_link {color:#4a92f5; }
+#login .btn-lg {font-size:30px;line-height:60px; }
+
+#register {margin: 50px;}
+#register .l { }
+#register .l h3 {font-size:36px;margin-bottom: 40px; }
+#register ul li { margin-top: 10px; }
+#register ul li .tips { font-size: 20px; }
+#register ul li label.col { display: block;line-height:60px; }
+#register ul li .tbox {width: 100%; height: 80px; border: 1px solid #e2e2e2;padding:0 10px; }
+#register ul li .tcbox { width: 50%; height: 80px; border: 1px solid #e2e2e2;padding:0 10px; }
+#register ul li .tbox:active,
+#register ul li .tbox:focus,
+#register ul li .tcbox:focus,
+#register ul li .tcbox:active {border: 1px solid #17AEE6; }
+#register ul li #btnSendCode {border: 1px solid #E73034;background-color:#E73034;border-radius:5px;color:#fff;width:auto;padding:0 10px;}
+#register ul li #btnSendCode:hover {border: 1px solid #CC1C1E;background-color:#CC1C1E;}
+#register ul li #btnSendCode.hui {background-color:#ccc;border:1px solid #ccc; }
+#register ul li #btnSendCode.hui:hover {background-color:#ccc;border:1px solid #ccc; }
+#register ul li.protocol { }
+#register ul li.protocol input {width:35px;height:25px; }
+#register ul li.protocol a { color: #4a92f5; }
+#register .r { padding: 140px 0 0 70px; width: 230px; float: left; font-size: 18px; text-align: center;box-sizing:content-box; }
+#register .r .r_login { margin-top: 16px; }
+#register input[type="radio"] { margin-right: 0; }
+#register .btn-lg {font-size:30px;line-height:60px;margin:25px 0; }
+
+#getPwd { padding: 60px; margin-top: 10px; height: 300px; border: 1px solid #e0e0e0; background-color: #fff; }
+#getPwd .l { height: 80px; }
+#getPwd .l h3 { font-size: 18px; line-height: 30px; display: block; font-weight: normal; font-family: "Microsoft Yahei"; }
+#getPwd ul li { margin-top: 10px; height: 50px; font-size: 14px; }
+#getPwd ul li label { display: block; float: left; width: 350px; line-height: 30px; text-align: right; padding-right: 5px; }
+#getPwd ul li .tbox { width: 269px; height: 27px; border: 1px solid #e2e2e2; float: left; color: #888; }
+#getPwd .btn-lg {font-size:30px; line-height:60px;}

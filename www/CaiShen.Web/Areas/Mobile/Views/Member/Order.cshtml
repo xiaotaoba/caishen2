@@ -1,0 +1,121 @@
+﻿@using PagedList.Mvc;
+@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository;
+
+@model PagedList.PagedList<Pannet.Models.UserOrderVModel>
+
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "我的订单";
+    User LoginUser = ViewBag.LoginUser;
+    
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+}
+@section Js{
+    @*<script src="~/My97DatePicker/WdatePicker.js"></script>*@
+}
+
+<!--主区域-->
+<div id="container">
+    <div class="mc_right_menu">
+        <ul>
+            <li class="@(ViewBag.status == 0 ? "active" : "")"><a href="@Url.Action("Order", new { status = 0 })">所有订单</a></li>
+            <li class="@(ViewBag.status == 1 ? "active" : "")"><a href="@Url.Action("Order", new { status = 1 })">待付款</a></li>
+            <li class="@(ViewBag.status == 2 ? "active" : "")"><a href="@Url.Action("Order", new { status = 2 })">待发货</a></li>
+            <li class="@(ViewBag.status == 3 ? "active" : "")"><a href="@Url.Action("Order", new { status = 3 })">待收货</a></li>
+            <li class="@(ViewBag.status == 4 ? "active" : "")"><a href="@Url.Action("Order", new { status = 4 })">待评价</a></li>
+        </ul>
+    </div>
+    <div class="mc_content">
+        <div class="order_product">
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var item in Model)
+                {
+                    int i = 1;
+                    int total_count = 0;
+                
+                
+                <div class="order_item_tit">
+                    <span class="order_num">单号：<em>@item.Order.O_OrderNo</em></span>
+                    <span class="order_status">@(DataConfig.OrderStatus.Find(m => m.Value == item.Order.O_Status.ToString()).Name)</span>
+                </div>
+          
+                    foreach (OrderDetailVModel order_detail in item.OrderDetailVList)
+                    {
+                <dl class="order_item">
+                    <dd class="order_product_img">
+                        <a href="@Url.Action("Index", "Goods", new { ID = order_detail.OrderDetail.GoodsID })" target="_blank">
+                            <img src="@(SiteService.GetImgUrl(order_detail.PhotoUrl))" width="80"/>
+                        </a>
+                    </dd>
+                    <dd>
+                        <div class="order_product_name">@order_detail.OrderDetail.OD_GoodsName</div>
+                        <div class="order_property">@order_detail.OrderDetail.OD_PropertiesName</div>
+                        <div class="order_unitprice">
+                            @(SiteService.GetPriceWithUnit(order_detail.OrderDetail.OD_TotalAmount / order_detail.OrderDetail.OD_Count)) <span>*@order_detail.OrderDetail.OD_Count</span>
+                        </div>
+                    </dd>
+
+                </dl>
+                        i++;
+                        total_count += order_detail.OrderDetail.OD_Count;
+                    }
+
+                <div class="order_item_total">
+                    共<span class="order_total_count">@total_count</span>件，合计：<span class="total_pay_amount">@(SiteService.GetPriceWithUnit(item.Order.O_PayAmount))</span>
+
+                </div>
+                <div class="order_item_operate">
+                    @if (item.Order.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.待付款))
+                    { 
+                        <a class="btn" target="_blank" href="@Url.Action("Index", "Pay", new { ID = item.Order.ID })">前往支付</a>
+                        <a class="btn" target="_blank"  data-confirm="cancel" href="@Url.Action("OrderCancel", "Member", new { ID = item.Order.ID })">取消订单</a>
+                    }
+                    else if (item.Order.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.已支付定金))
+                    {
+                        <a class="btn" target="_blank" href="@Url.Action("Index", "Pay", new { ID = item.Order.ID })">支付尾款</a>
+                    }
+                    <a class="btn" target="_blank" href="@Url.Action("OrderDetail", "Member", new { ID = item.Order.ID })">详细</a>
+                </div>
+                }
+                <div class="tac">@Html.PagedListPager(Model, page => Url.Action("Order", new { page, keyword = ViewBag.Keyword, time_from = ViewBag.time_from, time_end = ViewBag.time_end }))</div>
+            }
+            else
+            {
+            <div class="nothing"><i class="icon-lightbulb"></i>暂无数据.</div>
+            }
+        </div>
+    </div>
+</div>
+<!--/container-->
+
+
+@section FootJs{
+    <script>
+        $(".btn_design_file").each(function () {
+            var $item = $(this);
+            $item.click(function () {
+                var currentIndex = layer.open({
+                    type: 2,
+                    title: '上传设计稿源文件',
+                    maxmin: true,
+                    shadeClose: true, //点击遮罩关闭层
+                    area: ['700px', '300px'],
+                    content: '/Member/OrderDesignFile?orderDetailID=' + $item.data("detailid"),
+                    cancel: function () {
+                    },
+                    close: function () {
+                    },
+                    end: function () {
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+}

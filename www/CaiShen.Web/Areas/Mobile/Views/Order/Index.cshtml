@@ -1,0 +1,848 @@
+﻿@model Pannet.Models.Order
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using Pannet.DAL
+@using Pannet.Utility
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "下单页面";
+
+    int defaultAddressID = 0;
+
+    //总金额(含邮费)
+    decimal total_amount = 0;
+    //总件数
+    int total_count = 0;
+    //应付(含邮费)
+    decimal needpay_amount = 0;
+    //本次实付(含邮费)（如：预付定金）
+    decimal pay_amount = 0;
+    //邮费
+    decimal post_fee = ViewBag.post_fee;
+    decimal discount_amount_coupon = 0;
+    //红包不能用于支付运费，即订单金额必须大于红包
+    decimal discount_amount_hongbao = 0;
+
+    //地址前面省市区部分
+    string addressPrefix = "";
+    string addressEnd = "";
+
+    UserAddress defaultAddress = ViewBag.defaultAddress;//默认显示的地址
+
+    if (defaultAddress != null)
+    {
+        defaultAddressID = defaultAddress.ID;
+    }
+
+    UserAddress editAddress = ViewBag.AddressModel;
+    if (editAddress == null)
+    {
+        editAddress = new UserAddress();
+    }
+    else
+    {
+        int lastindex = 0;
+        if (!string.IsNullOrEmpty(editAddress.Address))
+        {
+            lastindex = editAddress.Address.LastIndexOf(" ");
+        }
+        if (lastindex > 0)
+        {
+            addressPrefix = editAddress.Address.Substring(0, lastindex).Trim();
+            addressEnd = editAddress.Address.Substring(lastindex).Trim();
+        }
+        else
+        {
+            addressEnd = editAddress.Address;
+        }
+    }
+    List<UserAddress> addressList = ViewBag.Address;
+            
+}
+@section Style{
+    <style>
+        body { background-color: #eee; }
+        #footer { display: none; }
+        .pc_bottom { display:none;}
+    </style>
+}
+<!--主区域-->
+<div id="container">
+
+    <div id="order" class="base">
+
+        @using (Html.BeginForm("SaveAdd", "Order", FormMethod.Post))
+        { 
+            @Html.Raw(ViewBag.MessageInfo)
+            <input id="at" name="at" type="hidden" value="@ViewBag.at">
+            <input id="cart" name="cart" type="hidden" value="@ViewBag.cart">
+            <input id="aid" name="aid" type="hidden" value="@ViewBag.aid" />
+            <input id="ID" name="ID" type="hidden" value="@ViewBag.aid" />
+            <dl id="order_address" style="display: none;">
+                <dt>
+                    <i class="iconfont icon-jiantoul order_close_choose"></i>
+                    <h3>选择收货人</h3>
+                    <a href="@Url.Action("Index", new { at = "add", cart = ViewBag.cart })" class="new_address btn btn-info">新建收货人</a>
+                </dt>
+                <dd>
+                    <ul class="order_address_list">
+                        @if (addressList != null && addressList.Count > 0)
+                        {
+                            foreach (var item in addressList)
+                            {
+                            <li data-username="@item.UserName" data-address="@item.Address" data-mobile="@item.Mobile">
+                                <label>
+                                    <input type="radio" name="user_address" value="@item.ID" @Html.Raw(item.ID == defaultAddressID ? "checked='checked'" : "") /><span>@item.UserName,@item.Address,@item.Mobile @item.Tel,@item.Post_Code</span></label>
+                                <span class="btn_operate"><a href="@Url.Action("Index", new { at = "edit", aid = item.ID, cart = ViewBag.cart })">编辑</a><a href="@Url.Action("DeleteAdd", new { aid = item.ID, cart = ViewBag.cart })">删除</a></span>
+                            </li>
+                            }
+                        }
+                        @if (ViewBag.at == "" && (addressList == null || addressList.Count < 1))
+                        {
+                            <li>暂无收货人信息，<a href="@Url.Action("Index", new { at = "add", cart = ViewBag.cart })" class="blue">新建收货人</a></li>
+                        }
+                    </ul>
+                    @if (ViewBag.at != "")
+                    { 
+                        <ul class="order_address_edit">
+                            <li>
+                                @if (ViewBag.aid == 0)
+                                {
+                                    <b>新建收件人信息</b>
+                                }
+                                else
+                                { 
+                                    <b>编辑收件人信息</b>
+                                }
+                            </li>
+                            <li>
+                                <label><i class="red">*</i>收件人：</label>
+                                <span>
+                                    <input type="text" name="username" id="username" class="tbox"  value="@editAddress.UserName" />
+                                    @Html.ValidationMessage("username")
+                                </span>
+                            </li>
+                            <li class="address_area">
+                                <label><i class="red">*</i>所在地区：</label>
+                                <span>
+                                    <select name="Province" id="Province">
+                                        <option value="0">-请选择省份-</option>
+                                        @if (ViewBag.Provinces != null)
+                                        {
+                                            foreach (var item in ViewBag.Provinces)
+                                            {
+                                            <option @(editAddress != null && editAddress.Province == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                            }
+                                        }
+                                    </select>
+                                    <select name="City" id="City">
+                                        <option value="0">-请选择城市-</option>
+                                        @if (ViewBag.Citys != null)
+                                        {
+                                            foreach (var item in ViewBag.Citys)
+                                            {
+                                            <option @(editAddress != null && editAddress.City == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                            }
+                                        }
+                                    </select>
+                                    @{
+                                        List<Area> listRegions = ViewBag.Regions as List<Area>;
+                                    }
+                                    <select name="Region" id="Region" style="@(listRegions != null && listRegions.Count > 1 ? "display:inline-block;" : "display:none;")">
+                                        <option value="0">-请选择地区-</option>
+                                        @if (listRegions != null)
+                                        {
+                                            foreach (var item in listRegions)
+                                            {
+                                            <option @(editAddress != null && editAddress.Region == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                            }
+                                        }
+                                    </select>
+
+                                    @Html.ValidationMessage("area")
+                                </span>
+                                <script>
+                                    var $Province = $("#Province")
+                                    var $City = $("#City")
+                                    var $Region = $("#Region")
+                                    $(function () {
+                                        $Province.change(function () {
+                                            var provinceid = $Province.val();
+                                            if (parseInt(provinceid) != 0) {
+                                                GetCityData();
+                                                GetRegionData();
+                                            }
+                                            ChangeAddressPrefix();
+                                        });
+                                        $City.change(function () {
+                                            var cityid = $City.val();
+                                            if (parseInt(cityid) != 0) {
+                                                GetRegionData();
+                                            }
+                                            ChangeAddressPrefix();
+                                        });
+                                        $Region.change(function () {
+                                            ChangeAddressPrefix();
+                                        });
+                                    });
+
+                                    function ShowCityHtml(cityJson) {
+                                        var cityHtml = "<option value='0'>-请选择城市-</option>";
+                                        //alert(cityJson);
+                                        $.each(cityJson, function (index, data) {
+                                            cityHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                        });
+                                        $City.html(cityHtml);
+                                    }
+                                    function ShowRegionHtml(regionJson) {
+                                        var regionHtml = "<option value='0'>-请选择地区-</option>";
+                                        //alert(regionJson);
+                                        var ishasregion = false;
+                                        $.each(regionJson, function (index, data) {
+                                            regionHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                            ishasregion = true;
+                                        });
+                                        $Region.html(regionHtml);
+                                        if (ishasregion) {
+                                            $Region.show();
+                                        }
+                                        else {
+                                            $Region.hide();
+                                        }
+                                    }
+                                    function GetCityData() {
+                                        var provinceid = $Province.val();
+                                        if (parseInt(provinceid) == 0)
+                                            return null;
+
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: '@Url.Action("GetAreaJson", "Area")',
+                                            data: { "parentid": provinceid },
+                                            dataType: "json",
+                                            async: false,
+                                            success: function (data) {
+                                                ShowCityHtml(data);
+                                            }
+                                        });
+                                    }
+                                    function GetRegionData() {
+                                        var cityid = $City.val();
+                                        if (parseInt(cityid) == 0)
+                                            return null;
+
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: '@Url.Action("GetAreaJson", "Area")',
+                                            data: { "parentid": cityid },
+                                            dataType: "json",
+                                            async: false,
+                                            success: function (data) {
+                                                ShowRegionHtml(data);
+                                            }
+                                        });
+                                    }
+                                    function ChangeAddressPrefix() {
+                                        //console.log($Province.find("option:selected").text());
+                                        //console.log($City.find("option:selected").text());
+                                        //console.log($Region.find("option:selected").text());
+                                        $("#AddressPrefix").val($Province.find("option:selected").text() + " " + $City.find("option:selected").text() + " " + $Region.find("option:selected").text().replace("-请选择地区-", ""));
+                                    }
+                                </script>
+                            </li>
+                            <li>
+                                <label><i class="red">*</i>详细地址：</label>
+                                <span>
+                                    <input id="AddressPrefix" name="AddressPrefix" type="hidden" value="@addressPrefix" />
+                                    <input type="text" name="address" id="address" class="tbox" value="@addressEnd" placeholder="如：街道、楼层、门牌号" />
+                                    @Html.ValidationMessage("address")
+                                </span>
+                            </li>
+                            <li>
+                                <label><i class="red">*</i>手机号码：</label>
+                                <span>
+                                    <input type="number" name="Mobile" id="Mobile" class="tbox"  value="@editAddress.Mobile" />
+                                    <input type="text" name="Tel" id="Tel" class="tbox"  value="@editAddress.Tel" style="display:none;" />
+                                </span>
+                                @Html.ValidationMessage("tel")
+                            </li>
+                            <li style="display: none;">
+                                <label><i class="red">*</i>邮政编码：</label>
+                                <span>
+                                    <input type="number" name="Post_Code" id="Post_Code" class="tbox" max="1000000" value="@editAddress.Post_Code" />
+                                </span>
+                                @*@Html.ValidationMessage("post")*@
+
+                            </li>
+                            <li>
+                                <label><i class="red"></i>设为默认：</label>
+                                <span>
+                                    <select name="Is_Default" id="Is_Default">
+                                        @foreach (var item in DataConfig.YesOrNo)
+                                        {
+                                            <option value="@item.Value" @(editAddress != null && item.Value == editAddress.Is_Default.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                                        }
+                                    </select>
+                                </span>
+                                @Html.ValidationMessage("post")
+                            </li>
+                            <li>
+                                <button class="btn_save_address">保存收货人</button>
+                                @Html.ValidationSummary(true)
+                            </li>
+                        </ul>
+                    }
+                </dd>
+            </dl>
+        }
+
+        <dl class="order_address_selected">
+            <dt>
+                <i class="iconfont icon-weizhi1"></i>
+            </dt>
+            <dd>
+                @if (defaultAddress == null)
+                {
+                    <div>
+                        <span class="order_user_name" style="padding-top: 25px;">请选择收货人信息</span>
+                        <div class="clear"></div>
+                    </div>
+                }
+                else
+                { 
+                    <div>
+                        <span class="order_user_name">@defaultAddress.UserName</span>
+                        <span class="order_user_phone">@defaultAddress.Mobile</span>
+                        <div class="clear"></div>
+                    </div>
+                    <span class="order_user_address">@defaultAddress.Address</span>
+                }
+                <i class="iconfont icon-jiantou"></i>
+            </dd>
+        </dl>
+
+
+        @using (Html.BeginForm("CreateOrder", "Order", FormMethod.Post))
+        { 
+            
+            <dl id="order_shipping" style="display: none;">
+                <dt>支付及配送方式
+                </dt>
+                <dd>
+                    <ul class="order_shipping_item">
+                        <li class="col_tit">
+                            <label>支付方式：</label>
+                        </li>
+                        <li>
+                            @foreach (var item in DataConfig.OrderPayWay)
+                            {
+                                <div>
+                                    @if (item.Value == Convert.ToInt32(DataConfig.OrderPayWayEnum.在线支付).ToString())
+                                    {
+                                        <label>
+                                            <input type="radio" name="payway" checked="checked" value="@item.Value" />@item.Name <span>(使用微信或支付宝支付)</span></label> 
+                                    }
+                                    else if (item.Value == Convert.ToInt32(DataConfig.OrderPayWayEnum.货到付款).ToString())
+                                    {
+                                        //if (UserShopService.IsDaofu())
+                                        //{ 
+                                        //<label><input type="radio" name="payway" value="@item.Value" />@item.Name</label>
+                                        //}
+                                    }
+                                    else if (item.Value == Convert.ToInt32(DataConfig.OrderPayWayEnum.预付定金).ToString())
+                                    {
+                                        //if (UserShopService.IsYufu())
+                                        //{ 
+                                        //    <label><input type="radio" name="payway" value="@item.Value" />@item.Name</label>
+                                        //}
+                                    }
+                                    else if (item.Value != Convert.ToInt32(DataConfig.OrderPayWayEnum.月结).ToString())
+                                    {
+                                        <label>
+                                            <input type="radio" name="payway" value="@item.Value" />@item.Name</label>
+                                    }
+                                </div>
+                            }
+                        </li>
+
+                    </ul>
+                    <ul class="order_shipping_item">
+                        <li class="col_tit">
+                            <label>配送方式：</label>
+                        </li>
+                        <li>
+                            @foreach (var item in DataConfig.OrderShippingWay)
+                            {
+                                if (item.Value == Convert.ToInt32(DataConfig.OrderShippingWayEnum.快递配送).ToString())
+                                {
+                                <label>
+                                    <input type="radio" name="shipping_way" checked="checked" value="@item.Value" />@item.Name</label> 
+                                }
+                                else if (item.Value == Convert.ToInt32(DataConfig.OrderShippingWayEnum.上门自提).ToString() && ViewBag.IsZiti)//支持自提才显示
+                                {
+                                <label>
+                                    <input type="radio" name="shipping_way" value="@item.Value" />@item.Name</label>
+                                }
+                            }
+                        </li>
+                    </ul>
+                    <ul class="order_shipping_item">
+                        <li class="col_tit">
+                            <label>派送时间：</label>
+                        </li>
+                        <li>
+                            @foreach (var item in DataConfig.OrderShippingTime)
+                            {
+                                if (item.Value == Convert.ToInt32(DataConfig.OrderShippingTimeEnum.工作日与节假日均可).ToString())
+                                {
+                                <label>
+                                    <input type="radio" name="shipping_time" checked="checked" value="@item.Value" />@item.Name</label> 
+                                }
+                                else
+                                {
+                                <label>
+                                    <input type="radio" name="shipping_time" value="@item.Value" />@item.Name</label>
+                                }
+                            }
+                        </li>
+                    </ul>
+                </dd>
+            </dl>
+            <dl id="order_invoice" style="display: none;">
+                <dt>发票信息
+                </dt>
+                <dd>
+                    <ul class="order_invoice_item">
+                        <li class="col_tit">
+                            <label>是否开发票：</label>
+                        </li>
+                        <li>
+                            @foreach (var item in DataConfig.OrderInvoice)
+                            {
+                                if (item.Value == Convert.ToInt32(DataConfig.OrderInvoiceEnum.否).ToString())
+                                {
+                                <label>
+                                    <input type="radio" name="invoice" checked="checked" value="@item.Value" />@item.Name</label> 
+                                }
+                                else
+                                {
+                                <label>
+                                    <input type="radio" name="invoice" value="@item.Value" />@item.Name</label>
+                                }
+                            }
+
+                        </li>
+                    </ul>
+                    <ul class="order_invoice_info invoice_title">
+                        <li class="col_tit">
+                            <label>发票抬头：</label>
+                        </li>
+                        <li>
+                            <input type="text" name="invoice_title" class="tbox" placeholder="请填写姓名" />
+                        </li>
+                    </ul>
+                    <ul class="order_invoice_info invoice_number">
+                        <li class="col_tit">
+                            <label>企业税号：</label>
+                        </li>
+                        <li>
+                            <input type="text" name="invoice_number" class="tbox" />
+                            <span class="red">(自2017年7月1日起，企业需提供纳税人识别号或统一社会信用代码)</span>
+                        </li>
+                    </ul>
+                </dd>
+            </dl>
+            <div class="order_product">
+                <table class="order_pro_table">
+                    <tr>
+                        <td colspan="2" class="table_tit">订单详情
+                        </td>
+                    </tr>
+                    @if (ViewBag.CartList != null)
+                    {
+                        foreach (var item in ViewBag.CartList as List<CartVModel>)
+                        {
+                            total_amount = total_amount + item.Cart.CartTotalPrice;
+                            needpay_amount = needpay_amount + item.Cart.CartTotalPrice;
+                            total_count = total_count + item.Cart.Count;
+                        <tr>
+                            <td class="order_product_img">
+                                <a href="@Url.Action("Index", "Goods", new { ID = item.Cart.GoodsID })" target="_blank">
+                                    <img src="@(SiteService.GetImgUrl(item.PhotoUrl))" width="80" />
+                                </a>
+                            </td>
+                            <td class="order_product_info">
+                                <span class="order_product_name">@item.Title</span>
+                                <span class="order_property">@item.Cart.PropertiesName</span>
+                                <span class="order_unitprice">￥<i>@(SiteService.GetPrice(item.Cart.CartTotalPrice / item.Cart.Count))</i><em> × @item.Cart.Count</em></span>
+                            </td>
+                        </tr>
+                        }
+                    }
+                </table>
+            </div>
+            <div class="order_remark">
+                留言：<input type="text" maxlength="30" name="remark" id="remark" placeholder="给商家留言（30字以内）" />
+            </div>
+            <dl class="order_coupon" style="display: none;">
+                <dt>购物券</dt>
+                <dd>
+                    @if (ViewBag.CouponList != null)
+                    {
+                        int i = 0;
+                        <span class="order_coupon_name">
+                            <select name="coupon" id="coupon">
+                                <option value="0" data-amount="0">有可购物券，请选择</option>
+                                @foreach (CouponInfo item in ViewBag.CouponList)
+                                {
+                                    if (i == 0)
+                                    {
+                                        discount_amount_coupon = item.CP_Amount;
+                                    }
+                                    <option value="@item.ID" data-amount="@item.CP_Amount">@item.CP_Name -￥@(item.CP_Amount)</option>
+                                    i++;
+                                }
+                            </select>
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="no_coupon">没有可使用的购物券</span>
+                    }
+                    <i class="iconfont icon-jiantou"></i>
+                </dd>
+            </dl>
+            
+            <dl class="order_coupon" style="display: none;">
+                <dt>红包</dt>
+                <dd>
+                    <span class="order_coupon_name">
+                        <select name="hongbao" id="hongbao">
+                            <option value="0" data-amount="0">有可用红包，请选择</option>
+
+                        </select>
+                    </span>
+                    <i class="iconfont icon-jiantou"></i>
+                </dd>
+            </dl>
+            
+            <div class="order_price_line">
+                @{
+                    //pay_amount = pay_amount + post_fee;
+                    //string cart = CookieHelper.GetValue("orderCartIds");
+                    //Int32[] cartids = CartService.GetCartIds(cart);
+                    //List<CartVModel> listCartVModel = ViewBag.CartList as List<CartVModel>;
+                    //Int32[] cartids = listCartVModel.Select(m => m.Cart.ID).Distinct().ToList<Int32>().ToArray();
+                    //post_fee = OrderService.GetShippingFee(defaultAddressID, cartids, UserShopService.GetCurrentShop());
+                }
+                <div class="total_price_shipping" style="display:none;">
+                    <label>运费</label><span>￥<i class="money">@post_fee</i></span>
+                </div>
+                <div class="total_price">
+                    <label>商品总额</label><span>￥<i class="money">@(total_amount)</i></span>
+                </div>
+                @{
+                    total_amount = total_amount + post_fee;
+                    needpay_amount = needpay_amount + post_fee - discount_amount_coupon - discount_amount_hongbao;
+                    pay_amount = needpay_amount;
+                }
+                @*<div class="total_price_needpay">应付金额：<span class="red">￥</span><i class="money">@needpay_amount</i> </div>*@
+
+                <div class="order_address_text" style="display: none;"><b>寄送至：</b><span class="user_address_selected">加载中...</span></div>
+                <input type="hidden" name="user_address_selected" id="user_address_selected" />
+                <input type="hidden" name="addressid" id="addressid" />
+                <input type="hidden" name="total_amount" id="total_amount" value="@total_amount" />
+                <input type="hidden" name="pay_amount" id="pay_amount"  value="@pay_amount"/>
+                <input type="hidden" name="needpay_amount" id="needpay_amount"  value="@needpay_amount"/>
+                <input type="hidden" name="postFee" id="postFee" value="@post_fee" />
+                <input type="hidden" name="discount_amount_coupon" id="discount_amount_coupon" value="@discount_amount_coupon" />
+                <input type="hidden" name="discount_amount_hongbao" id="discount_amount_hongbao" value="@discount_amount_hongbao" />
+            </div>
+            
+            <dl class="order_payway_name">
+                <dd class="on">
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_alipay.png" /></span>
+                        <input name="payway_name" type="radio" checked="checked" value="alipay" />
+                        支付宝支付
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+                <dd>
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_wepay.png" /></span>
+                        <input name="payway_name" type="radio" value="wxpay" />
+                        微信支付
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+                <dd>
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_yxpay.png" /></span>
+                        <input name="payway_name" type="radio" value="yue" />
+                        账户支付
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+            </dl>
+            
+            <div class="clear"></div>
+            <div class="order_submit_line">
+                <div class="total_price_pay">
+                    应付金额@*<span class="dingjin">
+                    @if (pay_amount < needpay_amount)
+                    {
+                        (@(UserShopService.GetCurrentShopYufuPercent() * 100)%定金)
+                    }
+                    </span>*@：<span class="red">￥</span><i class="money">@pay_amount</i>
+                </div>
+                <button class="btn_order">立即支付</button>
+                <a class="back_cart" href="@Url.Action("Index", "Cart")">取消</a>
+                @Html.ValidationSummary(true)
+                <div>@Html.ValidationMessage("order")</div>
+            </div>
+        }
+    </div>
+
+</div>
+<!--/container-->
+
+@section FootJs{
+
+    <script>
+        var $payway_name = $("[name='payway_name']");
+        //是否默认显示选择地址层
+        var show_choose_address = localStorage.getItem("show_choose_address");
+        if (show_choose_address == "yes") {
+            $("#order_address").show();
+        }
+        else {
+            $("#order_address").hide();
+        }
+        $(function () {
+
+            //点击开票
+            $("[name='invoice']").click(function () {
+                var invoiceWay = $(this).val();
+                //console.log($(this).val());
+                if (invoiceWay == "0") {
+                    $(".order_invoice_info").hide();
+                }
+                else if (invoiceWay == "1") {
+                    $(".order_invoice_info.invoice_title").show();
+                    $(".order_invoice_info.invoice_number").hide();
+                    $("[name='invoice_title']").atttr("placeholder", "请填写姓名");
+                }
+                else if (invoiceWay == "2") {
+                    $(".order_invoice_info").show();
+                    $("[name='invoice_title']").atttr("placeholder", "请输入公司名称");
+                }
+            });
+
+            //点击配送方式
+            $("[name='shipping_way']").click(function () {
+                ChangeAllPrice();
+
+            });
+
+            //点击支付方式
+            $("[name='payway']").click(function () {
+                ChangeAllPrice();
+            });
+            //付款方式
+            $payway_name.click(function () {
+                var $payitem = $(this);
+                if ($payitem.is(':checked')) {
+                    $payitem.parents("dd").addClass("on");
+                    $payitem.parents("dd").siblings("dd").removeClass("on");
+                }
+                else {
+                    $payitem.parents("dd").removeClass("on");
+                }
+            });
+
+            //选择地址
+            $("[name='user_address']").click(function () {
+                var $curAdd = $(this);
+                var addid = $curAdd.val();
+                console.log($curAdd.val());
+
+                $(".user_address_selected").text($curAdd.parent().find("span").text());
+                $("#user_address_selected").val($(".user_address_selected").text());
+                $("#addressid").val(addid);
+
+                ChangeAllPrice();
+
+            });
+
+            //加载时初始地址数据
+            $("#addressid").val($("[name='user_address']").first().val());
+            $(".user_address_selected").text($("[name='user_address']").first().parent().find("span").text());
+            $("#user_address_selected").val($(".user_address_selected").text());
+
+
+            //点击下单
+            $(".btn_order ").click(function () {
+
+                return CheckOrderForm();
+
+            });
+
+            //点击保存地址
+            $(".btn_save_address").click(function () {
+
+                return CheckAddressForm();
+            });
+
+            //优惠券
+            $("#coupon").change(function () {
+                var item_value = $(this).val();
+                $("#discount_amount_coupon").val($("#coupon option[value='" + item_value + "']").data("amount"));
+                ChangeAllPrice();
+            });
+            //红包
+            $("#hongbao").change(function () {
+                var item_value = $(this).val();
+                $("#discount_amount_hongbao").val($("#hongbao option[value='" + item_value + "']").data("amount"));
+                ChangeAllPrice();
+            });
+            //关闭选择地址
+            $(".order_close_choose").click(function () {
+                localStorage.setItem("show_choose_address", "no");
+                $("#order_address").hide();
+            });
+            //显示选择地址层
+            $(".order_address_selected").click(function () {
+                $("#order_address").show();
+                localStorage.setItem("show_choose_address", "yes");
+            });
+            $(".order_address_list>li").each(function () {
+                var $li = $(this);
+                $li.click(function () {
+                    $(".order_address_selected").find(".order_user_name").text($li.data("username"));
+                    $(".order_address_selected").find(".order_user_phone").text($li.data("mobile"));
+                    $(".order_address_selected").find(".order_user_address").text($li.data("address"));
+                });
+            });
+
+        });
+
+        //调整所有价格
+        function ChangeAllPrice() {
+
+            var payway = $("[name='payway']:checked").val();
+            var shipping_way = $("[name='shipping_way']:checked").val();
+            var addressid = $("#addressid").val();
+            var coupon_amount = $("#discount_amount_coupon").val();
+            var hongbao_amount = $("#discount_amount_hongbao").val();
+
+            //console.log("payway:" + payway);
+            //console.log("shipping_way:" + shipping_way);
+            //console.log("addressid:" + addressid);
+
+            $.ajax({
+                url: "@Url.Action("GetOrderTongJiJson", "Order")",
+                type: "GET",
+                async: true,
+                cache: false,
+                data: { "addressid": addressid, "shipping_way": shipping_way, "payway": payway, "coupon": coupon_amount, "hongbao": hongbao_amount },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")");
+                    if (json_rs == null || json_rs.status == null) {//返回错误
+                        //showAlert("warning", "系统错误！", null);
+                        // alert("系统错误！");
+                    }
+                    else if (json_rs.status == "success") {
+
+                        $(".total_count .count").text(json_rs.total_count);
+                        $(".total_price_shipping .money").text(parseFloat(json_rs.post_fee).toFixed(2));
+                        $(".total_price_needpay .money").text(parseFloat(json_rs.needpay_amount).toFixed(2));
+                        $(".total_price_pay .money").text(parseFloat(json_rs.pay_amount).toFixed(2));
+                        $(".total_price .money").text(parseFloat(json_rs.total_amount - json_rs.post_fee).toFixed(2));
+                        $(".postFee").val(parseFloat(json_rs.post_fee).toFixed(2));
+                        $(".total_amount").val(parseFloat(json_rs.total_amount).toFixed(2));
+                        $(".pay_amount").val(parseFloat(json_rs.pay_amount).toFixed(2));
+                        $(".needpay_amount").val(parseFloat(json_rs.needpay_amount).toFixed(2));
+                        //alert(unescape(decodeURI(json_rs.body))+"");
+                        //alert("加入成功！");
+
+                        //alert(json_rs.msg);
+
+                        //if (callback != null)
+                        //    callback();
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                },
+                error: function (xmlhttp) {
+                    //alert("系统错误！<br/>" + xmlhttp.responseText);
+                }
+            });
+        }
+
+        function CheckOrderForm() {
+
+            var invoiceWay = $("[name='invoice']:checked").val();
+            var $user_address_selected = $("#user_address_selected");
+            var $addressid = $("#addressid");
+
+            if ($user_address_selected.val() == "" || $addressid.val() == "") {
+                alert("请选择收货人信息！")
+                return false;
+            }
+
+            if (invoiceWay == "1" && $("[name='invoice_title']").val() == "") {
+                alert("开发票请填写您的姓名!");
+                $("[name='invoice_title']").focus();
+                return false;
+            }
+            else if (invoiceWay == "2") {
+                if ($("[name='invoice_title']").val() == "") {
+                    alert("请填写公司名称!");
+                    $("[name='invoice_title']").focus();
+                    return false;
+                }
+                if ($("[name='invoice_number']").val() == "") {
+                    alert("请填写企业税号!");
+                    $("[name='invoice_number']").focus();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function CheckAddressForm() {
+            if ($("#username").val() == "") {
+                alert("请输入收件人!");
+                return false;
+            }
+            if ($("#Province").val() == "0" || $("#City").val() == "0") {//|| $("#Region").val() == "0"
+                alert("请选择完整所在地区!");
+                return false;
+            }
+            if ($("#address").val() == "") {
+                alert("请输入详细地址!");
+                return false;
+            }
+            if ($("#Mobile").val() == "" && $("#Tel").val() == "") {
+                alert("手机号码和联系电话必须填写一项!");
+                return false;
+            }
+            //if ($("#Post_Code").val() == "") {
+            //    alert("请输入邮编!");
+            //    return false;
+            //}
+
+            return true;
+        }
+    </script>
+}

@@ -1,0 +1,63 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <style>
+        html { PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; }
+        BODY { BACKGROUND: #dad9d7; FONT-FAMILY: "微软雅黑"; }
+        IMG { BORDER-TOP-STYLE: none; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BORDER-BOTTOM-STYLE: none; }
+        A { CURSOR: pointer; }
+        UL { LIST-STYLE-TYPE: none; }
+        LI { LIST-STYLE-TYPE: none; }
+        TABLE { TABLE-LAYOUT: fixed; }
+        TABLE TR TD { WORD-BREAK: break-all; WORD-WRAP: break-word; }
+        A { TEXT-DECORATION: none; outline: none; }
+        A:hover { TEXT-DECORATION: underline; }
+        .cf { CLEAR: both; ZOOM: 1; }
+        .bg { BACKGROUND: url(/Content/images/404/01.jpg) #dad9d7 no-repeat center top; LEFT: 0px; OVERFLOW: hidden; WIDTH: 100%; POSITION: absolute; TOP: 0px; HEIGHT: 600px; }
+        .cont { MARGIN: 0px auto; WIDTH: 500px; LINE-HEIGHT: 20px; }
+        .c1 { HEIGHT: 360px; TEXT-ALIGN: center; }
+        .c1 .img1 { MARGIN-TOP: 180px; }
+        .c1 .img2 { MARGIN-TOP: 165px; }
+        .cont H2 { FONT-WEIGHT: normal; FONT-SIZE: 18px; COLOR: #555; HEIGHT: 35px; TEXT-ALIGN: center; }
+        .c3 { FONT-SIZE: 12px; COLOR: #999; HEIGHT: 180px; TEXT-ALIGN: center; }
+        #bf { LEFT: 0px; WIDTH: 100%; POSITION: absolute; TOP: 269px; }
+        .bf1 { PADDING-LEFT: 32px; MARGIN: 0px auto; WIDTH: 99px; }
+        .bd { OVERFLOW: hidden; HEIGHT: 600px; }
+        #box { LEFT: 0px; WIDTH: 100%; POSITION: absolute; TOP: 165px; TEXT-ALIGN: center; }
+        .bf1 { PADDING-LEFT: 32px; MARGIN: 0px auto; WIDTH: 99px; }
+    </style>
+</head>
+<body>
+    <div class="bg">
+        <div class="cont">
+            <div class="c1">
+                <img class="img1" src="~/Content/images/404/01.png">
+            </div>
+            @{
+                string urlRefer = "http://yx.test.com";
+                string url = Request["aspxerrorpath"];
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    urlRefer = url;
+                }
+                else if (Request.UrlReferrer != null && !string.IsNullOrEmpty(Request.UrlReferrer.ToString()))
+                {
+                    urlRefer = Request.UrlReferrer.ToString();
+                }
+            }
+            <h2>对不起，页面暂时无法访问 【<a href="@urlRefer">重试</a>】</h2>
+            <div class="c3">
+                <a class="c3" href="http://wx.test.com/">您可能输入了错误的网址，或者该网页已删除或移动
+            </div>
+        </div>
+    </div>
+</body>
+</html>

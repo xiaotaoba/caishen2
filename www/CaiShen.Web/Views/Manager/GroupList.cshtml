@@ -1,0 +1,78 @@
+﻿@model IEnumerable<Pannet.Models.ManagerGroup>
+@{
+    ViewBag.Title = "角色列表";    
+}
+
+<div class="page-content">
+    <div class="page-header">
+
+        <h1>
+            <span id="lblTitle">角色列表</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                角色管理
+            </small>
+        </h1>
+    </div>
+    <div class="form-inline">
+        <div class="dropdown pull-right">
+            <a class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="icon-cog"></i>操作菜单<i class="icon-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu pull-right" role="menu">
+                <li>
+                    <a href="@Url.Action("GroupList")"><i class="icon-group"></i>角色管理</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="@Url.Action("GroupAdd")"><i class="icon-plus"></i>新增角色</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="javascript:window.location.reload();">
+                        <i class="icon-refresh"></i>刷新页面</a>
+                </li>
+            </ul>
+        </div>
+        <a href="@Url.Action("GroupAdd")" class="btn btn-sm btn-success"><i class="glyphicon glyphicon-plus"></i>新增角色</a>
+    </div>
+    <p></p>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                @*<th width="20" align="right"></th>*@
+                @*<th width="40" align="left">Id</th>*@
+                <th width="200" align="left">角色组</th>
+                <th align="left" class="dr_option">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+            }
+            @foreach (var item in Model)
+            {
+                <tr id="dr_row_@i">
+                    @*<td align="right">
+                        <input name="ids[]" type="checkbox" class="dr_select toggle md-check" value="1" disabled=""></td>*@
+                    @*<td align="left">@Html.DisplayFor(modelItem => item.ID)</td>*@
+                    <td align="left">@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td align="left" class="dr_option">
+                        @*<a class="aadd" href="javascript:;"><i class="icon-cogs"></i>系统权限</a>*@
+                        <a class="alist" href="@Url.Action("AdminList", "Manager", new { GroupID = item.ID })"><i class="icon-user"></i>成员管理</a>
+                        <a class="aedit" href="@Url.Action("GroupAdd", "Manager", new { ID = item.ID })"><i class="icon-edit"></i>编辑</a>
+                        <a class="adel" href="@Url.Action("GroupDelete", "Manager", new { ID = item.ID })" style="@(item.ID == 1 ? "display:none" : "") " data-confirm="delete"><i class="icon-trash"></i>删除</a></td>
+                </tr>
+                i++;
+            }
+            @*<tr>
+                            <th align="right" style="border: none">
+                                <input class="toggle md-check" name="dr_select" type="checkbox" onclick="dr_selected()"></th>
+                            <td colspan="33" align="left" style="border: none">
+                                <button type="button" class="btn red btn-sm" name="option" onclick="dr_confirm_del_all()"><i class="fa fa-trash"></i>删除</button>
+                                &nbsp;<div class="onShow">操作完成之后请更新缓存，否则不会生效</div>
+                            </td>
+                        </tr>*@
+        </tbody>
+    </table>
+</div>
+

@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DE8D836B-C762-4F56-BDCA-607C3E74D17E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pannet.Models</RootNamespace>
+    <AssemblyName>Pannet.Models</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\YinXia\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\YinXia\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\YinXia\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\YinXia\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\YinXia\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\YinXia\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\YinXia\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataConfigModel.cs" />
+    <Compile Include="GoodsSKUPrice.cs" />
+    <Compile Include="Manager.cs" />
+    <Compile Include="ManagerGroup.cs" />
+    <Compile Include="ManagerWithGroup.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ManagerLog.cs" />
+    <Compile Include="SignIn.cs" />
+    <Compile Include="User.cs" />
+    <Compile Include="UserPayInfo.cs" />
+    <Compile Include="UserRole.cs" />
+    <Compile Include="UserLevel.cs" />
+    <Compile Include="UserShop.cs" />
+    <Compile Include="UserRoleHistory.cs" />
+    <Compile Include="UserLevelHistory.cs" />
+    <Compile Include="UserAmountHistory.cs" />
+    <Compile Include="UserScoreHistory.cs" />
+    <Compile Include="UserAddress.cs" />
+    <Compile Include="Area.cs" />
+    <Compile Include="Goods.cs" />
+    <Compile Include="GoodsType.cs" />
+    <Compile Include="Brand.cs" />
+    <Compile Include="Supplier.cs" />
+    <Compile Include="GoodsPhoto.cs" />
+    <Compile Include="Property.cs" />
+    <Compile Include="PropertyValue.cs" />
+    <Compile Include="GoodsPropertyValue.cs" />
+    <Compile Include="GoodsSKU.cs" />
+    <Compile Include="GoodsCategory.cs" />
+    <Compile Include="Warehouse.cs" />
+    <Compile Include="ArticleType.cs" />
+    <Compile Include="Article.cs" />
+    <Compile Include="AdvertisementType.cs" />
+    <Compile Include="Advertisement.cs" />
+    <Compile Include="ShippingCompany.cs" />
+    <Compile Include="ShippingArea.cs" />
+    <Compile Include="WarehouseArea.cs" />
+    <Compile Include="SupplierArea.cs" />
+    <Compile Include="SupplierGoods.cs" />
+    <Compile Include="Order.cs" />
+    <Compile Include="OrderDetail.cs" />
+    <Compile Include="OrderShipping.cs" />
+    <Compile Include="ReturnOrder.cs" />
+    <Compile Include="ReturnOrderShipping.cs" />
+    <Compile Include="OrderComment.cs" />
+    <Compile Include="SupplierGoodsCategory.cs" />
+    <Compile Include="UserShopGoodsCategory.cs" />
+    <Compile Include="UserShopGoods.cs" />
+    <Compile Include="Cart.cs" />
+    <Compile Include="SystemInfo.cs" />
+    <Compile Include="Favorite.cs" />
+    <Compile Include="ShippingTemplate.cs" />
+    <Compile Include="ShopGuaranteeHistory.cs" />
+    <Compile Include="UserShopGoodsDown.cs" />
+    <Compile Include="UserLog.cs" />
+    <Compile Include="ScoreProduct.cs" />
+    <Compile Include="UserScoreProduct.cs" />
+    <Compile Include="CouponInfo.cs" />
+    <Compile Include="UserCoupon.cs" />
+    <Compile Include="OrderFeeList.cs" />
+    <Compile Include="UserFile.cs" />
+    <Compile Include="HongBao.cs" />
+    <Compile Include="UserHongBao.cs" />
+    <Compile Include="WarehouseGoods.cs" />
+    <Compile Include="OrderChangeLog.cs" />
+    <Compile Include="Navigation.cs" />
+    <Compile Include="UserShopGoodsSet.cs" />
+    <Compile Include="ConsultMessage.cs" />
+    <Compile Include="OrderCustomMessage.cs" />
+    <Compile Include="UserInvoiceAmount.cs" />
+    <Compile Include="InvoiceLog.cs" />
+    <Compile Include="GoodsPriceArea.cs" />
+    <Compile Include="OrderDetailLog.cs" />
+    <Compile Include="BrowseRecord.cs" />
+    <Compile Include="TiXian.cs" />
+    <Compile Include="Department.cs" />
+    <Compile Include="GoodsArticle.cs" />
+    <Compile Include="Question.cs" />
+    <Compile Include="Answer.cs" />
+    <Compile Include="TestRecord.cs" />
+    <Compile Include="Test.cs" />
+    <Compile Include="GoodsArticleRecord.cs" />
+    <Compile Include="AdvertisementRecord.cs" />
+    <Compile Include="Questionnaire.cs" />
+    <Compile Include="DesignWork.cs" />
+    <Compile Include="Tag.cs" />
+    <Compile Include="DesignWorkPhoto.cs" />
+    <Compile Include="Comment.cs" />
+    <Compile Include="QuestionnaireRecord.cs" />
+    <Compile Include="QuestionnaireRecordAnswer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

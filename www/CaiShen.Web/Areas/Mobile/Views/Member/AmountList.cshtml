@@ -1,0 +1,89 @@
+﻿@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository;
+@using PagedList.Mvc;
+
+@model PagedList.PagedList<Pannet.Models.UserAmountHistory>
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "我的资产";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css?v=1008" rel="stylesheet" />
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_right_menu">
+        <ul>
+            <li><a href="@Url.Action("Recharge", "Member")">充值</a></li>
+            <li class="active"><a href="@Url.Action("AmountList")">资金记录</a></li>
+        </ul>
+    </div>
+    <ul class="home_user" style="padding:0;background: none;">
+        <li class="account">
+            <div>
+                <i class="iconfont icon-yue"></i>账户余额<span class="red">￥<em class="money">@LoginUser.U_Amount</em></span>
+                <a href="@Url.Action("Recharge", "Member")" class="btn btn-danger btn-sm">充值</a>
+                <a class="btn btn-info btn-sm" href="@Url.Action("TiXianApply")">提现</a>
+            </div>
+            <div>
+                <i class="iconfont icon-yue lock"></i>不可用余额<span class="red">￥<em class="money">@LoginUser.U_LockAmount</em></span>
+            </div>
+        </li>
+    </ul>
+    <dl class="amount_history">
+        <dt>资金流动记录</dt>
+        <dd>
+            <table class="table">
+                <tr>
+                    @*<th>创建时间</th>*@
+                    @*<th>说明</th>*@
+                    <th>事项</th>
+                    <th>收支金额(元)</th>
+                    <th>余额(元)</th>
+                    @* <th>变动不可用金额(元)</th>
+                    <th>剩余不可用金额(元)</th>
+                    <th>操作</th>*@
+                </tr>
+                @if (Model.Count() > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                    <tr>
+                        @*<td></td>*@
+                        <td>
+                            @(item.Thing)
+                            <br />@(item.Time.ToString("yyyy.MM.dd HH:mm:ss"))
+                        </td>
+                        @*<td>@item.Category</td>*@
+                        <td>@Html.Raw(item.Type == 1 ? "<span class='red'>+" + item.Amount +"<br>+"+ item.LockAmount+ "</span>" : "<span class='green'>-" + item.Amount+"<br>-"+ item.LockAmount + "</span>")</td>
+                        <td>
+                            @(item.TotalAmount)<br />
+                            @(item.LockTotalAmount)
+
+                        </td>
+                        @*  <td>@Html.Raw(item.Type == 1 ? "<span class='red'>+" + item.LockAmount + "</span>" : "<span class='green'>-" + item.LockAmount + "</span>")</td>
+                        <td>@item.LockTotalAmount</td>
+                        <td class="dr_option">
+                            <a class="adel" href="@Url.Action("UserAmountHistoryDelete", "Member", new { ID = item.ID })" data-confirm="delete" title="删除"><i class="iconfont icon-iconfontshanchu"></i></a>
+                        </td>*@
+                    </tr>
+
+                    }
+                    <tr>
+                        <td colspan="20" align="right">@Html.PagedListPager(Model, page => Url.Action("AmountList", new { page }))</td>
+                    </tr>
+                }
+
+
+            </table>
+        </dd>
+    </dl>
+    <div class="clear"></div>
+
+</div>
+<!--/container-->

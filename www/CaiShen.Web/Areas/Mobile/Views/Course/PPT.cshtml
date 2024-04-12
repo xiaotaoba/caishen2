@@ -1,0 +1,68 @@
+﻿@model PagedList.PagedList<Pannet.Models.Goods>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "资料类";
+    User LoginUser = ViewBag.LoginUser;
+    List<GoodsCategory> listCategory = ViewBag.Catagorys;
+}
+
+<div class="box">
+    @{
+        ViewBag.TopAction = "ppt";
+        Html.RenderPartial("_TopNavKC");
+    }
+
+    <div class="bsb_box">
+        <div class="line_box">
+            <ul>
+                @if (listCategory != null)
+                {
+                    foreach (var item in listCategory)
+                    {
+                    <li class="@(item.ID == ViewBag.cat_id ? "line_liSel" : "")"><a href="@Url.Action("PPT", new { cat_id = item.ID })">@item.GC_Name</a></li>
+                    }
+                }
+            </ul>
+        </div>
+        <div class="bsb_content">
+            <div class="bsb_conBox">
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                    <dl>
+                        <a href="@Url.Action("PPTDetail", new { item.ID })">
+                            <dt>
+                                <img src="@item.G_Image" alt="@item.G_Name" /></dt>
+                            <dd>
+                                <div class="bsb_conBHeader">@item.G_Name</div>
+                                <div class="bsb_conBTh">
+                                    <span>@item.G_CreateTime.ToString("yyyy-MM-dd")</span>
+                                    <span>浏览:@(item.G_ShowTimes)</span>
+                                </div>
+                            </dd>
+                        </a>
+                    </dl>  
+                    }
+
+                }
+                else
+                {
+                    <div class="nothing">暂无数据.</div>
+                }
+            </div>
+            @*<div class="bsb_conMore">
+                <a href="#">
+                    <p>加载更多活动</p>
+                    <i class="icon iconfont icon-xiala"></i>
+                </a>
+            </div>*@
+        </div>
+    </div>
+</div>

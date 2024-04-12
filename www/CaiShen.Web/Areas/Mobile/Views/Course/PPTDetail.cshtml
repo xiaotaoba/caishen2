@@ -1,0 +1,62 @@
+﻿@model Pannet.Models.Goods
+
+@using Pannet.Models
+@using Pannet.Utility
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    //ViewBag.Title = Model.G_Name;
+    User LoginUser = ViewBag.LoginUser;
+    GoodsCategory categoryModel = ViewBag.GoodsCategoryModel;
+    ViewBag.GoodsID = Model.ID;
+
+    bool hasLimit = false;//是否有权限
+}
+
+<div class="box">
+    @{
+        ViewBag.TopAction = "ppt";
+        Html.RenderPartial("_TopNavKC");
+
+        if (LoginUser != null && categoryModel != null)
+        {
+            string limits = categoryModel.GC_Department;
+            if (string.IsNullOrEmpty(limits))
+            {
+                hasLimit = false;
+            }
+            else
+            {
+                string[] limitArr = limits.Split(',');
+                if (limitArr.Contains(LoginUser.U_DepartmentID.ToString()))
+                {
+                    hasLimit = true;
+                }
+            }
+        }
+    }
+
+    <div class="bsd_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle">@Model.G_Name</div>
+            <div class="bsd_hText">
+                <span>发布时间：@Model.G_CreateTime.ToString("yyyy-MM-dd")</span>
+                <span>浏览：@Model.G_ShowTimes</span>
+                @*<span>发布：@Model.G_Author</span>*@
+            </div>
+        </div>
+        @if (hasLimit)
+        {
+            <div class="bsd_content">@Html.Raw(Model.G_Desc)</div>
+        }
+        else
+        {
+            <div style="padding:100px 80px;background-color:#fff; text-align:center;color:#f00;">您暂时无法查看该资料！</div>
+        }
+        @{
+            Html.RenderPartial("_PartialComment");
+        }
+    </div>
+</div>

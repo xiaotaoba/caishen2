@@ -1,0 +1,96 @@
+﻿@using Pannet.Models;
+@using Pannet.DAL;
+
+@model Pannet.Models.UserPayInfo
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "我的账户";
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+    <link href="~/Content/css/font-awesome.min.css" rel="stylesheet" />
+}
+
+<!--主区域-->
+<div id="container">
+    <div class="base">
+        @{
+            Html.RenderPartial("_PartialMemberLeft");
+        }
+        <div class="mc_right">
+            <div class="m_location">
+                当前位置：<a href="/Member">会员中心</a>»&nbsp;我的账户
+            </div>
+            <div class="mc_right_body">
+                <div class="mc_right_menu">
+                    <ul>
+                        <li><a href="@Url.Action("Info")">我的账户</a></li>
+                        <li class="active"><a href="@Url.Action("InfoPay")">支付信息</a></li>
+                        <li><a href="@Url.Action("InfoPassword")">修改密码</a></li>
+                    </ul>
+                </div>
+                <div class="mc_content">
+                    <div class="user_info">
+                        @using (Html.BeginForm("InfoPay", "Member", FormMethod.Post, new { @class = "form-horizontal" }))
+                        { 
+                            @Html.ValidationSummary(true)
+                            @Html.Raw(ViewBag.MessageInfo)
+                            <table class="">
+                                <tbody>
+                                    <tr>
+                                        <td colspan="2" width="100"><b>支付信息</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">@Html.LabelFor(m => m.AlipayNO)：</td>
+                                        <td>
+                                            @Html.TextBoxFor(m => m.AlipayNO)
+                                            @Html.ValidationMessageFor(m => m.AlipayNO)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">@Html.LabelFor(m => m.Wechat)：</td>
+                                        <td>
+                                            @Html.TextBoxFor(m => m.Wechat)
+                                            @Html.ValidationMessageFor(m => m.Wechat)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">@Html.LabelFor(m => m.BankName)：</td>
+                                        <td>
+                                            @Html.TextBoxFor(m => m.BankName)
+                                            @Html.ValidationMessageFor(m => m.BankName)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">@Html.LabelFor(m => m.BankAddress)：</td>
+                                        <td>
+                                            @Html.TextBoxFor(m => m.BankAddress)
+                                            @Html.ValidationMessageFor(m => m.BankAddress)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">@Html.LabelFor(m => m.BankNO)：</td>
+                                        <td>
+                                            @Html.TextBoxFor(m => m.BankNO)
+                                            @Html.ValidationMessageFor(m => m.BankNO)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+</div>
+<!--/container-->

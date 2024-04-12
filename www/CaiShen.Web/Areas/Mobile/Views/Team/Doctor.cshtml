@@ -1,0 +1,108 @@
+﻿@model PagedList.PagedList<Pannet.Models.DesignWork>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "康复医师";
+    List<Tag> tagJingyan = ViewBag.DesignStyles;
+    List<Tag> tagTags = ViewBag.DesignTags;
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <style>
+        body { background-color: #eee; }
+        .dn_conhoose dl { margin-bottom: 2px; }
+        .dn_conhoose dl.nomargin dd { margin-top: 0; }
+        .dn_conhoose .dn_conC_th { float: none; width: 90%; }
+        .dn_conhoose .dn_conC_th select { padding: 0 10px; border-radius: 6px; height: 65px; line-height: 65px; }
+        .dn_conhoose .dn_conC_th select:last-child { margin-right: 0; }
+        .dn_conhoose dd:first-child { line-height: 40px; font-size: 24px; }
+    </style>
+}
+<div class="box">
+
+    <div class="kangfu_nav" style="display: block;">
+        <ul>
+            @if (ViewBag.Catagorys != null)
+            {
+                foreach (GoodsCategory item in ViewBag.Catagorys)
+                {
+                <li>
+                    <a href="@Url.Action("Index", new { cat = item.ID })">
+                        <i class="syioc_cssimg">
+                            <img src="@(item.GC_Image)"></i>
+                        <span>@(item.GC_Name)</span>
+                    </a>
+                </li>
+                }
+            }
+        </ul>
+    </div>
+
+    <div class="car_nav">
+        <a href="@Url.Action("Index", "Health", new { ViewBag.ID, ViewBag.keyword, order = "tj" })">康复项目</a>
+        <a href="@Url.Action("Doctor", "Team", new { ViewBag.ID, ViewBag.keyword, order = "new" })" class="carnav_sel">康复医师</a>
+    </div>
+    <div class="car_content">
+
+        <div class="doctor_list">
+
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (DesignWork item in Model)
+                {
+                <a href="@Url.Action("Detail", new { item.ID })">
+                    <dl>
+                        <dt>
+                            <img src="@(item.DW_Image)"></dt>
+                        <dd>
+                            <ul>
+                                <li class="ayi_name">
+                                    <span class="">@(item.DW_Name)</span>
+                                </li>
+                                <li class="ayi_status">
+                                    <span>@(tagJingyan.Find(m => m.ID == item.DW_Style).T_Name)</span>
+                                </li>
+                                <li class="ayi_tags">标签：
+                            @{
+                    string tags = item.DW_TypeTags;
+                    List<string> tagIds = new List<string>();
+                    if (!string.IsNullOrEmpty(tags))
+                    {
+                        tagIds = tags.Split(',').ToList();
+                    }
+                    tagTags = tagTags.Where(m => tagIds.Contains(m.ID.ToString())).ToList();
+                    foreach (var item_tag in tagTags)
+                    {
+                                <span>@(item_tag.T_Name)</span>
+                    }
+                            }
+
+
+                                </li>
+                                <li class="ayi_status">
+                                    @* <span>明星月嫂</span>
+                                    <span>3年经验</span>*@
+                                    @*<em class="status_0">康复师</em>*@
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
+                </a>
+                }
+            }
+            else
+            {
+                <div class="nothing">暂无数据.</div>
+            }
+        </div>
+
+        <div class="clear"></div>
+        <div id="page_nav" style="display:none;">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { page, ID = ViewBag.ID, sort = ViewBag.sort, asc = ViewBag.asc }))
+        </div>
+    </div>
+</div>

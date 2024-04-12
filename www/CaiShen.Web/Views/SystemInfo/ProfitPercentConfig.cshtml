@@ -1,0 +1,118 @@
+﻿@using Pannet.DAL
+@using Pannet.Models
+
+@model Pannet.Models.ProfitPercentConfig
+
+@{
+    ViewBag.Title = "系统参数设置";
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">系统参数 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                <span>设置 </span>
+            </small>
+        </h1>
+    </div>
+
+    @using (Html.BeginForm("ProfitPercentConfig", "SystemInfo", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+
+        <table class="table table-striped table-hover">
+            <tbody>
+               @* <tr>
+                    <td width="200">@Html.LabelFor(m => m.Shop_Yufu_Percent)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Shop_Yufu_Percent, new { style = "width:200px" })
+                        @Html.ValidationMessageFor(m => m.Shop_Yufu_Percent)
+                        （填写百分比值，如：填写0.3为30%，下同）
+                    </td>
+                </tr>*@
+              @*  <tr>
+                    <td>@Html.LabelFor(m => m.Join_Partner_Profit_Percent)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Join_Partner_Profit_Percent, new { style = "width:200px" })
+                        @Html.ValidationMessageFor(m => m.Join_Partner_Profit_Percent)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Join_Platform_Profit_Percent)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Join_Platform_Profit_Percent, new { style = "width:200px" })
+                        @Html.ValidationMessageFor(m => m.Join_Platform_Profit_Percent)
+                    </td>
+                </tr>
+
+              
+                <tr>
+                    <td>@Html.LabelFor(m => m.Order_Partner_Profit_Percent)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Order_Partner_Profit_Percent, new { style = "width:200px" })
+                        @Html.ValidationMessageFor(m => m.Order_Partner_Profit_Percent)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Order_Shop_Profit_Percent)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Order_Shop_Profit_Percent, new { style = "width:200px" })
+                        @Html.ValidationMessageFor(m => m.Order_Shop_Profit_Percent)
+                    </td>
+                </tr>
+                 <tr>
+                    <td>@Html.LabelFor(m => m.Shop_JieSuan_Day)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Shop_JieSuan_Day, new { style = "width:200px" }) 日，每月当日系统自动结算
+                        @Html.ValidationMessageFor(m => m.Shop_JieSuan_Day)
+                    </td>
+                </tr>
+                 <tr>
+                    <td>@Html.LabelFor(m => m.Order_TuiHuo_Days)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Order_TuiHuo_Days, new { style = "width:200px" }) 天，即确认收货后，多少天内允许退货，过了退货期开始计算结算周期。
+                        @Html.ValidationMessageFor(m => m.Order_TuiHuo_Days)
+                    </td>
+                </tr>*@
+                 <tr>
+                    <td width="200">@Html.LabelFor(m => m.Sms_Product)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sms_Product, new { style = "width:200px" }) 
+                        @Html.ValidationMessageFor(m => m.Sms_Product)
+                    </td>
+                </tr>
+                 <tr>
+                    <td>@Html.LabelFor(m => m.Sms_Domain)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sms_Domain, new { style = "width:200px" }) 
+                        @Html.ValidationMessageFor(m => m.Sms_Domain)
+                    </td>
+                </tr>
+                 <tr>
+                    <td>@Html.LabelFor(m => m.Sms_AccessKeyId)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sms_AccessKeyId, new { style = "width:200px" })
+                        @Html.ValidationMessageFor(m => m.Sms_AccessKeyId)
+                    </td>
+                </tr>
+                 <tr>
+                    <td>@Html.LabelFor(m => m.Sms_AccessKeySecret)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sms_AccessKeySecret, new { style = "width:200px" }) 
+                        @Html.ValidationMessageFor(m => m.Sms_AccessKeySecret)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

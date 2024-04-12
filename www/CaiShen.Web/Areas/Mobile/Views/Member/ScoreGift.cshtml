@@ -1,0 +1,124 @@
+﻿@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository;
+@using PagedList.Mvc;
+
+@model PagedList.PagedList<Pannet.Models.UserScoreProductVmodel>
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "积分兑换礼品";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+    <style>
+        .table > tbody > tr > td.td_middle { vertical-align: middle; }
+    </style>
+}
+
+<!--主区域-->
+<div id="container">
+    <div class="base">
+        @{
+            Html.RenderPartial("_PartialMemberLeft");
+        }
+        <div class="mc_right">
+            <div class="m_location">
+                当前位置：<a href="/Member">会员中心</a>»&nbsp;积分兑换礼品
+            </div>
+            <div class="mc_right_body">
+                <div class="mc_right_menu">
+                    <ul>
+                        <li class="active"><a href="@Url.Action("ScoreGift")">积分兑换礼品列表</a></li>
+                    </ul>
+                </div>
+                <div class="mc_content">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                @*<th width="20" align="right"></th>*@
+                                <th width="240">礼品名称</th>
+                                <th width="140">兑换时间</th>
+                                <th>收货地址</th>
+                                <th>快递信息</th>
+                                <th width="60">状态</th>
+                                <th width="60" align="left" class="dr_option">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int i = 1;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                UserScoreProduct userproduct = item.UserScoreProduct;
+                                ScoreProduct product = item.ScoreProduct;
+                                <tr id="dr_row_@i">
+                                    <td align="right" style="display: none;">
+                                        <input name="ids[]" type="checkbox" class="dr_select toggle md-check" value="1" disabled=""></td>
+                                    <td>
+                                        <img src="@(SiteService.GetImgUrl(product.SP_Image))" width="80" /><br />
+                                        @product.SP_Name
+
+                                    </td>
+                                    <td class="td_middle">@userproduct.USP_Time</td>
+                                    <td class="td_middle">@userproduct.USP_Address
+                                        @if (userproduct.USP_Status == Convert.ToInt16(DataConfig.UserScoreProductStatusEnum.待发货))
+                                        {
+
+                                            <a href="javascript:void(0)" class="btn btn-info btn-xs btn_change_address" data-id="@userproduct.ID">更换地址</a> 
+                                        }
+                                    </td>
+                                    <td class="td_middle">@userproduct.USP_ShippingCompany<br />@userproduct.USP_ShippingNo</td>
+                                    <td class="td_middle">
+                                        <span class="@(userproduct.USP_Status == Convert.ToInt16(DataConfig.UserScoreProductStatusEnum.待发货) ? "text-danger" : "text-success")">@(DataConfig.UserScoreProductStatus.Find(m => m.Value == userproduct.USP_Status.ToString()).Name)</span>
+                                    </td>
+                                    <td align="left" class="dr_option td_middle">
+
+                                        <a class="adel" href="@Url.Action("ScoreGiftDelete", "Member", new { ID = userproduct.ID })" style="@(userproduct.ID == 1 ? "display:none" : "") " data-confirm="delete" title="删除"><i class="iconfont icon-iconfontshanchu"></i></a>
+                                    </td>
+                                </tr>
+                                        i++;
+                            }
+                            <tr>
+                                <td colspan="20" align="right">@Html.PagedListPager(Model, page => Url.Action("ScoreGift", new { page }))</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+</div>
+<!--/container-->
+
+@section FootJs{
+    <script>
+        $(".btn_change_address").each(function () {
+            var $item = $(this);
+            $item.click(function () {
+                var currentIndex = layer.open({
+                    type: 2,
+                    title: '选择收货地址',
+                    maxmin: true,
+                    shadeClose: true, //点击遮罩关闭层
+                    area: ['800px', '300px'],
+                    content: '/Member/ScoreGiftChooseAddress?usp_id=' + $item.data("id"),
+                    cancel: function () {
+                    },
+                    close: function () {
+                    },
+                    end: function () {
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+

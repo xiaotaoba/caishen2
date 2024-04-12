@@ -1,0 +1,70 @@
+﻿@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository;
+
+@model Pannet.Models.Order
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "支付成功";
+    List<OrderDetail> orderDetailList = ViewBag.orderList as List<OrderDetail>;
+    int orderDetailId = 0;
+    if (orderDetailList != null && orderDetailList.Count > 0)
+    {
+        orderDetailId = orderDetailList.First().ID;
+    }
+}
+<!--主区域-->
+<div id="container">
+    <div id="pay" class="base">
+        <dl class="pay_order_success">
+            <dt>订单支付成功</dt>
+            <dd>
+                <div class="tips"><i class="iconfont icon-dizhiguanliyigouxuan"></i>您的订单已支付成功！</div>
+                <table border="1">
+                    <tr class="tr_th">
+                        <td>订单号</td>
+                        <td align="center">支付金额</td>
+                        <td align="center">操作</td>
+                    </tr>
+                    <tr>
+                        <td>@ViewBag.trade_no
+                        </td>
+                        <td align="center"><span class="red">@(SiteService.GetPrice(ViewBag.total_fee))</span>元</td>
+                        @if (OrderService.GetOrderTypeByOrderNo(ViewBag.trade_no) == "02")
+                        {
+                            <td align="center"><a href="@Url.Action("AmountList", "Member")">查看记录</a></td>
+                        }
+                        else
+                        {
+                            <td align="center"><a href="@Url.Action("Order", "Member")">查看订单</a></td>
+                        }
+                    </tr>
+                </table>
+            </dd>
+        </dl>
+    </div>
+
+</div>
+<!--/container-->
+@section FootJs{
+    <script>
+        var orderDetailId = parseInt('@orderDetailId');
+        $(function () {
+            if (orderDetailId != 0) {
+
+                var currentTipsIndex = layer.open({
+                    content:'订单支付成功，需要上传设计稿源文件！',
+                    btn: ['现在上传', '稍后再说'], //按钮,
+                    icon: 1,
+                    yes: function (index) {
+                        //location.reload();
+                        //layer.close(index);
+                        location.href = '/Mobile/Member/OrderDesignFile?from=success&orderDetailID=' + orderDetailId;
+                        layer.close(currentTipsIndex);
+                    }
+                });
+            }
+        });
+    </script>
+}

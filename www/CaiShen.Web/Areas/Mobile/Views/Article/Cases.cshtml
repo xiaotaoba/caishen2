@@ -1,0 +1,42 @@
+﻿@model PagedList.PagedList<Pannet.Models.Article>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "作业本通知";
+    User LoginUser = ViewBag.LoginUser;
+    ArticleType typeModel = ViewBag.TypeModel;
+    if (typeModel != null)
+    {
+        ViewBag.Title = typeModel.AT_Name;
+    }
+}
+
+<div class="box">
+    <div class="case_list">
+        @if (Model != null && Model.Count > 0)
+        {
+        <ul>
+            @foreach (Article item in Model)
+            {
+            <li>
+                <a href="@Url.Action("Detail", new { item.ID })">
+                    <img src="@item.Art_Image" alt="@item.Art_Title" />
+                    <div class="case_tit">@item.Art_Title</div>
+                    <div class="case_time">@item.Art_CreateTime.ToString("yyyy-MM-dd")</div>
+                </a>
+            </li>
+            }
+            </ul>
+        }
+        else
+        {
+            <div class="nothing">暂无数据.</div>
+        }
+
+    </div>
+</div>

@@ -1,0 +1,136 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>注册</title>
+    <link href="~/Content/css/base.css" rel="stylesheet" />
+    <link href="~/Content/css/login.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="base">
+        <div id="register">
+            <div class="l">
+                <h3>
+                    注册新用户</h3>
+                <ul>
+                    <li>
+                        <label>
+                            <span class="red">*</span>用户名：</label>
+                        <input type="text" class="tbox" runat="server" id="txtUserName" clientidmode="Static"
+                            maxlength="16" /><span class="tips">(4-16位字母、数字及下划线)</span> </li>
+                    <li>
+                        <label>
+                            <span class="red">*</span>密码：</label>
+                        <input type="password" class="tbox" runat="server" id="txtPwd" clientidmode="Static"
+                            maxlength="16" /><span class="tips">(6-16位字母、数字及下划线) </li>
+                    <li>
+                        <label>
+                            <span class="red">*</span>确认密码：</label>
+                        <input type="password" class="tbox" runat="server" id="txtPwdAgain" clientidmode="Static"
+                            maxlength="16" />
+                    </li> 
+                    <li>
+                        <label>
+                            <span class="red">*</span>电子邮箱：</label>
+                        <input type="text" class="tbox" runat="server" id="txtEmail" clientidmode="Static"
+                            maxlength="16" /><span class="tips"></span> </li>
+                    <li>
+                        <label>
+                            <span class="red">*</span>验证码：</label>
+                        <input type="text" class="tcbox" runat="server" id="txtCode" clientidmode="Static" /><a
+                            href="JavaScript:setCodeImage()"><img src='/Code' id='codeImage' style="border: 0;" /></a>
+                    </li>
+                    <li class="protocol">
+                        <label>
+                            &nbsp;</label>
+                        <asp:CheckBox ID="ckbReaded" runat="server" Checked="true" />请先阅读《<a href="#">用户注册协议</a>》
+                    </li>
+                    <li>
+                        <label>
+                            &nbsp;</label>
+                        <asp:ImageButton ID="ibtnRegister" runat="server" ImageUrl="~/Content/images/btn_register.jpg"
+                            OnClick="ibtnRegister_Click" OnClientClick="javascript:return CheckRegister(); " />
+                    </li>
+                </ul>
+            </div>
+            <div class="r">
+                已经有账号？请直接登录<br />
+                <div class="r_login">
+                    <a href="/login">
+                        <img src="~/Content/images/btn_login2.jpg" /></a></div>
+                <br />
+                <div style="font-size: 14px;">
+                    <p>
+                        使用合作网站账号登录</p>
+                    <p class="login_other_icon">
+                        <a id="wb_connect_link" href="javascript:void(0);" title="新浪微博">
+                            <img src="~/Content/images/site2_v1.png" /></a> <a href="javascript:void(0);" id="qqLoginLink" title="QQ">
+                                <img src="~/Content/images/site2_v2.png" /></a>
+                        <a id="renren_link" href="javascript:void(0);" title="人人网">
+                            <img src="~/Content/images/site2_v3.png" /></a>
+                        <a id="douban_link" href="javascript:void(0);" title="豆瓣网">
+                            <img src="~/Content/images/site2_vdouban.png" /></a>
+                    </p>
+                </div>
+            </div>
+            <div class="clear">
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var $userName = $("#txtUserName");
+        var $pwd = $("#txtPwd");
+        var $pwdAgain = $("#txtPwdAgain");
+        var $code = $("#txtCode");
+        var $email = $("#txtEmail");
+        var regName = /^[\w]{4,16}$/
+        var regPwd = /^[\w]{6,16}$/
+        var regEmail = /^\w+([-+.']\w+)*@@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+
+        function CheckRegister() {
+            if ($userName.val() == "")
+            {
+                alert("请输入注册用户名！");
+                return false;
+            }
+            if (!$userName.val().match(regName)) {
+                alert("注册用户名为4-16位字母、数字及下划线组成！");
+                return false;
+            }
+            if ($pwd.val() == "")
+            {
+                alert("请输入密码！");
+                return false;
+            }
+            if (!$pwd.val().match(regPwd)) {
+                alert("注册密码为6-16位字母、数字及下划线组成！");
+                return false;
+            }
+            if ($pwd.val() != $pwdAgain.val()) {
+                alert("输入密码不一致！");
+                return false;
+            }
+           
+            if ($email.val() == "" || !$email.val().match(regEmail)) {
+                alert("请输入正确的电子邮箱！");
+                return false;
+            }
+            if ($code.val() === "") {
+                alert("请输入验证码！");
+                return false;
+            }
+            return true;
+        }
+
+        function setCodeImage() {
+            document.getElementById("codeImage").src = '/Code?t='+new Date().getMilliseconds();
+        }
+
+    </script>
+</body>
+</html>

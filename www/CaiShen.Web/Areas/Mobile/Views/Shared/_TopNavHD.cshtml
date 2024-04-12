@@ -1,0 +1,22 @@
+﻿<div class="op_wrap">
+    <ul>
+        <li class="@(ViewBag.TopAction == "home" ? "op_liSel" : "")"><a href="/Mobile/Activity/">
+            <dl>
+                <dt><i class="icon iconfont icon-boshi"></i></dt>
+                <dd>商学院</dd>
+            </dl>
+        </a></li>
+        <li class="@(ViewBag.TopAction == "list" ? "op_liSel" : "")"><a href="/Mobile/Activity/List">
+            <dl>
+                <dt><i class="icon iconfont icon-72"></i></dt>
+                <dd>培训活动</dd>
+            </dl>
+        </a></li>
+        <li class="@(ViewBag.TopAction == "news" ? "op_liSel" : "")"><a href="/Mobile/Activity/News">
+            <dl>
+                <dt><i class="icon iconfont icon-zhinanzhen"></i></dt>
+                <dd>市场动态</dd>
+            </dl>
+        </a></li>
+    </ul>
+</div>

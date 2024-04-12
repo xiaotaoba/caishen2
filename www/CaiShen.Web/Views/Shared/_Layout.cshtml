@@ -1,0 +1,265 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/css/ace/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/css/ace/css/ace.min.css" rel="stylesheet" />
+    <link href="~/Content/css/validation.css" rel="stylesheet" />
+    <link href="~/editor/themes/default/default.css" rel="stylesheet" />
+    <link href="~/Content/css/admin.css" rel="stylesheet" />
+    @RenderSection("Style", false)
+    <script src="~/Content/css/ace/js/ace-extra.min.js"></script>
+    <script src="~/Content/css/ace/js/jquery-2.0.3.min.js"></script>
+    <script src="~/Content/js/jquery.validate.min.js"></script>
+    <script src="~/Content/js/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Content/js/modernizr-2.6.2.js"></script>
+    <script src="~/editor/kindeditor-min.js"></script>
+    <script src="~/editor/lang/zh_CN.js"></script>
+    <script src="~/Scripts/layer/layer.js"></script>
+    <script src="~/My97DatePicker/WdatePicker.js"></script>
+    <!--[if lt IE 9]>
+		<script src="~/Content/js/html5shiv.js"></script>
+		<script src="~/Content/js/respond.min.js"></script>
+		<![endif]-->
+
+    @RenderSection("Js", false)
+</head>
+<body>
+    @RenderBody()
+    <script src="~/Content/js/bootstrap.min.js"></script>
+    <script src="~/Content/css/ace/js/ace-elements.min.js"></script>
+    <script src="~/Content/css/ace/js/ace.min.js"></script>
+
+    <!-- system modal start -->
+    <div id="my-alert" class="modal">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                    <h5 class="modal-title"><i class="icon-exclamation-sign"></i>[Title]</h5>
+                </div>
+                <div class="modal-body small">
+                    <p>[Message]</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary ok" data-dismiss="modal">[BtnOk]</button>
+                    <button type="button" class="btn btn-default cancel" data-dismiss="modal">[BtnCancel]</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- system modal end -->
+    <script>
+        $(function () {
+            window.Modal = function () {
+                var reg = new RegExp("\\[([^\\[\\]]*?)\\]", 'igm');
+                var alr = $("#my-alert");
+                var ahtml = alr.html();
+
+                //关闭时恢复 modal html 原样，供下次调用时 replace 用
+                //var _init = function () {
+                //	alr.on("hidden.bs.modal", function (e) {
+                //		$(this).html(ahtml);
+                //	});
+                //}();
+
+                /* html 复原不在 _init() 里面做了，重复调用时会有问题，直接在 _alert/_confirm 里面做 */
+
+
+                var _alert = function (options) {
+                    alr.html(ahtml);	// 复原
+                    alr.find('.ok').removeClass('btn-success').addClass('btn-primary');
+                    alr.find('.cancel').hide();
+                    _dialog(options);
+
+                    return {
+                        on: function (callback) {
+                            if (callback && callback instanceof Function) {
+                                alr.find('.ok').click(function () { callback(true) });
+                            }
+                        }
+                    };
+                };
+
+                var _confirm = function (options) {
+                    alr.html(ahtml); // 复原
+                    alr.find('.ok').removeClass('btn-primary').addClass('btn-success');
+                    alr.find('.cancel').show();
+                    _dialog(options);
+
+                    return {
+                        on: function (callback) {
+                            if (callback && callback instanceof Function) {
+                                alr.find('.ok').click(function () { callback(true) });
+                                alr.find('.cancel').click(function () { callback(false) });
+                            }
+                        }
+                    };
+                };
+
+                var _dialog = function (options) {
+                    var ops = {
+                        msg: "提示内容",
+                        title: "操作提示",
+                        btnok: "确定",
+                        btncl: "取消"
+                    };
+
+                    $.extend(ops, options);
+
+                    console.log(alr);
+
+                    var html = alr.html().replace(reg, function (node, key) {
+                        return {
+                            Title: ops.title,
+                            Message: ops.msg,
+                            BtnOk: ops.btnok,
+                            BtnCancel: ops.btncl
+                        }[key];
+                    });
+
+                    alr.html(html);
+                    alr.modal({
+                        width: 500,
+                        backdrop: 'static'
+                    });
+                }
+
+                return {
+                    alert: _alert,
+                    confirm: _confirm
+                }
+
+            }();
+        });
+        /*
+        调用方法：
+
+        // 四个选项都是可选参数
+        Modal.alert(
+            {
+                msg: '内容',
+                title: '标题',
+                btnok: '确定',
+                btncl: '取消'
+            });
+
+        // 如需增加回调函数，后面直接加 .on( function(e){} );
+        // 点击“确定” e: true
+        // 点击“取消” e: false
+        Modal.confirm(
+            {
+                msg: "是否删除角色？"
+            })
+            .on(function (e) {
+                alert("返回结果：" + e);
+            });
+            */
+
+        $(function () {
+
+            $("[data-confirm]").each(function () {
+                var curHref = $(this);
+                curHref.click(function (e) {
+                    if (curHref.data("confirm") == "delete") {
+                        e.preventDefault();
+                        Modal.confirm({ msg: "确定删除？" }).on(function (flag) {
+                            if (flag) {
+                                window.location.href = curHref.attr("href");
+                            }
+                            else {
+                                return false;
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        function dr_alert(msg) {
+            //art.dialog({
+            //    icon: "error",
+            //    content: msg
+            //})
+            layer.alert(msg, {
+                icon: 0
+                //,skin: 'layer-ext-moon' 
+            })
+        }
+        function dr_confirm_batch(title, formid, ckb_name) {
+            layer.confirm(title, {
+                btn: ['确定', '取消'] //按钮
+            }, function () {
+
+                if (ckb_name == null) {
+                    ckb_name = "ids";
+                }
+                if (formid == null) {
+                    formid = "#myform";
+                }
+                else {
+                    formid = "#" + formid;
+                }
+                var _data = $(formid).serialize();
+                var _url = window.location.href;
+                if ((_data.split(ckb_name)).length - 1 <= 0) {
+                    //$.dialog.tips("请选中操作项", 2);
+                    layer.msg('请选择操作项', { icon: 0 });
+                    return false;
+                }
+                $(formid).submit();
+
+            }, function () {
+                //取消
+                //return false;
+            });
+            return false
+        }
+
+        function select_all(obj, ckb_name, formid)
+        {
+            if (ckb_name == null) {
+                ckb_name = "ids";
+            }
+            if (formid == null) {
+                formid = "#myform";
+            }
+            else {
+                formid = "#" + formid;
+            }
+
+            if ($(obj).is(":checked")) {
+                //alert(1);
+               // $(formid).find(":checkbox").attr("checked", true);
+                //$("[name='" + ckb_name + "']").attr("checked", true);
+                $(formid).find(":checkbox").each(function () {
+                    //$(this).attr("checked", true);
+                    $(this).get(0).checked = $(obj).get(0).checked;
+                });
+            }
+            else {
+                //alert(2);
+                //$("[name='" + ckb_name + "']").removeAttr("checked");
+                //$(formid).find(":checkbox").attr("checked",false );
+                $(formid).find(":checkbox").each(function () {
+                    //$(this).attr("checked", false);
+                    $(this).get(0).checked = $(obj).get(0).checked;
+                });
+            }
+        }
+
+        window.alert = function (msg) {
+            layer.alert(msg, { icon: 1 });
+        }
+        window.tips = function (msg) {
+            layer.msg(msg, { icon: 1 });
+        }
+
+    </script>
+    @RenderSection("FootJs", false)
+
+</body>
+</html>

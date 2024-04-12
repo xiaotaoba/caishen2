@@ -1,0 +1,28 @@
+﻿@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository;
+
+@model Pannet.Models.Order
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "支付失败";
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div id="pay" class="base">
+        <dl class="pay_order_success">
+            <dt>支付失败</dt>
+            <dd>
+                <div class="tips_error red"><i class="iconfont icon-shibai"></i>支付失败！</div>
+                <div class="tips_error_info tac">
+                    @Html.Raw(HttpUtility.UrlDecode(ViewBag.MessageInfo))
+                </div>
+            </dd>
+        </dl>
+    </div>
+
+</div>
+<!--/container-->

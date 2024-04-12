@@ -1,0 +1,188 @@
+﻿@model PagedList.PagedList<Pannet.Models.QuestionnaireRecordVModel>
+
+@using Pannet.DAL.Repository;
+@using Pannet.DAL;
+@using Pannet.Models;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "问卷调查记录";    
+}
+
+<div class="page-content">
+    <div class="page-header">
+
+        <h1>
+            <span id="lblTitle">问卷调查记录</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                列表
+            </small>
+        </h1>
+    </div>
+    <div class="form-inline">
+        <div class="pull-left">
+            <form method="post" action="@Url.Action("Record")" name="searchform" id="searchform">
+                <input type="hidden" name="action" value="" id="action" />
+                <input type="text" class="form-control" value="@ViewBag.Keyword" placeholder="输入课程名称、用户名或门店" name="keyword" style="width:200px;">
+                <select name="Province" id="Province" class="form-control">
+                    <option value="0">-请选择省份-</option>
+                    @if (ViewBag.Provinces != null)
+                    {
+                        foreach (var item in ViewBag.Provinces)
+                        {
+                        <option @(ViewBag.province == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                        }
+                    }
+                </select>
+                <select name="City" id="City" class="form-control">
+                    <option value="0">-请选择城市-</option>
+                    @if (ViewBag.Citys != null)
+                    {
+                        foreach (var item in ViewBag.Citys)
+                        {
+                        <option @(ViewBag.city == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                        }
+                    }
+                </select>
+                @*<select name="Region" id="Region">
+                    <option value="0">-请选择地区-</option>
+                    @if (ViewBag.Regions != null)
+                    {
+                        foreach (var item in ViewBag.Regions)
+                        {
+                        <option @(ViewBag.region == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                        }
+                    }
+                </select>*@
+                <script>
+                    var city_select = "@(ViewBag.city)";
+                    $(function () {
+                        $("#Province").change(function () {
+                            var U_Provinceid = $("#Province").val();
+                            if (parseInt(U_Provinceid) != 0) {
+                                GetCityData();
+                                //GetRegionData();
+                            }
+                        });
+                        GetCityData();
+                        $("#City").val(city_select);
+                        //$("#City").change(function () {
+                        //    var U_Cityid = $("#City").val();
+                        //    if (parseInt(U_Cityid) != 0) {
+                        //        GetRegionData();
+                        //    }
+                        //});
+                    });
+
+                    function ShowU_CityHtml(U_CityJson) {
+                        var U_CityHtml = "<option value='0'>-请选择城市-</option>";
+                        //alert(U_CityJson);
+                        $.each(U_CityJson, function (index, data) {
+                            U_CityHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                        });
+                        $("#City").html(U_CityHtml);
+                    }
+                    function ShowU_RegionHtml(U_RegionJson) {
+                        var U_RegionHtml = "<option value='0'>-请选择地区-</option>";
+                        //alert(U_RegionJson);
+                        $.each(U_RegionJson, function (index, data) {
+                            U_RegionHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                        });
+                        $("#Region").html(U_RegionHtml);
+                    }
+                    function GetCityData() {
+                        var U_Provinceid = $("#Province").val();
+                        if (parseInt(U_Provinceid) == 0)
+                            return null;
+
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("GetAreaJson", "Area")',
+                            data: { "parentid": U_Provinceid },
+                            dataType: "json",
+                            async: false,
+                            success: function (data) {
+                                ShowU_CityHtml(data);
+                            }
+                        });
+                    }
+                    @* function GetRegionData() {
+                        var U_Cityid = $("#City").val();
+                        if (parseInt(U_Cityid) == 0)
+                            return null;
+
+                        $.ajax({
+                            type: 'POST',
+                            url: '@Url.Action("GetAreaJson", "Area")',
+                            data: { "parentid": U_Cityid },
+                            dataType: "json",
+                            async: false,
+                            success: function (data) {
+                                ShowU_RegionHtml(data);
+                            }
+                        });
+                    }*@
+                </script>
+                <button type="submit" class="btn btn-success btn-sm" onclick="javascript:$('#action').val('')"><i class="icon-search"></i>搜索</button>
+                <button type="submit" class="btn btn-danger btn-sm" onclick="javascript:$('#action').val('export')">导出</button>
+            </form>
+        </div>
+        <div class="dropdown pull-right">
+            <a class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="icon-cog"></i>操作菜单<i class="icon-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu pull-right" role="menu">
+                @* <li class="divider"></li>*@
+                <li>
+                    <a href="javascript:window.location.reload();">
+                        <i class="icon-refresh"></i>刷新页面</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <p></p>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                @*<th width="20" align="right"></th>*@
+                @*<th width="40">ID</th>*@
+                <th>问卷名称</th>
+                <th>用户</th>
+                <th>地区</th>
+                <th>门店</th>
+                <th>调查时间</th>
+                <th width="160" align="left" class="dr_option">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+            }
+            @foreach (var itemv in Model)
+            {
+                QuestionnaireRecord item = itemv.QuestionnaireRecord;
+                <tr id="dr_row_@i">
+                    @* <td align="right">
+                        <input name="ids[]" type="checkbox" class="dr_select toggle md-check" value="1" disabled=""></td>*@
+                    @*<td>@item.ID</td>*@
+                    <td>@itemv.Quest_Title</td>
+                    <td>@(itemv.RealName)@itemv.UserName</td>
+                      <td>
+                        @(AreaService.GetAreaNames(itemv.Province + "," + itemv.City))
+                    </td>
+                    <td>@itemv.ShopName</td>
+                    <td>@item.CreateTime</td>
+                    <td align="left" class="dr_option">
+                        <a class="adel" href="@Url.Action("RecordDetail", "Questionnaire", new { Record_ID = item.ID, Quest_ID = item.Quest_ID })"><i class="icon-edit"></i>查看详细</a>
+                        <a class="adel" href="@Url.Action("RecordDelete", "Questionnaire", new { ID = item.ID, Quest_ID = item.Quest_ID })"  data-confirm="delete"><i class="icon-trash"></i>删除</a>
+                    </td>
+                </tr>
+                i++;
+            }
+            <tr>
+                <td colspan="20" align="right">@Html.PagedListPager(Model, page => Url.Action("Record", new { page, ViewBag.Quest_ID }))</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+

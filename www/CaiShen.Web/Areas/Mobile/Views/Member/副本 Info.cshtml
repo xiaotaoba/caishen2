@@ -1,0 +1,128 @@
+﻿@model Pannet.Models.User
+
+@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "个人信息";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+    <link href="/editor/themes/default/default.css" rel="stylesheet" />
+}
+@section Js{
+    <script charset="utf-8" src="/editor/kindeditor-min.js"></script>
+    <script charset="utf-8" src="/editor/lang/zh_CN.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var editor;
+        KindEditor.options.filterMode = false;
+        KindEditor.ready(function (K) {
+            var uploadbutton = K.uploadbutton({
+                button: K('#btnImg')[0],
+                fieldName: 'imgFile',
+                url: '/editor/asp.net/upload_json.ashx?FileUrl=@(LoginUser.ID)/thumb/',
+                afterUpload: function (data) {
+                    if (data.error === 0) {
+                        var url = K.formatUrl(data.url, 'absolute');
+                        //K('#txtImg').val(url);
+                        $("#imgView").attr("src", url);
+                        saveThumb(url);
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                afterError: function (str) {
+                    alert('自定义错误信息: ' + str);
+                }
+            });
+            uploadbutton.fileBox.change(function (e) {
+                uploadbutton.submit();
+            });
+           @* editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx?FileUrl=@(LoginUser.ID)/thumb/',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx?FileUrl=@(LoginUser.ID)/thumb/',
+                allowFileManager: true
+            });*@
+        });
+
+        $(function () {
+            $("#l_changeThumb").click(function () {
+                $(".user_img").find("[name='imgFile']").trigger("click");
+            });
+        });
+        function saveThumb(url) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("InfoThumb", "Member")',
+                data: { "url": url },
+                dataType: "json",
+                async: false,
+                cache: false,
+                success: function (data) {
+                    var json_rs = data;
+                    if (json_rs == null || json_rs.status == null) {//返回错误
+                        alert("系统错误！");
+                    }
+                    else if (json_rs.status == "1") {
+                        //成功
+
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                }
+            });
+        }
+    </script>
+}
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_content">
+        <div class="user_info_items">
+            <ul>
+                <li class="user_img">
+                    <span class="item_name">头像</span>
+                    <a href="javascript:void(0);" class="item_r" id="l_changeThumb">
+                        <img id="imgView" src="@(UserService.GetThumbnail(Model.U_Thumbnail))" />
+                        <i class="iconfont icon-jiantou"></i>
+                    </a>
+                    <div style="visibility: hidden;">
+                        <input id="btnImg" type="button" value="选择头像" />
+                    </div>
+                </li>
+                <li>
+                    <span class="item_name">手机号</span>
+                    <span class="item_r">
+                        @(Model.U_Phone)
+                    </span>
+                </li>
+                <li>
+                    <span class="item_name">昵称</span>
+                    <a href="@Url.Action("InfoNickName", "Member")" class="item_r">
+                        @(Model.U_NickName)
+                        <i class="iconfont icon-jiantou"></i>
+                    </a>
+                </li>
+                <li>
+                    <span class="item_name">性别</span>
+                    <a href="@Url.Action("InfoGender", "Member")" class="item_r">
+                        @(DataConfig.UserGenders.Find(m => m.Value == Model.U_Gender.ToString()).Name)
+                        <i class="iconfont icon-jiantou"></i>
+                    </a>
+                </li>
+                <li>
+                    <span class="item_name">修改密码</span>
+                    <a href="@Url.Action("InfoPassword", "Member")" class="item_r">
+                        <i class="iconfont icon-jiantou"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+<!--/container-->

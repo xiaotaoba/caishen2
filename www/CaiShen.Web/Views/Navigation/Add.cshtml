@@ -1,0 +1,160 @@
+﻿@model Pannet.Models.Navigation
+@using Pannet.DAL
+@using Pannet.Utility
+
+@{
+    ViewBag.Title = "导航链接 ";
+    List<Pannet.Models.Navigation> listParentType = ViewBag.Parents as List<Pannet.Models.Navigation>;
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">导航链接 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("Add", "Navigation", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        //@Html.HiddenFor(m => m.ID, new { @value = ViewBag.ID })
+
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120">@Html.LabelFor(m => m.Nav_Type)： </td>
+                    <td>
+                        <select name="Nav_Type" id="Nav_Type">
+                            @foreach (var item in DataConfig.NavigationType)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Nav_Type.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Nav_Type)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Nav_FollowID)： </td>
+                    <td>
+                        <select name="Nav_FollowID">
+                            <option value="0">作为一级导航</option>
+                            @{
+                            if (listParentType != null && listParentType.Count() > 0)
+                            {
+                                foreach (var item in listParentType.Where(m => m.Nav_FollowID == 0))
+                                {
+                                <option value="@item.ID" @(Model.Nav_FollowID == item.ID ? "selected='selected'" : "")>@item.Nav_Name</option>
+                                   
+                                    foreach (var itemSub in listParentType.Where(m => m.Nav_FollowID == item.ID).ToList())
+                                    {
+                                <option value="@itemSub.ID" @(Model.Nav_FollowID == itemSub.ID ? "selected='selected'" : "")>|---@itemSub.Nav_Name</option>
+                                    }
+                                }
+                            }
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Nav_FollowID)
+                    </td>
+                </tr>
+                <tr>
+                    <td><font color="red">*</font>@Html.LabelFor(m => m.Nav_Name)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Nav_Name, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Nav_Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td><font color="red">*</font>@Html.LabelFor(m => m.Nav_ShortName)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Nav_ShortName, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Nav_ShortName)
+                    </td>
+                </tr>
+                <tr>
+                    <td><font color="red">*</font>@Html.LabelFor(m => m.Nav_Url)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Nav_Url, new { @class = "input-text", style = "width:300px" })
+                        @Html.ValidationMessageFor(m => m.Nav_Url)
+                        <br />
+                        1.如果是本站URL，不能包含域名；如现货专区只需填写：/Category/36 ；<br />
+                        2.分类链接格式，如现货专区：/Category/36 ，后面数字36为分类ID，可修改成其他分类ID；<br />
+                        3.产品链接格式，如不干胶：/Goods/Index/136，后面数字136为产品ID，可修改成其他产品ID；
+                    </td>
+                </tr>
+                <tr>
+                    <td><font color="red">*</font>@Html.LabelFor(m => m.Nav_Target)： </td>
+                    <td>
+                        <select name="Nav_Target" id="Nav_Target">
+                            @foreach (var item in DataConfig.NavigationTarget)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Nav_Target.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Nav_Target)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Nav_Remark)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Nav_Remark, new { @class = "input-text", style = "width:300px" })
+                        @Html.ValidationMessageFor(m => m.Nav_Remark)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Nav_IsRecommend)： </td>
+                    <td>
+                        <select name="Nav_IsRecommend" id="Nav_IsRecommend">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Nav_IsRecommend.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select> (<span class="red">推荐则会在一级导航下显示</span>)
+                        @Html.ValidationMessageFor(m => m.Nav_IsRecommend)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Nav_IsEnable)： </td>
+                    <td>
+                        <select name="Nav_IsEnable" id="Nav_IsEnable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Nav_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Nav_IsEnable)
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Nav_Order)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Nav_Order, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.Nav_Order)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

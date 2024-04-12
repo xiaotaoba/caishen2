@@ -1,0 +1,125 @@
+﻿@model Pannet.Models.UserEmailRegisterVModel
+@using Pannet.DAL;
+@{
+    ViewBag.Title = "注册";
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+}
+@section Style{
+   <style>
+        html { background: #f8f8f8!important; }
+        .pc_bottom {display:none; }
+    </style>
+}
+<div class="base">
+    <div id="register">
+        <div class="l">
+            <h3>注册新用户</h3>
+            @using (Html.BeginForm("Register", "Register", FormMethod.Post))
+            { 
+                @Html.ValidationSummary(true)
+                <input type="hidden" name="returnurl" value="@ViewBag.returnurl" />
+                <input type="hidden" name="u" value="" />
+                <ul>
+                    <li>
+                        <label class="col">
+                            <span class="red">*</span>电子邮箱：</label>
+                        @Html.TextBoxFor(m => m.U_Email, new { @class = "tbox" })
+                        @Html.ValidationMessageFor(Model => Model.U_Email)
+                    </li>
+                    <li style="height: auto;">
+                        <label class="col">&nbsp;</label>
+                        <a href="@Url.Action("Mobile")">切换手机注册</a>
+                    </li>
+                    <li>
+                        <label class="col">
+                            <span class="red">*</span>密码：</label>
+                        @Html.PasswordFor(m => m.U_Pwd, new { @class = "tbox", placeholder = "(6-20位字母、数字及下划线)" })
+                        @Html.ValidationMessageFor(Model => Model.U_Pwd)</li>
+                    <li>
+                        <label class="col">
+                            <span class="red">*</span>确认密码：</label>
+                        @Html.PasswordFor(m => m.U_Pwd2, new { @class = "tbox" })
+                        @Html.ValidationMessageFor(Model => Model.U_Pwd2)
+                    </li>
+                    <li style="display: none;">
+                        <label class="col">
+                            <span class="red">*</span>会员类型：</label>
+                        @* @foreach (var item in DataConfig.RoleValues)
+                        {
+                            <input type="radio" name="Role" @("3" == item.Value ? "checked='checked'" : "")   id="@("role" + item.Value)" value="@item.Value"  /><label for="@("role" + item.Value)">@item.Name</label>
+                        }*@
+                        <input type="hidden" name="Role" value="3" />
+                    </li>
+                    <li>
+                        <label class="col">
+                            <span class="red">*</span>验证码：</label>
+                        @Html.TextBoxFor(m => m.U_Code, new { @class = "tcbox" })<a
+                            href="JavaScript:setCodeImage()"><img src='/Code' id='codeImage' style="border: 0;" /></a>
+                        @Html.ValidationMessageFor(Model => Model.U_Code)
+                    </li>
+                    <li class="protocol">
+                        <input type="checkbox" checked="checked" />
+                        请先阅读《<a href="/Article/Detail/8" target="_blank">用户注册协议</a>》
+                    </li>
+                    <li>
+                        <button type="submit" id="btnSubmit" class="btn btn-danger btn-lg btn-block">注册</button>
+                    </li>
+                </ul>
+                <div class="field-validation-error">
+                    @Html.Raw(ViewBag.MessageInfo)
+                </div>
+            }
+        </div>
+        <div class="r">
+            <div class="r_login">
+                <a href="/mobile/login">登录</a>
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+@section Js{
+    <script type="text/javascript">
+        $("[name='u']").val(localStorage.getItem("u"));
+        //var $userName = $("#txtUserName");
+        //var $pwd = $("#txtPwd");
+        //var $pwdAgain = $("#txtPwdAgain");
+        //var $code = $("#U_Code");
+        //var $email = $("#txtEmail");
+        //var regName = /^[\w]{4,16}$/
+        //var regPwd = /^[\w]{6,20}$/
+        //var regEmail = /^\w+([-+.']\w+)*@@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+
+        //function CheckRegister() {
+        //    if ($email.val() == "" || !$email.val().match(regEmail)) {
+        //        alert("请输入正确的电子邮箱！");
+        //        return false;
+        //    }
+        //    if ($pwd.val() == "") {
+        //        alert("请输入密码！");
+        //        return false;
+        //    }
+        //    if (!$pwd.val().match(regPwd)) {
+        //        alert("注册密码为6-20位字母、数字及下划线组成！");
+        //        return false;
+        //    }
+        //    if ($pwd.val() != $pwdAgain.val()) {
+        //        alert("输入密码不一致！");
+        //        return false;
+        //    }
+
+
+        //    if ($code.val() === "") {
+        //        alert("请输入验证码！");
+        //        return false;
+        //    }
+        //    return true;
+        //}
+        function setCodeImage() {
+            document.getElementById("codeImage").src = '/Code?t=' + new Date().getMilliseconds();
+        }
+
+    </script>
+
+}

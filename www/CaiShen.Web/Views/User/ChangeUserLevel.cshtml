@@ -1,0 +1,144 @@
+﻿@model IEnumerable<Pannet.Models.UserLevelHistory>
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@{
+    ViewBag.Title = "调整用户等级";
+    User UserModel = ViewBag.User;
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">用户信息</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                <span>编辑用户信息</span>
+            </small>
+        </h1>
+    </div>
+    <ul class="nav nav-tabs padding-18 tab-size-bigger" id="myTab">
+        <li class="">
+            <a href="@Url.Action("MemberEdit", new { ID = ViewBag.ID })">
+                <i class="blue icon-info bigger-120"></i>
+                用户信息
+            </a>
+        </li>
+
+       @* <li class="">
+            <a href="@Url.Action("ChangeUserRole", new { UserID = ViewBag.ID })">
+                <i class="green icon-user bigger-120"></i>
+                用户角色
+            </a>
+        </li>*@
+
+        <li class="active">
+            <a href="@Url.Action("ChangeUserLevel", new { UserID = ViewBag.ID })">
+                <i class="orange icon-user  bigger-120"></i>
+                用户等级
+            </a>
+        </li>
+        <li class="">
+            <a href="@Url.Action("ChangeUserAmount", new { UserID = ViewBag.ID })">
+                <i class="blue icon-credit-card bigger-120"></i>
+                用户账户余额
+            </a>
+        </li>
+        <li class="">
+            <a href="@Url.Action("ChangeUserScore", new { UserID = ViewBag.ID })">
+                <i class="green icon-credit-card bigger-120"></i>
+                用户积分
+            </a>
+        </li>
+         <li class="">
+            <a href="@Url.Action("ChangeUserPwd", new { UserID = ViewBag.ID })">
+                <i class="blue icon-lock bigger-120"></i>
+                修改密码
+            </a>
+        </li>
+    </ul>
+
+    @using (Html.BeginForm("ChangeUserLevel", "User", FormMethod.Post, new { @class = "form-horizontal" }))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td colspan="2" align="left"><b>用户等级</b></td>
+                </tr>
+                <tr>
+                    <td width="120">当前等级：</td>
+                    <td>
+                        @UserModel.UserLevel.Level_Name
+                        <input type="hidden" name="UserID" id="UserID" value="@UserModel.ID" />
+                        <input type="hidden" name="Level" id="Level" value="@UserModel.UserLevelID" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><font class="red">*</font>等级调整为：</td>
+                    <td>
+                        <select name="ddlUserLevel" id="ddlUserLevel">
+                            <option value="">请选择等级</option>
+                            @foreach (UserLevel item in ViewBag.UserLevels)
+                            {
+                                <option value="@item.ID">@item.Level_Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><font class="red">*</font>调整说明：</td>
+                    <td>
+                        <textarea name="title" id="title" style="width: 300px;" maxlength="50"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th colspan="10">等级调整记录</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td width="20"></td>
+                <td>操作人</td>
+                <td>调整说明</td>
+                <td>调整前</td>
+                <td>调整后</td>
+                <td>操作时间</td>
+                <td>操作</td>
+            </tr>
+            @{
+                int i = 1;
+            }
+            @if (Model.Count() > 0)
+            {
+                foreach (var item in Model)
+                {
+                <tr id="dr_row_@i">
+                    <td>
+                        <input name="ids[@item.ID]" type="checkbox" class="dr_select toggle md-check" value="@item.ID"></td>
+                    <td>@item.Operator</td>
+                    <td>@item.Title</td>
+                    <td>@UserLevelService.GetModel(item.Prev_Level_ID).Level_Name</td>
+                    <td>@UserLevelService.GetModel(item.Current_Level_ID).Level_Name</td>
+                    <td>@item.Time</td>
+                    <td class="dr_option">
+                        <a class="adel label label-sm label-default" href="@Url.Action("UserLevelHistoryDelete", "User", new { ID = item.ID, UserID = UserModel.ID })" data-confirm="delete"><i class="icon-trash"></i>删除</a>
+                    </td>
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

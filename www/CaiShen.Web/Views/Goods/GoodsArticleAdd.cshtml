@@ -1,0 +1,213 @@
+﻿@model Pannet.Models.GoodsArticle
+@using Pannet.DAL
+@using Pannet.Utility
+@using Pannet.Models
+
+@{
+    ViewBag.Title = "课程目录管理 ";
+}
+@section Style{
+    <style>
+        .table ul { list-style: none; width: 100%; margin: 0; padding: 0; }
+        .table ul li { padding: 0; text-align: left; font-size: 13px; margin-bottom: 5px; }
+        .table ul li span { display: inline-block; padding: 4px 8px; margin: 0 5px 5px 0; border: 1px solid #ddd; cursor: pointer; position: relative; }
+        .table ul li span:hover { border: 1px solid #17AEE6; }
+        .table ul li span.active { border: 1px solid #17AEE6; background-color: #17AEE6; color: #fff; }
+        .table ul li.city { padding-left: 80px; }
+        .table ul li span:first-child { background-color: #ddd; }
+        .table ul li span.active:first-child { border: 1px solid #17AEE6; background-color: #17AEE6; color: #fff; }
+        .table ul li span i { position: absolute; right: -10px; top: -8px; background-color: #f00; border: 1px solid #f00; color: #fff; border-radius: 16px; width: 16px; height: 16px; line-height: 16px; text-align: center; font-weight: bold; font-size: 12px; font-style: normal; display: inline-block; display: none; }
+        .table ul li span:hover i { display: block; }
+        .table ul#SelectArea { padding: 0; }
+        .table ul#SelectArea span:first-child { background-color: transparent; }
+    </style>
+}
+@section Js{
+    <script src="~/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript">
+        var editor;
+        KindEditor.ready(function (K) {
+            editor = K.create('#GA_Content', {
+                //editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#CP_Photo').val(),
+                        clickFn: function (url, title) {
+                            K('#CP_Photo').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+
+        });
+    </script>
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">课程目录管理 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+    @{
+        ViewBag.Action = "GoodsArticle";
+        Html.RenderPartial("_PartialMenu");
+    }
+    @using (Html.BeginForm("GoodsArticleAdd", "Goods", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <input type="hidden" name="GoodsID" value="@ViewBag.GoodsID" />
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="160">@Html.LabelFor(m => m.GA_Title)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GA_Title, new { @class = "input-text", style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.GA_Title)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.GA_ShortTitle)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GA_ShortTitle, new { @class = "input-text", style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.GA_ShortTitle)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.GA_IsVideo)： </td>
+                    <td>
+                        <select name="GA_IsVideo" id="GA_IsVideo">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.GA_IsVideo.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <script>
+                    var $GA_IsVideo = $("#GA_IsVideo");
+                    /*类型相关 */
+                    $(function () {
+                        $GA_IsVideo.change(function () {
+                            var isvideo = $(this).val();
+                            if (parseInt(isvideo) == 1) {
+                                $(".tr_VideoUrl").show();
+                                $("#tr_image").hide();
+                            }
+                            else {
+                                $(".tr_VideoUrl").hide();
+                                $("#tr_image").show();
+                            }
+                        });
+                        if ($GA_IsVideo.val() == "1") {
+                            $(".tr_VideoUrl").show();
+                            $("#tr_image").hide();
+
+                        }
+                        else {
+                            $(".tr_VideoUrl").hide();
+                            $("#tr_image").show();
+                        }
+                    });
+                </script>
+                <tr id="tr_image" style="display: none;">
+                    <td>@Html.LabelFor(m => m.GA_Image)：</td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.GA_Image)" runat="server" width="100" /><br />
+                        @Html.TextBoxFor(m => m.GA_Image, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />
+                        @Html.ValidationMessageFor(m => m.GA_Image)
+                    </td>
+                </tr>
+                <tr class="tr_VideoUrl" style="display: none;">
+                    <td>@Html.LabelFor(m => m.GA_VideoUrl)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GA_VideoUrl, new { @class = "input-text", style = "width:400px;" }) (<span class="red">请填写完整视频地址</span>)
+                        @Html.ValidationMessageFor(m => m.GA_VideoUrl)
+                    </td>
+                </tr>
+                 <tr class="tr_VideoUrl" style="display: none;">
+                    <td>@Html.LabelFor(m => m.GA_TimeLength)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GA_TimeLength, new { @class = "input-text", style = "width:400px;" }) (<span class="red">单位：秒</span>)
+                        @Html.ValidationMessageFor(m => m.GA_TimeLength)
+                    </td>
+                </tr>
+                  <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.GA_Description)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GA_Description)
+                        @Html.ValidationMessageFor(m => m.GA_Description)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.GA_Content)：</td>
+                    <td>
+                        @Html.TextAreaFor(m => m.GA_Content, new { style = "width:100%;height:200px;" })
+                        @Html.ValidationMessageFor(m => m.GA_Content)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.GA_IsEnable)： </td>
+                    <td>
+                        <select name="GA_IsEnable" id="GA_IsEnable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.GA_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.GA_ShowTimes)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GA_ShowTimes, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.GA_ShowTimes)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.GA_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GA_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.GA_Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+    <script>
+
+        $(function () {
+
+        });
+
+    </script>
+</div>

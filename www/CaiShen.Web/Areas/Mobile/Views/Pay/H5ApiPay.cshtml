@@ -1,0 +1,96 @@
+﻿@model Pannet.Models.Order
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "支付页面";
+}
+@section Js{
+    <script>
+        if ($(window).width() > 960)//转至二维码支付
+        {
+            location.href = "/Mobile/Pay/QRCodePay?trade_no=@(ViewBag.trade_no)&total_fee=@(ViewBag.total_fee)";
+        }
+    </script>
+}
+<!--主区域-->
+<div id="container">
+
+    <div id="pay" class="base">
+        <dl class="pay_order_success">
+            <dt>订单支付</dt>
+            <dd>
+                @if (ViewBag.total_fee == null || string.IsNullOrEmpty(ViewBag.trade_no))
+                {
+                    <div class="tips">
+                        <div class="red">参数错误!</div>
+                    </div>
+                }
+                else
+                {
+                    bool IsPay = OrderService.IsPay(ViewBag.trade_no);
+                    
+                    <div class="tips">
+                        <i class="iconfont icon-dizhiguanliyigouxuan"></i>
+                        @if (IsPay)
+                        { 
+                            <span>支付成功！</span>
+                        }
+                        else
+                        {
+                            <span>请尽快完成支付！</span>
+                        }
+                    </div>
+                    <table border="1">
+                        <tr class="tr_th">
+                            <td>交易单号</td>
+                            <td>交易金额</td>
+                        </tr>
+                        <tr>
+                            <td>@ViewBag.trade_no</td>
+                            <td align="center"><span class="red">@(SiteService.GetPrice(ViewBag.total_fee))</span>元</td>
+                        </tr>
+                    </table>
+
+                    <div class="center-block" style="text-align: center;">
+                        <div class="err_message">
+                            @Html.Raw(ViewBag.MessageInfo)
+                        </div>
+                        @if (IsPay)
+                        { 
+                            <div class="center-block" style="text-align: center;">
+                                <a href="/Mobile/Member/Order" class="btn btn-success btn-lg">查看记录</a>
+                            </div>
+                        }
+                        else
+                        {
+                            if (ViewBag.mwebUrl != null && ViewBag.mwebUrl != "")
+                            { 
+                            <button id="btn_pay" class="btn btn-danger  btn-lg">&nbsp;&nbsp; 确认支付 &nbsp;&nbsp;  </button> <a href="/Member/AmountList" class="btn btn-success btn-lg">已完成支付</a>
+                            }
+                        }
+                    </div>
+                }
+            </dd>
+        </dl>
+
+    </div>
+
+</div>
+<!--/container-->
+
+
+@section FootJs{
+
+    <script>
+        $(function () {
+            $("#btn_pay").click(function () {
+                location.href = "@ViewBag.mwebUrl";
+            });
+        })
+
+    </script>
+}

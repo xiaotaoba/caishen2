@@ -1,0 +1,290 @@
+﻿@model Pannet.Models.User
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.Utility
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "用户中心";
+    User LoginUser = ViewBag.LoginUser;
+    TongJiCountVModel countModel = ViewBag.CountModel;
+
+    //作业
+    List<Article> articleList = ViewBag.NoticeList;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+    <link href="/editor/themes/default/default.css" rel="stylesheet" />
+}
+@section Js{
+    <script charset="utf-8" src="/editor/kindeditor-min.js"></script>
+    <script charset="utf-8" src="/editor/lang/zh_CN.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var editor;
+        KindEditor.options.filterMode = false;
+        KindEditor.ready(function (K) {
+            var uploadbutton = K.uploadbutton({
+                button: K('#btnImg')[0],
+                fieldName: 'imgFile',
+                url: '/editor/asp.net/upload_json.ashx?FileUrl=@(LoginUser.ID)/thumb/',
+                afterUpload: function (data) {
+                    if (data.error === 0) {
+                        var url = K.formatUrl(data.url, 'absolute');
+                        //K('#txtImg').val(url);
+                        $("#imgView").attr("src", url);
+                        saveThumb(url);
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                afterError: function (str) {
+                    alert('自定义错误信息: ' + str);
+                }
+            });
+            uploadbutton.fileBox.change(function (e) {
+                uploadbutton.submit();
+            });
+           @* editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx?FileUrl=@(LoginUser.ID)/thumb/',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx?FileUrl=@(LoginUser.ID)/thumb/',
+                allowFileManager: true
+            });*@
+        });
+
+        $(function () {
+            //$("#l_changeThumb").click(function () {
+            //    $(".user_img").find("[name='imgFile']").trigger("click");
+            //});
+        });
+        function saveThumb(url) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("InfoThumb", "Member")',
+                data: { "url": url },
+                dataType: "json",
+                async: false,
+                cache: false,
+                success: function (data) {
+                    var json_rs = data;
+                    if (json_rs == null || json_rs.status == null) {//返回错误
+                        alert("系统错误！");
+                    }
+                    else if (json_rs.status == "1") {
+                        //成功
+
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                }
+            });
+        }
+    </script>
+}
+<div class="box">
+    <div class="pc_header" style="height: 460px;">
+        <div class="pc_hMess">
+            <div class="pc_hM_other">
+                <ul>
+                    <li><a href="@Url.Action("Info", "Member")">
+                        <i class="icon iconfont icon-yonghuset2"></i>设置
+                        @*<span class="pc_otherIn"></span>*@
+                    </a>
+                    </li>
+                    <li><a href="@Url.Action("ScoreSign", "Member")">
+                        <i class="icon iconfont icon-qiandaoneiyebiao"></i>签到
+                        @*<span class="pc_otherIn"></span>*@
+                    </a>
+                    </li>
+                    @* <li><a href="#">
+                        <i class="icon iconfont icon-xiaoxi"></i>
+                        <span class="pc_otherIn"></span>
+                    </a>
+                    </li>*@
+                </ul>
+            </div>
+            <div class="pc_hM_th">
+                <dl>
+                    <dt class="user_img">
+                        <a href="javascript:void(0);" class="item_r" id="l_changeThumb">
+                            <img src="@(LoginUser != null && !string.IsNullOrEmpty(LoginUser.U_Thumbnail) ? LoginUser.U_Thumbnail : !string.IsNullOrEmpty(CookieHelper.GetValue("wx_headimgurl")) ? CookieHelper.GetValue("wx_headimgurl") : "/Areas/Mobile/images/default_logo.jpg")" id="imgView">
+                        </a>
+                        <div style="visibility: hidden;">
+                            <input id="btnImg" type="button" value="选择头像" />
+                        </div>
+                    </dt>
+                    <dd>
+                        <div class="pc_hM_thText">
+                            <p><span class="pc_hM_name" style="width: 190px;">@(string.IsNullOrEmpty(Model.U_NickName) ? Model.U_UserName : Model.U_NickName)</span></p>
+                            @if (Model.UserRoleID == Convert.ToInt16(DataConfig.RoleEnum.注册会员))
+                            {
+                            }
+                            <p style="display: none;">部门：<a href="@Url.Action("Info", "Member")"><span class="pc_hM_department"> @ViewBag.DepartmentName</span></a></p>
+
+                        </div>
+                        <div class="pc_hM_thText">
+                            <p>@(Model.U_Phone)</p>
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        <div class="pc_hInfo">
+            <ul>
+                <li><a href="/Mobile/Member/AmountList">
+                    <p>我的元宝</p>
+                    <p><span class="pc_hIn_num">@(Model.U_Amount + Model.U_LockAmount)</span></p>
+                </a>
+                </li>
+                <li>
+                    <a href="/Mobile/Member/AmountList">
+                    <p>可提现元宝</p>
+                    <p><span class="pc_hIn_num">@Model.U_Amount</span></p>
+                    </a>
+                </li>
+                <li>
+                    <a href="/Mobile/Member/ScoreSign">
+                        <p>冻结元宝</p>
+                        <p><span class="pc_hIn_num">@Model.U_LockAmount</span></p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="pc_class">
+        <div class="pc_cHeader">注意：冻结元宝不能提现，解冻规则请关注官方公告。</div>
+        <div class="pc_cContent">
+            <div class="pc_cCon_th">
+                <ul>
+                    <li>
+                        <a href="@Url.Action("Info", "Member")">
+                            <div class="pc_cCon_thHeader">
+                                <dl>
+                                    <dt><span class="iconfont icon-gerenxinxi"></span></dt>
+                                    <dd>基本信息</dd>
+                                </dl>
+                            </div>
+                            <div class="pc_cCon_thBox">
+                                <p><span class="pc_cCon_num"></span></p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Mobile/Member/AmountList">
+                            <div class="pc_cCon_thHeader">
+                                <dl>
+                                    <dt><span class="iconfont icon-ziyuan"></span></dt>
+                                    <dd>我的账单</dd>
+                                </dl>
+                            </div>
+                            <div class="pc_cCon_thBox">
+                                <p><span class="pc_cCon_num"></span></p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Mobile/Member/ScoreSign">
+                            <div class="pc_cCon_thHeader">
+                                <dl>
+                                    <dt><span class="iconfont icon-category"></span></dt>
+                                    <dd>我的积分</dd>
+                                </dl>
+                            </div>
+                            <div class="pc_cCon_thBox">
+                                <p><span class="pc_cCon_num">@(Model.U_Score)</span></p>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+                <div class="pc_lineOne pc_line"></div>
+                <div class="pc_lineTwo pc_line"></div>
+            </div>
+            <div class="pc_cCon_th">
+                <ul>
+                    <li>
+                        @* <a href="/Mobile/Activity/List">*@
+                        <a href="/Mobile/Member/Address">
+                            <div class="pc_cCon_thHeader">
+                                <dl>
+                                    <dt><span class="iconfont icon-xingzhuang1"></span></dt>
+                                    <dd>常用地址</dd>
+                                </dl>
+                            </div>
+                            <div class="pc_cCon_thBox">
+                                <p><span class="pc_cCon_num"></span></p>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/Mobile/Member/InfoReferrer">
+                            <div class="pc_cCon_thHeader">
+                                <dl>
+                                    <dt><span class="iconfont icon-fenxiang"></span></dt>
+                                    <dd>分享有礼</dd>
+                                </dl>
+                            </div>
+                            <div class="pc_cCon_thBox">
+                                <p><span class="pc_cCon_num"></span></p>
+                            </div>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#">
+                            <div class="pc_cCon_thHeader">
+                                <dl>
+                                    <dt><span class="iconfont icon-kehu"></span></dt>
+                                    <dd>平台介绍</dd>
+                                </dl>
+                            </div>
+                            <div class="pc_cCon_thBox">
+                                <p><span class="pc_cCon_num"></span></p>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+                <div class="pc_lineOne pc_line"></div>
+                <div class="pc_lineTwo pc_line"></div>
+            </div>
+        </div>
+    </div>
+    <div class="pc_notice">
+        <div class="pc_nHeader">
+            <div class="pc_nH_th">
+                <dl>
+                    <dt><span class="iconfont icon-gonggao"></span></dt>
+                    <dd>平台公告</dd>
+                </dl>
+            </div>
+            <div class="pc_nH_more"><a href="/Mobile/Article/List">查看更多></a></div>
+        </div>
+        <div class="pc_hContent">
+            <ul>
+                @if (articleList != null)
+                {
+                    foreach (var item in articleList)
+                    {
+                    <li>
+                        <div class="pc_hCon_text">
+                            <h5>
+                                <nobr>@item.Art_Title</nobr>
+                            </h5>
+                            <p>
+                                <nobr>@item.Art_Description</nobr>
+                            </p>
+                        </div>
+                        <div class="pc_hCon_btn"><a href="@Url.Action("Detail", "Article", new { item.ID })">立即加入</a></div>
+                    </li>
+                    }
+                }
+
+            </ul>
+        </div>
+    </div>
+    @{
+        ViewBag.PageAction = "Member";
+        Html.RenderPartial("_FootNav");
+    }
+</div>

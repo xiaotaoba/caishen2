@@ -1,0 +1,101 @@
+﻿@using Pannet.Models
+@using Pannet.DAL.Repository
+@using Pannet.DAL
+
+@{
+    Layout = null;
+    List<UserAddress> addressList = ViewBag.Address;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>设置积分兑换收货地址</title>
+    <link href="/Content/css/bootstrap.css" rel="stylesheet" />
+    <script src="/Content/js/jquery-1.10.2.js"></script>
+    <script src="~/Content/js/bootstrap.min.js"></script>
+    <script src="~/Scripts/layer/layer.js"></script>
+    <style>
+        .container {padding:10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <table class="table">
+            @if (addressList != null)
+            {
+                if (addressList.Count > 0)
+                {
+                    foreach (var item in addressList)
+                    {
+                <tr>
+                    <td>
+
+                        <label>
+                            <input type="radio" name="addressid" value="@item.ID" @Html.Raw(item.ID == ViewBag.addressid ? "checked='checked'" : "") /><span>@item.UserName,@item.Address,@item.Mobile @item.Tel,@item.Post_Code</span></label>
+                    </td>
+                    <td>
+                        <span class="btn_operate"><a href="@Url.Action("Address", new { at = "edit", aid = item.ID, cart = ViewBag.cart })" target="_top">编辑</a></span>
+                    </td>
+                </tr>
+                    }
+                }
+                else
+                {
+                <tr>
+                    <td>暂无收货人信息，<a href="@Url.Action("Index", new { at = "add", cart = ViewBag.cart })" class="red">新建收货人</a></td>
+                </tr>
+                }
+            }
+            <tr>
+                <td colspan="2">
+                    <button id="btnSave" class="btn btn-primary">确定</button>
+                    &nbsp;<a href="@Url.Action("Address", new { at = "add", cart = ViewBag.cart })" class="btn btn-danger" target="_top">新建收货地址</a></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+<script>
+    $(function () {
+
+       
+        $("#btnSave").click(function (e) {
+
+            e.preventDefault();
+
+            if ($("[name='addressid']:checked").size() < 0) {
+                alert("请选择收货地址！");
+                return;
+            }
+
+            $.ajax({
+                url: "@Url.Action("ScoreGiftChooseAddressSave", "Member")",
+                type: "POST",
+                async: false,
+                cache: false,
+                data: { "usp_id": "@ViewBag.usp_id", "addressid": $("[name='addressid']:checked").val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")");
+                    if (json_rs == null || json_rs.status == null) {
+                        alert("系统错误！");
+                    }
+                    else if (json_rs.status == "1") {
+                        alert(json_rs.msg);
+                        var parent_index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                        parent.layer.close(parent_index);
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                },
+                error: function (xmlhttp) {
+                    //alert("系统错误！<br/>" + xmlhttp.responseText);
+                }
+            });
+        });
+    });
+
+</script>

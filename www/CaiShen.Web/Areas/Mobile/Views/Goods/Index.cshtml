@@ -1,0 +1,171 @@
+﻿@model PagedList.PagedList<Pannet.Models.Goods>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品展示";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <style>
+        body { background-color: #eee; }
+    </style>
+}
+
+<!--主区域-->
+<div class="products">
+    <div class="newchange-type">
+        <p>选择商品分类</p>
+        <div class="m_5 change_m02">
+            <ul>
+                <li class="bd">
+                    <select name="cat" id="cat">
+                        <option value='0'>-所有系列-</option>
+                        @if (ViewBag.Catagorys != null)
+                        {
+                            foreach (GoodsCategory item in ViewBag.Catagorys)
+                            {
+                            <option @(ViewBag.cat == item.ID ? "selected='selected'" : "") value="@item.ID">@item.GC_Name</option>
+                            }
+                        }
+
+                    </select>
+                </li>
+                <li class="jt"><i></i></li>
+                <li class="bd">
+                    @if (ViewBag.CatagorySubs != null && (ViewBag.CatagorySubs as List<GoodsCategory>).Count > 0)
+                    {
+                        <select name="sub" id="sub">
+                            <option value='0'>-所有分类-</option>
+                            @foreach (GoodsCategory item in ViewBag.CatagorySubs)
+                            {
+                                <option @(ViewBag.sub == item.ID ? "selected='selected'" : "") value="@item.ID">@item.GC_Name</option>
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        <select name="sub" id="sub">
+                            <option value='0'>-所有分类-</option>
+                        </select>
+                    }
+                    <script>
+                        /*  商品分类相关 */
+                        $(function () {
+                            $("#cat").change(function () {
+                                var parentid = $("#cat").val();
+                                //if (parseInt(parentid) != 0) {
+                                    //GetCategorySubData();
+                                    location.href = "/Mobile/Goods/Index?cat=" + parentid;
+                                //}
+                            });
+                            $("#sub").change(function () {
+                                var parentid = $("#cat").val();
+                                var sid = $("#sub").val();
+                                //if (parseInt(sid) != 0) {
+                                    //GetCategorySubData();
+                                    location.href = "/Mobile/Goods/Index?cat=" + parentid + "&sub=" + sid;
+                                //}
+                            });
+                            //点击搜索
+                            $("#btn_search").click(function () {
+                                var parentid = $("#cat").val();
+                                var sid = $("#sub").val();
+                                var keyword = $("#keywords").val();
+                                location.href = "/Mobile/Goods/Index?cat=" + parentid + "&sub=" + sid + "&keyword=" + keyword;
+                            });
+                        });
+
+                        function GetCategorySubData() {
+                            var parentid = $("#cat").val();
+                            if (parseInt(parentid) == 0)
+                                return null;
+
+                            $.ajax({
+                                type: 'POST',
+                                url: '@Url.Action("GetCategoryJson", "Goods")',
+                                data: { "parentid": parentid },
+                                dataType: "json",
+                                async: false,
+                                success: function (data) {
+                                    ShowCategorySubHtml(data);
+                                }
+                            });
+                        }
+                        function ShowCategorySubHtml(dataJson) {
+                            var optionHtml = "<option value='0'>-所有分类-</option>";
+                            if (dataJson.length > 0) {
+                                $.each(dataJson, function (index, data) {
+                                    optionHtml += "<option value='" + data.ID + "'>" + data.GC_Name + "</option>";
+                                });
+                                $("#sub").show();
+                                $("#sub").html(optionHtml);
+                            }
+                            else {
+                                //$("#sub").hide();
+                            }
+                        }
+                    </script>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!--搜索框-->
+    <div class="hot_search ">
+        <div class="s_block">
+            <div class="s_block_l">
+                <input name="keywords" type="text" id="keywords" value="@(ViewBag.keyword)" class="s_input keywords s_but_sou" placeholder="输入关键词搜索">
+                <div class="s_but s_but_sou" style="background: url(files/img/searchbutbg.png)"></div>
+            </div>
+            <div class="s_block_r s_but_sou" id="btn_search">搜索</div>
+        </div>
+
+        <div class="clear"></div>
+        <p>
+            @if (ViewBag.SearchKeywords != null)
+            {
+                List<Article> keyswordList = ViewBag.SearchKeywords;
+                foreach (Article item in keyswordList)
+                {
+                <a href="@(item.Art_IsUrl == 1 ? item.Art_Url : "/Mobile/Article/Detail/" + item.ID)">
+                    @item.Art_Title
+                </a>
+                }
+            }
+        </p>
+    </div>
+
+    <!--产品列表-->
+    <div class="pro_list_1 pro_list_list" id="pro_list">
+        <ul class="page">
+            @foreach (var item in Model)
+            {
+                <li>
+                    <a href="@Url.Action("Detail", new { item.ID })">
+                        <div class="img">
+                            <img src="@(item.G_Image)" alt="@item.G_Name">
+                        </div>
+                        <p class="pro_info">
+                            <span>@(item.G_Name)</span>
+                            <span>
+                                <i class="pro_price">￥<em>@(item.G_Price)</em></i>
+                                <del>@(item.G_MarketPrice)</del>
+                                <i class="pro_sale_count">已售 @(item.G_SaleCount)</i>
+                            </span>
+                        </p>
+                    </a>
+                </li>
+            }
+        </ul>
+        <div class="fenye">
+        </div>
+    </div>
+</div>
+<div id="page_nav">
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page, ID = ViewBag.ID, sort = ViewBag.sort, asc = ViewBag.asc }))
+</div>

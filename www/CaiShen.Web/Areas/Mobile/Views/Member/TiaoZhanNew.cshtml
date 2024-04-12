@@ -1,0 +1,94 @@
+﻿@model Pannet.Models.TiXian
+
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using Pannet.Models
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "发起挑战";
+    User LoginUser = ViewBag.User;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+}
+<!--主区域-->
+<div id="container">
+    <div class="mc_content">
+        <div id="user_tiaozhan" class="tobx_items">
+            <ul>
+                <li>
+                    <span class="item_name">发起人</span>
+                    <span class="item_value">往事随风
+                    </span>
+                </li>
+                <li>
+                    <span class="item_name">时间</span>
+                    <span class="item_value">
+                        <input type="text" class="tbox" name="height" placeholder="请输入时间" /><em class="t_unit"><img src="/Areas/Mobile/images/member/ico_date2.png" /></em>
+                    </span>
+                </li>
+                <li>
+                    <span class="item_name">目标</span>
+                    <span class="item_value">
+                        <input type="text" class="tbox" name="height" placeholder="请输入目标" /><em class="t_unit"><img src="/Areas/Mobile/images/member/ico_person.png" /></em>
+                    </span>
+                </li>
+                <li>
+                    <span class="item_name">奖励</span>
+                    <span class="item_value">
+                        <input type="text" class="tbox" name="height" placeholder="请输入奖励" /><em class="t_unit"><img src="/Areas/Mobile/images/member/ico_gift.png" /></em>
+                    </span>
+                </li>
+            </ul>
+            <div>
+                <div class="block"></div>
+                <button type="submit" name="btnSubmit" id="btnSubmit" class="btn_danger">发起挑战</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section FootJs{
+    <script>
+        @*var $Amount = $("#TX_Amount");
+        var maxAmount = parseFloat('@LoginUser.U_Amount');
+        var amount = 0;
+        $(function () {
+            $Amount.blur(function () {
+                amount = $Amount.val();
+                if (isRealNum(amount)) {
+                    amount = toDecimal(amount);
+                }
+                else {
+                    amount = 0;
+                }
+                //console.log(amount);
+                if (amount > maxAmount) {
+                    amount = maxAmount;
+                }
+                $Amount.val(amount);
+            });
+        });
+        function DoSubmit() {
+            if (amount <= 1) {
+                alert("请填写申请提现金额，且不小于1！");
+                return false;
+            }
+            if ($("#TX_UserName").val() == "") {
+                alert("请输入真实姓名！");
+                return false;
+            }
+            if ($("#TX_BankName").val() == "") {
+                alert("请输入银行名称、支付宝或微信！");
+                return false;
+            }
+            if ($("#TX_BankNumber").val() == "") {
+                alert("请输入银行卡号、支付宝或微信账号！");
+                return false;
+            }
+            return true;
+        }*@
+    </script>
+}

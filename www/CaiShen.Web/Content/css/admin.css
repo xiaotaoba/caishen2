@@ -1,0 +1,10 @@
+body {background-color:#fff; }
+.navbar-brand { height:initial;}
+i {margin:0 4px; }
+.dr_option a{text-decoration:none; }
+.dr_option .adel:link{color:#999;}
+.dr_option .label.adel{color:#fff;}
+.dr_option .btn.adel{color:#fff;}
+.form-inline:after{content:" ";display:block;clear:both; }
+.table label {font-size:13px; }
+.alert {margin: 10px 0; }

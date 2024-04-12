@@ -1,0 +1,318 @@
+﻿@using Pannet.Models
+@using Pannet.DAL.Repository
+@using Pannet.DAL
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    if (ViewBag.aid == 0)
+    {
+        ViewBag.Title = "新建收件地址";
+    }
+    else
+    {
+        ViewBag.Title = "编辑收件地址";
+    }
+
+    //地址前面省市区部分
+    string addressPrefix = "";
+    string addressEnd = "";
+
+    UserAddress editAddress = ViewBag.AddressModel;
+    if (editAddress == null)
+    {
+        editAddress = new UserAddress();
+    }
+    else
+    {
+        int lastindex = 0;
+        if (!string.IsNullOrEmpty(editAddress.Address))
+        {
+            lastindex = editAddress.Address.LastIndexOf(" ");
+        }
+        if (lastindex > 0)
+        {
+            addressPrefix = editAddress.Address.Substring(0, lastindex).Trim();
+            addressEnd = editAddress.Address.Substring(lastindex).Trim();
+        }
+        else
+        {
+            addressEnd = editAddress.Address;
+        }
+    }
+}
+@section Style {
+    <link href="~/Areas/Mobile/css/member.css?v=1008.2" rel="stylesheet" />
+     <style>
+        .mc_content {background:none; }
+     </style>
+}
+
+<!--主区域-->
+<div id="container">
+    <div class="mc_content">
+        <div class="tobx_items user_address">
+            @using (Html.BeginForm("AddressSave", "Member", FormMethod.Post))
+            { 
+                @Html.Raw(ViewBag.MessageInfo)
+                <input id="aid" name="aid" type="hidden" value="@ViewBag.aid" />
+                <input id="ID" name="ID" type="hidden" value="@ViewBag.aid" />
+                <ul class="user_address_edit">
+                    <li>
+                        <span class="item_name">收件人</span>
+                        <span class="item_value">
+                            <input type="text" name="username" id="username" class="tbox"  value="@editAddress.UserName" placeholder="请输入收件人" />
+                        </span>
+                    </li>
+                    <li>
+                        <span class="item_name">手机号码</span>
+                        <span class="item_value">
+                            <input type="text" maxlength="11" name="Mobile" id="Mobile" class="tbox"  value="@editAddress.Mobile" placeholder="请输入手机号码"  />
+                        </span>
+                    </li>
+                    <li>
+                        <span class="item_name">或电话</span>
+                        <span class="item_value">
+                            <input type="text" name="Tel" id="Tel" class="tbox"  value="@editAddress.Tel" placeholder="请输入联系电话"  />
+                        </span>
+                    </li>
+                    <li style="overflow: visible; z-index: 1;">
+                        <span class="item_name">所在地区</span>
+                        <span class="item_value tar">
+                            <a href="javascript:void(0)" class="add_choose_area">
+                                <span>请选择</span><i class="iconfont icon-jiantou"></i>
+                            </a>
+                        </span>
+                        <div class="add_area_box">
+                            <select name="Province" id="Province">
+                                <option value="0">-省份-</option>
+                                @if (ViewBag.Provinces != null)
+                                {
+                                    foreach (var item in ViewBag.Provinces)
+                                    {
+                                    <option @(editAddress != null && editAddress.Province == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                    }
+                                }
+                            </select>
+                            <select name="City" id="City">
+                                <option value="0">-城市-</option>
+                                @if (ViewBag.Citys != null)
+                                {
+                                    foreach (var item in ViewBag.Citys)
+                                    {
+                                    <option @(editAddress != null && editAddress.City == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                    }
+                                }
+                            </select>
+                            <select name="Region" id="Region">
+                                <option value="0">-地区-</option>
+                                @if (ViewBag.Regions != null)
+                                {
+                                    foreach (var item in ViewBag.Regions)
+                                    {
+                                    <option @(editAddress != null && editAddress.Region == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <script>
+                            var $Province = $("#Province")
+                            var $City = $("#City")
+                            var $Region = $("#Region")
+                            var $addBox = $(".add_area_box");
+                            var $chooseAreaBtn = $(".add_choose_area");
+                            $(function () {
+                                $chooseAreaBtn.click(function () {
+                                    //if ($addBox.is(":visible")) {
+                                    //    $addBox.hide();
+                                    //}
+                                    //else {
+                                    $addBox.show();
+                                    //}
+                                });
+                                ChangeAddressPrefix();
+                                $(document).click(function (e) {
+                                    if (!$(e.target).isChildAndSelfOf(".add_area_box") && !$(e.target).isChildAndSelfOf(".add_choose_area")) {
+                                        $addBox.hide();
+                                    }
+                                });
+                                $Province.change(function () {
+                                    var provinceid = $Province.val();
+                                    if (parseInt(provinceid) != 0) {
+                                        GetCityData();
+                                        GetRegionData();
+                                    }
+                                    ChangeAddressPrefix();
+                                });
+                                $City.change(function () {
+                                    var cityid = $City.val();
+                                    if (parseInt(cityid) != 0) {
+                                        GetRegionData();
+                                    }
+                                    ChangeAddressPrefix();
+                                });
+                                $Region.change(function () {
+                                    ChangeAddressPrefix();
+                                });
+                            });
+
+                            function ShowCityHtml(cityJson) {
+                                var cityHtml = "<option value='0'>-城市-</option>";
+                                //alert(cityJson);
+                                $.each(cityJson, function (index, data) {
+                                    cityHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                });
+                                $City.html(cityHtml);
+                            }
+                            function ShowRegionHtml(regionJson) {
+                                var regionHtml = "<option value='0'>-地区-</option>";
+                                //alert(regionJson);
+                                $.each(regionJson, function (index, data) {
+                                    regionHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                });
+                                $Region.html(regionHtml);
+                            }
+                            function GetCityData() {
+                                var provinceid = $Province.val();
+                                if (parseInt(provinceid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": provinceid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowCityHtml(data);
+                                    }
+                                });
+                            }
+                            function GetRegionData() {
+                                var cityid = $City.val();
+                                if (parseInt(cityid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": cityid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowRegionHtml(data);
+                                    }
+                                });
+                            }
+                            function ChangeAddressPrefix() {
+                                //console.log($Province.find("option:selected").text());
+                                //console.log($City.find("option:selected").text());
+                                //console.log($Region.find("option:selected").text());
+                                $("#AddressPrefix").val($Province.find("option:selected").text() + " " + $City.find("option:selected").text() + " " + $Region.find("option:selected").text());
+                                if ($("#Province").val() == "0") {
+                                    $chooseAreaBtn.find("span").text("请选择");
+
+                                }
+                                else {
+                                    $chooseAreaBtn.find("span").text($("#AddressPrefix").val());
+                                }
+                            }
+                        </script>
+                    </li>
+                    <li>
+                        <span class="item_name">详细地址</span>
+                        <span class="item_value">
+                            <input id="AddressPrefix" name="AddressPrefix" type="hidden" value="@addressPrefix" />
+                            <input type="text" name="address" id="address" class="tbox" value="@addressEnd" placeholder="如：街道、楼层、门牌号" />
+                        </span>
+                    </li>
+
+                    <li>
+                        <span class="item_name">邮政编码</span>
+                        <span class="item_value">
+                            <input type="text" name="Post_Code" id="Post_Code" class="tbox"  maxlength="6" value="@editAddress.Post_Code" placeholder="请输入邮编" />
+                        </span>
+                    </li>
+                    <li class="@(editAddress != null && editAddress.Is_Default == 1 ? "default" : "")">
+                        <span class="item_name">设为默认</span>
+                        <span class="item_value add_default">
+                            <select name="Is_Default" id="Is_Default">
+                                @foreach (var item in DataConfig.YesOrNo)
+                                {
+                                    <option value="@item.Value" @(editAddress != null && item.Value == editAddress.Is_Default.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                                }
+                            </select>
+                            @*<i class="iconfont icon-circle"></i><i class="iconfont icon-gouxuan"></i>*@
+                        </span>
+                        @Html.ValidationMessage("post")
+                    </li>
+                </ul>
+                <div class="tips">
+                    @Html.ValidationSummary(true)
+                    @Html.ValidationMessage("username")
+                    @Html.ValidationMessage("tel")
+                    @Html.ValidationMessage("area")
+                    @Html.ValidationMessage("address")
+                    @Html.ValidationMessage("post")
+                </div>
+                <div class="block"></div>
+                <button class="btn-save btn_save_address" type="submit">保存</button>
+            }
+        </div>
+    </div>
+</div>
+<!--/container-->
+
+
+@section FootJs{
+
+    <script>
+        $(function () {
+
+            ////选择默认
+            //$(".user_address_edit .add_default").each(function () {
+            //    var $default = $(this);
+            //    var $li = $(this).parent();
+            //    $default.click(function () {
+            //        if ($li.hasClass("default")) {
+            //            $("[name='Is_Default']").val(0);
+            //            $li.removeClass("default");
+            //        }
+            //        else {
+            //            $("[name='Is_Default']").val(1);
+            //            $li.addClass("default");
+            //        }
+            //    });
+            //});
+
+            //点击保存地址
+            $(".btn_save_address").click(function () {
+                return CheckAddressForm();
+            });
+        });
+
+
+        function CheckAddressForm() {
+            if ($("#username").val() == "") {
+                alert("请输入收件人!");
+                return false;
+            }
+            if ($("#Province").val() == "0" || $("#City").val() == "0" || $("#Region").val() == "0") {
+                alert("请选择完整所在地区!");
+                return false;
+            }
+            if ($("#address").val() == "") {
+                alert("请输入详细地址!");
+                return false;
+            }
+            if ($("#Mobile").val() == "" && $("#Tel").val() == "") {
+                alert("手机号码和联系电话必须填写一项!");
+                return false;
+            }
+            //if ($("#Post_Code").val() == "") {
+            //    alert("请输入邮编!");
+            //    return false;
+            //}
+            return true;
+        }
+    </script>
+}

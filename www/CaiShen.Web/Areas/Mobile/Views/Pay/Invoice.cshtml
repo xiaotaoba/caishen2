@@ -1,0 +1,129 @@
+﻿@model Pannet.Models.InvoiceLog
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "支付税点费用";
+    User loginUserModel = ViewBag.LoginUser;
+
+    string tips = "请及时完成支付！";
+    string pay_amount_title = "专用发票税点";
+    decimal pay_amount = Model.Inv_TaxAmount;
+    
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div id="pay" class="base">
+        <dl class="pay_order_success">
+            <dt>申请发票记录已生成</dt>
+            <dd>
+                <div class="tips">
+                    <i class="iconfont icon-dizhiguanliyigouxuan"></i>
+                    <span>@tips</span>
+                </div>
+                <table border="1">
+                    <tr class="tr_th">
+                        <td>申请编号</td>
+                        <td>申请时间</td>
+                        <td>发票金额</td>
+                        <td>税点费用</td>
+                    </tr>
+                    <tr>
+                        <td>@Model.Inv_InvoiceNumber</td>
+                        <td>@Model.CreateTime</td>
+                        <td><span>@(SiteService.GetPrice(Model.Inv_Amount))</span>元</td>
+                        <td><span class="red">@(SiteService.GetPrice(Model.Inv_TaxAmount))</span>元</td>
+                    </tr>
+                </table>
+            </dd>
+        </dl>
+        @using (Html.BeginForm("Pay", "Pay", FormMethod.Post))
+        {
+
+            if (Model.Inv_Status == Convert.ToInt32(DataConfig.InvoiceStatusEnum.待支付税点))
+            {
+            <dl class="pay_payway_name">
+                <dd class="on">
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_alipay.png" /></span>
+                        <input name="payway" type="radio" checked="checked" value="alipay" />
+                        支付宝支付
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+                <dd>
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_wepay.png" /></span>
+                        <input name="payway" type="radio" value="wxpay" />
+                        微信支付
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+                <dd>
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_yxpay.png" /></span>
+                        <input name="payway" type="radio" value="yue" />
+                        账户支付(余额：<span class="red">￥@(loginUserModel.U_Amount)</span>)
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+            </dl>
+            <div class="pay_submit_line">
+                <div class="total_price_pay">
+                    @pay_amount_title <span class="red">￥</span><i class="money">@pay_amount</i>
+                </div>
+                <button class="btn_pay" type="submit">立即支付</button>
+                <a class="back_cart" href="@Url.Action("Index", "Member")">取消</a>
+                <input type="hidden" value="@pay_amount" name="pay_amount" />
+                <input type="hidden" value="@Model.Inv_InvoiceNumber" name="order_no" />
+            </div>
+            }
+        }
+    </div>
+
+</div>
+<!--/container-->
+
+
+@section FootJs{
+
+    <script>
+
+        var $payway_name = $("[name='payway']");
+
+        $(function () {
+            $(".pay_item").click(function () {
+                $(this).addClass("active");
+                //$(this).siblings().removeClass("active");
+                $(".pay_item").not($(this)).removeClass("active");
+            });
+            // $(".btn_pay ").click(function () {
+            //      location.href = "@Url.Action("Success", "Pay")";
+            //  });
+
+            //付款方式
+            $payway_name.click(function () {
+                var $payitem = $(this);
+                if ($payitem.is(':checked')) {
+                    $payitem.parents("dd").addClass("on");
+                    $payitem.parents("dd").siblings("dd").removeClass("on");
+                }
+                else {
+                    $payitem.parents("dd").removeClass("on");
+                }
+            });
+
+        });
+    </script>
+}

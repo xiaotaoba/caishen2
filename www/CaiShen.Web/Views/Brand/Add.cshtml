@@ -1,0 +1,139 @@
+﻿@model Pannet.Models.Brand
+@using Pannet.DAL
+@using Pannet.Utility
+
+@{
+    ViewBag.Title = "品牌管理 ";
+    List<Pannet.Models.Brand> listParentType = ViewBag.GoodsTypeParents as List<Pannet.Models.Brand>;
+}
+
+@section Js{
+    <script type="text/javascript">
+        var editor;
+        KindEditor.ready(function (K) {
+            //editor = K.create('#txtContent', {
+            editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#B_Image').val(),
+                        clickFn: function (url, title) {
+                            K('#B_Image').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+
+        });
+    </script>
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">品牌管理 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("Add", "Brand", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120"><font color="red">*</font>@Html.LabelFor(m => m.B_Name)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.B_Name, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.B_Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.B_NameEn)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.B_NameEn, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.B_NameEn)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.B_Image)： </td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.B_Image)" runat="server" width="100" /><br />
+                        @Html.TextBoxFor(m => m.B_Image, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />
+                        @Html.ValidationMessageFor(m => m.B_Image)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.B_Desc)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.B_Desc, new { style = "width:750px;height:100px;" })
+                        @Html.ValidationMessageFor(m => m.B_Desc)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.B_IsRecommend)： </td>
+                    <td>
+                        <select name="B_IsRecommend" id="B_IsRecommend">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.B_IsRecommend.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.B_IsEnable)： </td>
+                    <td>
+                        <select name="B_IsEnable" id="B_IsEnable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.B_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td>@Html.LabelFor(m => m.B_CreateTime)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.B_CreateTime)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.B_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.B_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.B_Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

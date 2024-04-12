@@ -1,0 +1,1 @@
+2019-04-01 05:40:32,user:15168370673 ——>:CheckLoginController，user为null：false,openid:

@@ -1,0 +1,113 @@
+﻿@model PagedList.PagedList<Pannet.Models.Goods>
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商学院";
+    User LoginUser = ViewBag.LoginUser;
+    List<Article> topScroll = ViewBag.ScrollPhotos;
+    SystemInfo sysModel = ViewBag.SystemInfo;
+    List<Goods> courseList = ViewBag.Courses;
+}
+
+@section Style{
+    <style>
+        .ho_banner img { max-height: 500px; }
+        .ho_inContent {margin-bottom:20px; }
+        .ho_inCon_more a { font-size:30px;}
+    </style>
+}
+@section Js{
+    <script src="~/Areas/Mobile/js/TouchSlide.1.1.js"></script>
+}
+<div class="box">
+    @{
+        ViewBag.TopAction = "home";
+        Html.RenderPartial("_TopNavHD");
+    }
+
+    <div class="ho_content">
+        <div class="ho_banner" id="ho_banner">
+            <div class="bd">
+                @if (topScroll != null)
+                {
+                    foreach (var item in topScroll)
+                    {
+                    <ul>
+                        <li><a href="@(item.Art_IsUrl == 1 ? item.Art_Url : Url.Action("Info", new { item.ID }))">
+                            <img src="@(item.Art_Image)" alt="@item.Art_Title" /></a></li>
+                    </ul>
+                    }
+                }
+            </div>
+            <div class="hd">
+                <ul></ul>
+            </div>
+        </div>
+        <div class="ho_option">
+            <div class="ho_opHeader">
+                <dl>
+                    <dd>卓牧鸟康复课程</dd>
+                    <dd><a href="/Mobile/Course">更多</a></dd>
+                </dl>
+            </div>
+            <div class="ho_opContent">
+                <ul>
+                    @if (courseList != null)
+                    {
+                        foreach (var item in courseList)
+                        {
+                            if (item.GoodsTypeID == Convert.ToInt16(DataConfig.GoodsTypeEnum.视频))
+                            { 
+                        <li><a href="@Url.Action("Detail", "Course", new { item.ID })">@(UtilityClass.Left(item.G_Name, 8))</a></li>
+                            }
+                            else if (item.GoodsTypeID == Convert.ToInt16(DataConfig.GoodsTypeEnum.PPT))
+                            { 
+                        <li><a href="@Url.Action("PPTDetail", "Course", new { item.ID })">@(UtilityClass.Left(item.G_Name, 8))</a></li>
+                            }
+                            else if (item.GoodsTypeID == Convert.ToInt16(DataConfig.GoodsTypeEnum.讲议))
+                            { 
+                        <li><a href="@Url.Action("JiangyiDetail", "Course", new { item.ID })">@(UtilityClass.Left(item.G_Name, 8))</a></li>
+                            }
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="ho_intro">
+            <div class="ho_inHeader">
+                为您提供专业的培训讲师服务<br />
+                最具实战型培训专家、高级培训师
+            </div>
+            @if (ViewBag.TeamInfo != null)
+            {
+                foreach (var team in ViewBag.TeamInfo)
+                {
+                    //Article team = ViewBag.TeamInfo;
+                <div class="ho_inContent">
+                    <div class="ho_inCon_info">
+                        <dl>
+                            <dt>
+                                <img src="@team.Art_Image" alt="" /></dt>
+                            <dd>@team.Art_Description</dd>
+                        </dl>
+                    </div>
+                    <div class="ho_inCon_more"><a href="@Url.Action("Info", new { team.ID })">+ 详细</a></div>
+                </div>
+                }
+
+            }
+        </div>
+    </div>
+    <div class="ho_bottom">
+        @if (sysModel != null)
+        {
+            <div>@Html.Raw(sysModel.Sys_Copyright)</div>
+        }
+    </div>
+</div>

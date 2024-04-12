@@ -1,0 +1,176 @@
+﻿@model PagedList.PagedList<Pannet.Models.QuestionAnswerVModel>
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "问卷调查";
+    User LoginUser = ViewBag.LoginUser;
+    Questionnaire QuestionnaireModel = ViewBag.Questionnaire;
+}
+<div class="box">
+    @{
+        ViewBag.TopAction = "questionnaire";
+        Html.RenderPartial("_TopNavSQ");
+    }
+    <div class="bsd_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle">@QuestionnaireModel.Quest_Title</div>
+            <div class="bsd_hText">
+                <span>问卷概况：@(Model.Count)个问题</span>
+                <span>@QuestionnaireModel.Quest_CreateTime.ToString("yyyy-MM-dd")</span>
+            </div>
+        </div>
+        <div class="vt_content">
+            @using (Html.BeginForm("TestSave", "Course", FormMethod.Post, new { @class = "form-horizontal", id = "myForm" }))
+            { 
+                <div class="vt_conBox">
+                    <ul>
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            int i = 1;
+                            foreach (var item in Model)
+                            {
+                            <li class="question_li" data-type="@item.Question.Q_Type" data-id="@item.Question.ID">
+                                <div class="vt_conB_header">
+                                    <span>@(i)、@item.Question.Q_Title</span>
+                                    @*<span>（@(DataConfig.QuestionType.Find(m => m.Value == item.Question.Q_Type.ToString()).Name)）</span>*@
+                                </div>
+                                <div class="vt_conB_th">
+                                    @if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.判断题))
+                                    {
+                                        <dl>
+                                            <dd>
+                                                <input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="1" id="a_@(item.Question.ID)_1">
+                                            </dd>
+                                            <dd>
+                                                <label for="a_@(item.Question.ID)_1">对</label></dd>
+                                        </dl>
+                                        <dl>
+                                            <dd>
+                                                <input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="0" id="a_@(item.Question.ID)_0">
+                                            </dd>
+                                            <dd>
+                                                <label for="a_@(item.Question.ID)_0">错</label></dd>
+                                        </dl>
+                                    }
+                                    else if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.问答题))
+                                    {
+                                        <dl>
+                                            <dd>
+                                                <input type="text" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" />
+                                            </dd>
+                                        </dl>
+                                    }
+                                    else
+                                    {
+                                        foreach (var itemA in item.AnswerList.OrderByDescending(m => m.A_Sort).ThenBy(m => m.ID))
+                                        {
+                                        <dl class="a_@itemA.ID">
+                                            <dd>
+                                                @if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.单选题))
+                                                {
+                                                    <input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="@itemA.ID" id="a_@itemA.ID">
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="@itemA.ID" id="a_@itemA.ID">
+                                                }
+                                            </dd>
+                                            <dd>
+                                                <label for="a_@itemA.ID">@itemA.A_Answer</label></dd>
+                                        </dl>
+                                        }
+                                    }
+                                </div>
+                            </li>
+                                    i++;
+                            }
+                        }
+                        else
+                        {
+                            <li>
+                                <div class="nothing">暂无相关测试题.</div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                        if (Model != null && Model.Count > 0)
+                        {
+                <div class="vt_submit">
+                    @if (QuestionnaireModel.Quest_EndTime != null && QuestionnaireModel.Quest_EndTime < DateTime.Now)
+                    {
+                        <input type="button" style="background-color: #ccc;" value="已结束" disabled="disabled">
+                    }
+                    else
+                    {
+                        <input type="button" value="确认提交" id="btnSubmit" onclick="javascript: return checkSave();">
+                    }
+                </div>
+                        }
+            }
+        </div>
+    </div>
+</div>
+<script>
+    var questions = [];
+    $(function () {
+
+    });
+    function checkSave() {
+
+        var isSelectAll = true;
+        $(".question_li").each(function () {
+            var $li = $(this);
+            var question = { Type: 0, ID: 0, Answer: "" };
+            var answerSelected = "";
+
+            question.Type = $li.data("type");
+            question.ID = $li.data("id");
+
+            $li.find("[name='a_" + question.ID + "_" + question.Type + "']:checked").each(function () {
+                answerSelected = answerSelected + $(this).val() + ",";
+            });
+
+            if (answerSelected == "") {
+                isSelectAll = false;
+                return false;
+            }
+            question.Answer = answerSelected;
+            questions.push(question);
+        });
+
+        if (!isSelectAll) {
+            tips("请选择所有试题!");
+            return;
+        }
+
+        //选择所有题后，禁止重复提交
+        $("#btnSubmit").attr("disabled", "disabled");
+
+        $.ajax({
+            type: 'POST',
+            url: '/Mobile/Questionnaire/Save',
+            data: { jsonData: JSON.stringify(questions), "quest_id": "@QuestionnaireModel.ID" },
+            dataType: "json",
+            async: false,
+            cache: false,
+            success: function (data) {
+                if (data == null || data.status == null) {//返回错误
+                    alert("操作失败！");
+                }
+                else if (data.status == "success") {
+                    //alert(data.msg);
+                    alert("提交成功，谢谢参与！");
+                }
+                else {
+                    alert(data.msg);
+                }
+            }
+        });
+    }
+</script>

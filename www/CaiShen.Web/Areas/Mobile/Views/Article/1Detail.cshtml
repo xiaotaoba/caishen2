@@ -1,0 +1,40 @@
+﻿@model Pannet.Models.Article
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using Pannet.DAL
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "常见设备问题";
+    SystemInfo sysModel = SystemInfoService.GetModel();
+}
+@section Style
+{
+}
+@section Js{
+}
+<div id="container">
+   @* <div class="head_menu">
+        <ul>
+            <li class="active"><a href="#">常见设备问题</a></li>
+            <li><a href="#">意见反馈</a></li>
+        </ul>
+    </div>*@
+   <div class="content">
+        <div class="newsdetail">
+            <div class="tit">
+                @Model.Art_Title
+            </div>
+            <div class="info">
+                作者：@(string.IsNullOrEmpty(Model.Art_Author) ? sysModel.Sys_SiteName : Model.Art_Author) &nbsp; 发布时间：@(Model.G_CreateTime.ToString("yyyy-MM-dd")) &nbsp; 来源：@(string.IsNullOrEmpty(Model.Art_From) ? sysModel.Sys_SiteName : Model.Art_From)
+            </div>
+            <div class="co">
+                @Html.Raw(UtilityClass.ImgAddDomain(Model.Art_Content, WebSiteConfig.ImgDomain))
+            </div>
+        </div>
+
+        <div class="clear"></div>
+    </div>
+</div>

@@ -1,0 +1,136 @@
+﻿@model PagedList.PagedList<Pannet.Models.UserScoreHistory>
+
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using Pannet.Models
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "签到";
+    User LoginUser = ViewBag.LoginUser;
+    List<SignIn> signList = ViewBag.SignList as List<SignIn>;
+    if(signList==null)
+    {
+        signList = new List<SignIn>();
+    }
+    bool isSign = false;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/base.css" rel="stylesheet" />
+    <link href="~/Areas/Mobile/css/member.css?v=0629.2" rel="stylesheet" />
+}
+<!--主区域-->
+<div id="container">
+    <div class="signin">
+        <ul>
+            <li>
+                <div class="user_box">
+                    <span class="user_img">
+                        <img src="@(UserService.GetThumbnail(LoginUser.U_Thumbnail))" />
+                    </span>
+                    <div class="user_info">
+                        <span class="user_name">积分</span>
+                        <span class="user_role">@LoginUser.U_Score</span>
+                    </div>
+                </div>
+                <a href="@Url.Action("ScoreRanking")" class="signin_rule">积分排行榜</a>
+            </li>
+            <li class="signin_line">
+                <a href="javascript:void(0)" id="link_signin" class="signin_circle"><span>签到</span>
+						<em>快点我签到吧~</em>
+                    <em>今日已签到</em>
+                </a>
+                <div class="signin_tj">本月已签到<span class="sign_days">@signList.Count()</span>天 累计签到<span class="sign_totaldays">@ViewBag.TotalCount</span>天</div>
+            </li>
+        </ul>
+    </div>
+    <div class="sign_date_box">
+        <div class="sign_date">2018年5月 </div>
+        <div class="sign_week">
+            <span class="on">日</span>
+            <span>一</span>
+            <span>二</span>
+            <span>三</span>
+            <span>四</span>
+            <span>五</span>
+            <span>六</span>
+        </div>
+        <div class="sign_days">
+            @{
+                //当前月第一天
+                DateTime monthFirstDay = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-01"));
+            }
+            @for (int i = 0; i < Convert.ToInt16(monthFirstDay.DayOfWeek); i++)
+            {
+                <span></span>
+            }
+            @for (int i = 0; i < DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month); i++)
+            {
+                DateTime date_from = monthFirstDay.AddDays(i);
+                DateTime date_end = monthFirstDay.AddDays(i + 1);
+
+                //当日签到数量
+                int daySignCount = 0;
+                if (signList != null)
+                {
+                    daySignCount = signList.Where(m => m.Sign_CreateTime > date_from && m.Sign_CreateTime < date_end && m.UserID == LoginUser.ID).Count();
+                }
+                if (date_end > DateTime.Now && date_from < DateTime.Now && daySignCount > 0)
+                {
+                    isSign = true;
+                }
+                <span class="@(daySignCount > 0 ? "on" : "")" data-today="@(date_end > DateTime.Now && date_from < DateTime.Now ? "1" : "0")"><em>@daySignCount</em>@(i + 1)</span>
+            }
+        </div>
+    </div>
+    <div class="score_list">
+        <div class="score_tit">积分记录</div>
+        @if (Model.Count() > 0)
+        {
+            foreach (var item in Model)
+            {
+            <ul class="score_item">
+                <li class="item_time">@(item.Time.ToString("yyyy.MM.dd HH:mm:ss"))</li>
+                <li class="item_thing">@item.Thing</li>
+                <li class="item_score @(item.Type == 1 ? "jia" : "jian")">@(item.Type == 1 ? "+" : "-") @item.Score</li>
+            </ul>
+            }
+        }
+        else
+        {
+            <div class="nothing">暂无记录.</div>
+        }
+    </div>
+</div>
+<!--/container-->
+
+@section FootJs{
+    <script>
+        var $signBtn = $("#link_signin");
+        var isSign = '@(isSign ? "1" : "0")';
+        $(function () {
+
+            if ($signBtn.hasClass("signed") || isSign == "1") {
+                //已签到
+                $signBtn.addClass("signed");
+            }
+            else {
+                $signBtn.click(function () {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/Mobile/Member/ScoreSignDo',                        data: {},
+                        dataType: "json",
+                        async: false,
+                        success: function (data) {
+                            if (data.status == "success") {
+                                tips("签到成功！");
+                                $("[data-today='1']").addClass("on");
+                                $signBtn.addClass("signed");
+                            }
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+}

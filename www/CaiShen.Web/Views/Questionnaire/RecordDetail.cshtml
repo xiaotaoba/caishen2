@@ -1,0 +1,105 @@
+﻿@model PagedList.PagedList<Pannet.Models.QuestionAnswerVModel>
+
+@using Pannet.DAL.Repository;
+@using Pannet.DAL;
+@using Pannet.Models;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "问卷调查记录";
+    Questionnaire QuestionnaireModel = ViewBag.Questionnaire;
+    List<QuestionnaireRecordAnswer> recordAnswerList = ViewBag.RecordAnswerList;
+}
+
+<style>
+    body { font-size: 14px; }
+    .vt_conBox ul, vt_conBox li { list-style: none; padding: 0; margin: 0; }
+    .vt_conBox .vt_conB_header { font-size: 16px; font-weight: bold; padding: 10px 0; margin-top: 15px; border-top: 1px solid #ddd; }
+    .vt_conBox .answer_item { margin-bottom: 10px; }
+    .vt_conBox .answer_item.selected { color: red; }
+</style>
+
+<div class="page-content">
+    <div class="page-header">
+
+        <h1>
+            <span id="lblTitle">问卷调查记录</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                列表
+            </small>
+        </h1>
+    </div>
+    <div class="alert alert-warning" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>提示：红色勾选项为用户选择提交数据。</div>
+
+    <div class="vt_conBox">
+        <h2>@QuestionnaireModel.Quest_Title</h2>
+        <ul>
+            @if (Model != null && Model.Count > 0)
+            {
+                int i = 1;
+                foreach (var item in Model)
+                {
+                    string answerIdsStr = recordAnswerList.Find(m => m.QuestionID == item.Question.ID).AnswerIds;
+                    List<string> answerIds = answerIdsStr.Trim(',').Split(',').ToList();
+                <li class="question_li" data-type="@item.Question.Q_Type" data-id="@item.Question.ID">
+                    <div class="vt_conB_header">
+                        <span>@(i.ToString().PadLeft(2, '0'))、@item.Question.Q_Title</span>
+                        <span>（@(DataConfig.QuestionType.Find(m => m.Value == item.Question.Q_Type.ToString()).Name)）</span>
+                    </div>
+                    <div class="vt_conB_th">
+                        @if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.判断题))
+                        {
+                            
+                            <div class="answer_item@(answerIdsStr == "1" ? " selected" : "")">
+                                @*<input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="1" id="a_@(item.Question.ID)_1">*@
+                                <span>@(answerIdsStr == "1" ? "√" : "")</span>
+                                <label for="a_@(item.Question.ID)_1">对</label>
+                            </div>
+                            <div class="answer_item@(answerIdsStr == "0" ? " selected" : "")">
+                                @*<input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="0" id="a_@(item.Question.ID)_0">*@
+                                <span>@(answerIdsStr == "0" ? "√" : "")</span>
+                                <label for="a_@(item.Question.ID)_0">错</label>
+                            </div>
+                        }
+                        else if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.问答题))
+                        {
+                            <div class="answer_item">
+                                @answerIdsStr
+                            </div>
+                        }
+                        else
+                        {
+                            int j = 1;
+                            foreach (var itemA in item.AnswerList.OrderByDescending(m => m.A_Sort).ThenBy(m => m.ID))
+                            {
+                            <div class="answer_item @(answerIds.Contains(itemA.ID.ToString()) ? "selected" : "")">
+                                @* @if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.单选题))
+                                {
+                                    <input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="@itemA.ID">
+                                }
+                                else
+                                {
+                                    <input type="checkbox" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="@itemA.ID">
+                                }*@
+                                @(j))  @itemA.A_Answer
+                                @(answerIds.Contains(itemA.ID.ToString()) ? "√" : "")
+                            </div>
+                                j++;
+                            }
+                        }
+                    </div>
+                </li>
+                        i++;
+                }
+            }
+            else
+            {
+                <li>
+                    <div class="nothing">暂无相关测试题.</div>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+

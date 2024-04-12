@@ -1,0 +1,241 @@
+﻿@model PagedList.PagedList<Pannet.Models.Goods>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using Pannet.DAL
+@using PagedList.Mvc
+
+@{
+    //Layout = null;
+    ViewBag.Title = "商品管理";
+}
+
+<div class="page-content">
+    <div class="page-header">
+
+        <h1>
+            <span id="lblTitle">商品管理</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                列表
+            </small>
+        </h1>
+    </div>
+    <div class="form-inline">
+
+        <div class="pull-left">
+            <form method="post" action="@Url.Action("Index", "Goods")" name="searchform" id="searchform">
+                <select class="form-control" name="field">
+                    <option value="name" @(ViewBag.Field == "name" ? "selected='selected'" : "")>商品名称</option>
+                    <option value="number" @(ViewBag.Field == "number" ? "selected='selected'" : "")>商品编号</option>
+                </select>
+                <input type="text" class="form-control" value="@ViewBag.Keyword" placeholder="输入搜索词" name="keyword">
+                <select name="GoodsTypeID" id="GoodsTypeID" class="form-control">
+                    <option value="">商品类型</option>
+                    @{
+                        List<GoodsType> GoodsTypeList = ViewBag.GoodsTypes;
+                    }
+                    @foreach (GoodsType item in GoodsTypeList.Where(m => m.GT_ParentID == 0).ToList())
+                    {
+
+                        if (ViewBag.GoodsTypeID.ToString() == item.ID.ToString())
+                        { 
+                        <option value="@item.ID" selected="selected">@item.GT_Name</option>
+                        }
+                        else
+                        {
+                        <option value="@item.ID">@item.GT_Name</option>
+                        }
+                    }
+                </select>
+                <select name="GoodsCategoryID" id="GoodsCategoryID" class="form-control">
+                    <option value="">商品分类</option>
+                    @{
+                        List<GoodsCategory> GoodsCategoryList = ViewBag.GoodsCategorys;
+                            
+                    }
+                    @foreach (GoodsCategory item in GoodsCategoryList.Where(m => m.GC_ParentID == 0).ToList().OrderBy(m => m.GC_Type))
+                    {
+
+                        if (ViewBag.GoodsCategoryID.ToString() == item.ID.ToString())
+                        { 
+                        <option value="@item.ID" selected="selected">@item.GC_Name</option>
+                        }
+                        else
+                        {
+                        <option value="@item.ID">@item.GC_Name</option>
+                        }
+                        foreach (var itemSub in GoodsCategoryList.Where(m => m.GC_ParentID == item.ID).ToList())
+                        {
+                            if (ViewBag.GoodsCategoryID.ToString() == itemSub.ID.ToString())
+                            { 
+                        <option value="@itemSub.ID" selected="selected">|---@itemSub.GC_Name</option>
+                            }
+                            else
+                            {
+                        <option value="@itemSub.ID">|---@itemSub.GC_Name</option>
+                            }
+                        }
+                    }
+                </select>
+
+                推荐：<select name="istuijian" id="istuijian" class="form-control">
+                    <option value="-1" @(ViewBag.istuijian == -1 ? "selected='selected'" : "")>全部</option>
+                    <option value="1" @(ViewBag.istuijian == 1 ? "selected='selected'" : "")>是</option>
+                    <option value="0" @(ViewBag.istuijian == 0 ? "selected='selected'" : "")>否</option>
+                </select>
+                @*  现货：<select name="isexist" id="isexist" class="form-control">
+                    <option value="-1" @(ViewBag.isexist==-1?"selected='selected'":"") >全部</option>
+                    <option value="1" @(ViewBag.isexist==1?"selected='selected'":"") >是</option>
+                    <option value="0" @(ViewBag.isexist==0?"selected='selected'":"") >否</option>
+                </select>
+              
+                手机：<select name="ismobile" id="ismobile" class="form-control">
+                    <option value="-1" @(ViewBag.ismobile==-1?"selected='selected'":"")>全部</option>
+                    <option value="1" @(ViewBag.ismobile==1?"selected='selected'":"")>是</option>
+                    <option value="0" @(ViewBag.ismobile==0?"selected='selected'":"")>否</option>
+                </select>
+                 手机推荐：<select name="ismobile_tj" id="ismobile_tj" class="form-control">
+                    <option value="-1" @(ViewBag.ismobile_tj==-1?"selected='selected'":"")>全部</option>
+                    <option value="1" @(ViewBag.ismobile_tj==1?"selected='selected'":"")>是</option>
+                    <option value="0" @(ViewBag.ismobile_tj==0?"selected='selected'":"")>否</option>
+                </select>*@
+                状态：<select name="status" id="status" class="form-control">
+                    <option value="-1" @(ViewBag.status == -1 ? "selected='selected'" : "")>全部</option>
+                    <option value="1" @(ViewBag.status == 1 ? "selected='selected'" : "")>上架</option>
+                    <option value="0" @(ViewBag.status == 0 ? "selected='selected'" : "")>下架</option>
+                </select>
+                <button type="submit" class="btn btn-success btn-sm"><i class="icon-search"></i>搜索</button>
+            </form>
+        </div>
+        <div class="dropdown pull-right">
+            <a class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="icon-cog"></i>操作菜单<i class="icon-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu pull-right" role="menu">
+                <li>
+                    <a href="@Url.Action("Index")"><i class="icon-group"></i>商品列表</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="@Url.Action("Add")"><i class="icon-group"></i>新增商品</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="javascript:window.location.reload();">
+                        <i class="icon-refresh"></i>刷新页面</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <p></p>
+    <form method="post" action="@Url.Action("Index")" name="fromlist" id="fromlist">
+        <input type="hidden" name="action" id="action" value="update" />
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th width="10"></th>
+                    <th>ID</th>
+                    <th>商品名称</th>
+                    <th>商品编号</th>
+                    <th>商品分类</th>
+                    <th>商品类型</th>
+                    @*<th>品牌</th>*@
+                    <th>商品价格</th>
+                    <th>市场价格</th>
+                    @*<th>单位</th>*@
+                    @*<th>单位说明</th>*@
+                    @*<th>一口价</th>*@
+                    @*<th>现货</th>
+                    <th>自提</th>
+                    <th>重货/泡货</th>*@
+                    <th>库存量</th>
+                    <th>上架状态</th>
+                    <th>推荐</th>
+                    @* <th>新品</th>
+                    <th>热卖</th>*@
+                    <th>排序</th>
+                    @*<th>手机显示</th>
+                    <th>手机推荐</th>
+                    <th>手机排序</th>*@
+                    <th class="dr_option">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = 1;
+                }
+                @if (Model.Count() > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                    <tr id="dr_row_@item.ID">
+                        <td>
+                            <input name="ids" type="checkbox" class="dr_select toggle md-check" value="@item.ID"></td>
+                        <td>@item.ID</td>
+                        <td>
+                            <input name="name_@item.ID" value="@item.G_Name" style="width:300px" /></td>
+                        <td>@item.G_Number</td>
+                        <td>@(GoodsCategoryService.GetName(item.GoodsCategoryID))</td>
+                        <td>@(GoodsTypeService.GetName(item.GoodsTypeID))</td>
+                        <td>
+                            <input name="price_@item.ID" value="@item.G_Price" style="width:60px" /></td>
+                        <td>
+                            <input name="marketprice_@item.ID" value="@item.G_MarketPrice" style="width:60px" /></td>
+                        @* <td>
+                            <input name="unit_@item.ID" value="@item.G_Unit" style="width:40px" /></td>
+                        <td>
+                            <input name="unitinfo_@item.ID" value="@item.G_UnitInfo" title="@item.G_UnitInfo" style="width:70px" /></td>*@
+                        @*<td>@Html.Raw(item.G_IsFixedPrice == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>*@
+                        @*<td>@Html.Raw(item.G_IsExist == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>
+                        <td>@Html.Raw(item.G_IsZiti == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>*@
+                        <td>@item.G_Count</td>
+                        @* <td class="@(item.G_IsWeight == 1 ? "red" : "")">@(DataConfig.GoodsWeightStatus.Find(m => m.Value == item.G_IsWeight.ToString()).Name)</td>*@
+                        <td>@Html.Raw(item.G_Status == 1 ? "<span class='green'>上架</span>" : "<span class='red'>下架</span>")</td>
+                        <td>@Html.Raw(item.G_IsRecommend == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>
+                        @* <td>@Html.Raw(item.G_IsNew == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>
+                        <td>@Html.Raw(item.G_IsHot == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>*@
+                        <td>
+                            <input name="sort_@item.ID" value="@item.G_Sort" style="width:40px" /></td>
+                        @*<td>@Html.Raw(item.G_IsMobile == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>*@
+                        @*<td>@Html.Raw(item.G_IsRecommendMobile == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>*@
+                        @*  <td>
+                            <input name="mobilesort_@item.ID" value="@item.G_SortMobile" style="width:40px" /></td>*@
+                        <td class="dr_option">
+                            @* <a class="aedit" href="@Url.Action("GoodsArticle", new { goodsid = item.ID })"><i class="icon-edit"></i>商品目录</a>
+                            <a class="aedit" href="@Url.Action("Question", new { goodsid = item.ID })"><i class="icon-edit"></i>试题</a>*@
+                            <a class="aedit" href="@Url.Action("Edit", new { ID = item.ID })"><i class="icon-edit"></i>编辑</a>
+                            <a class="adel" href="@Url.Action("Delete", "Goods", new { ID = item.ID })" style="@(item.ID == 1 ? "display:none" : "") " data-confirm="delete"><i class="icon-trash"></i>删除</a>
+                        </td>
+                    </tr>
+                    }
+                }
+                <tr>
+                    <td colspan="20" align="left">
+                        <label>
+                            <input name="chkSelectAll" type="checkbox" onclick="javascript: select_all(this, 'ids', 'fromlist')">全选</label>
+                        <a class="btn btn-sm btn-danger" onclick="javascript:$('#action').val('delete');return dr_confirm_batch('您确定删除吗？','fromlist');">删除</a>
+                        <a class="btn btn-sm btn-info" onclick="javascript:$('#action').val('update');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">更新</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('tj');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">推荐</a>
+                        <a class="btn btn-sm btn-danger" onclick="javascript:$('#action').val('onsale');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">上架</a>
+                        <a class="btn btn-sm btn-danger" onclick="javascript:$('#action').val('offsale');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">下架</a>
+                        @*<a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('tj_cancel');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">取消推荐</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('new');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">新品</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('new_cancel');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">取消新品</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('hot');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">热卖</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('hot_cancel');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">取消热卖</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('weight');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">重货</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('weight_not');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">泡货</a>
+                       
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('m_show');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">手机显示</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('m_show_cancel');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">取消手机显示</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('m_tj');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">手机推荐</a>
+                        <a class="btn btn-sm btn-success" onclick="javascript:$('#action').val('m_tj_cancel');return dr_confirm_batch('您确定要执行操作吗？','fromlist');">取消手机推荐</a>*@
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="20" align="right">@Html.PagedListPager(Model, page => Url.Action("Index", new { page, keyword = ViewBag.Keyword, field = ViewBag.Field, ViewBag.GoodsCategoryID, ViewBag.GoodsTypeID, ViewBag.isexist, ViewBag.istuijian, ViewBag.ismobile, ViewBag.ismobile_tj, ViewBag.status }))</td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

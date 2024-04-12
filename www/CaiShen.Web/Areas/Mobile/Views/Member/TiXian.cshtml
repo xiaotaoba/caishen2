@@ -1,0 +1,82 @@
+﻿@model PagedList.PagedList<Pannet.Models.TiXian>
+
+@using Pannet.DAL.Repository;
+@using PagedList.Mvc;
+@using Pannet.Models;
+@using Pannet.DAL;
+
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "申请提现记录";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+    <style>
+        .txt_blue { color: #17AEE6; }
+        table .btn { margin-bottom: 5px; }
+        .table > tbody > tr > td { font-size: 24px; padding: 18px 8px; }
+    </style>
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_right_body">
+        <div class="mc_right_menu">
+            <ul>
+                <li><a href="@Url.Action("TiXianApply", "Member")">申请提现</a></li>
+                <li class="active"><a href="@Url.Action("TiXian")">提现记录</a></li>
+            </ul>
+            @*<div class="fr"><a href="@Url.Action("TiXianApply")" class="btn  btn-sm btn-info">申请提现</a></div>*@
+        </div>
+        <div class="mc_content">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        @*<th width="20" align="right"></th>*@
+                        <th>提现信息</th>
+                        <th>收款人信息</th>
+                        <th width="90">状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 1;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr id="dr_row_@i">
+
+                            <td>
+                                @*编号：@(item.TX_Number)<br />*@
+                                金额：@(item.TX_Amount)<br />
+                                时间：@(item.TX_CreateTime)
+                            </td>
+                            <td>收款人：@item.TX_UserName<br />
+                                银行：@item.TX_BankName<br />
+                                账号：@item.TX_BankNumber
+                            </td>
+                            <td>
+                                <span class="@(item.TX_Status == 0 || item.TX_Status == 4 ? "red" : item.TX_Status == 1 || item.TX_Status == 2 ? "green" : "")">@(DataConfig.TiXianStatus.Find(m => m.Value == item.TX_Status.ToString()).Name)</span>
+                                @{
+                        if (item.TX_Status == Convert.ToInt16(DataConfig.TiXianStatusEnum.待处理))
+                        {
+                                    <br />
+                                    <a href='@Url.Action("TiXianApplyCancel", "Member", new { ID = item.ID })' class="btn btn-danger btn-xs">取消</a>
+                        }
+                                }
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                    <tr>
+                        <td colspan="20" align="right">@Html.PagedListPager(Model, page => Url.Action("TiXian", new { page }))</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!--/container-->

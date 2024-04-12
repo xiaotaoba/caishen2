@@ -1,0 +1,40 @@
+﻿@model Pannet.Models.User
+
+@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改昵称";
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_content">
+        <div class="info_items">
+            @using (Html.BeginForm("InfoNickName", "Member", FormMethod.Post, new { @class = "form-horizontal" }))
+            { 
+                @Html.ValidationSummary(true)
+                @Html.Raw(ViewBag.MessageInfo)
+                <ul>
+                    <li>
+                        <span class="item_name">
+                            <input name="nickName" id="nickName" maxlength="20" value="@Model.U_NickName" placeholder="请输入昵称" class="tbox" />
+                        </span>
+                        <span class="item_r"></span>
+                    </li>
+                </ul>
+                <div class="tips">2-20个字符，可由中英文、数字、"_"、"-"组成</div>
+                <div class="block"></div>
+                <button type="submit" id="btn_save" class="btn-save">保存</button>
+            }
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+<!--/container-->

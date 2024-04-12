@@ -1,0 +1,216 @@
+﻿@using Pannet.Models
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "品牌故事";
+    List<Advertisement> homeBanner = ViewBag.homeBanner;
+}
+@section Style
+{
+    	<link href="~/Areas/Mobile/css/animate.css" rel="stylesheet" />
+}
+@section Js{
+    <script src="~/Areas/Mobile/js/wow.js"></script>
+}
+<div id="container">
+    <div class="brandstory">
+        <div class="page page_1">
+            <img src="/Areas/Mobile/images/b/logo.png" class="logo wow bounceInLeft" data-wow-delay="0.1s" />
+            <span class="words wow bounceInLeft" data-wow-delay="0.3s">健康支持梦想  行动改变未来</span>
+            <div class="brand_js">
+                <div class="brand_js_tit wow bounceInLeft" data-wow-delay="0.3s">品牌精神</div>
+                <div class="brand_js_co wow fadeInLeft" data-wow-delay="0.4s">
+                    <div class="brand_js_co_bg">
+                        Salud胜路表达了厦门钢宇集团为消费
+							者打造健康、时尚的健身器材和赢在运
+							动的品牌理念。“胜利在望，快人一
+							路”，Salud胜路品牌全心全意为消费
+							者提供真正质优价良的健身器材，让
+							更多的人能够摆脱亚健康的烦恼。但
+							健康的身体需要长期的经营与投入，
+							Salud胜路可以带你“一路领先”。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page page_2">
+            <div class="brand_bj">
+                <div class="brand_bj_tit wow bounceInRight" data-wow-delay="0.3s">品牌精神</div>
+                <div class="brand_bj_co wow fadeInRight" data-wow-delay="0.4s">
+                    <div class="brand_bj_co_bg">
+                        <br>
+                        <br>
+                        Salud，中文名“胜路”，源自于西班牙
+						语，意为 “健康” ，表达了集团董事长
+						为消费者打造健康、时尚的健身器材和赢
+						在运动的品牌理念。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page page_3">
+            <div class="brand_ys">
+                <div class="brand_ys_tit wow bounceInRight" data-wow-delay="0.1s">核心产品及优势</div>
+                <div class="brand_ys_co brand_left wow fadeInRight" data-wow-delay="0.3s">
+                    <div class="brand_ys_co_bg">
+                        <div class="brand_ys_co_tit">
+                            跑步机
+                        </div>
+                        <div class="brand_ys_co_co">
+                            1.由美国和国内顶尖技术研发团队研发，生产工艺、材质、品
+							质全部按照欧美标准，智能、物联、互动是公司跑步机领先同行
+							的基础保证。<br>
+                            2.由厦门钢宇集团——全亚洲最大的跑步机生产基地（占地100
+							0多亩工业园区）生产制造，产能超过目前亚洲所有健身器材厂家。
+                        </div>
+                    </div>
+                </div>
+                <div class="brand_ys_co brand_right">
+
+                    <div class="brand_ys_co_bg">
+                        <div class="brand_ys_co_tit wow bounceInLeft" data-wow-delay="0.3s">
+                            单车系列
+                        </div>
+                        <div class="clear"></div>
+                        <div class="brand_ys_co_co wow fadeInLeft" data-wow-delay="0.3s">
+                            动感单车、椭圆机、磁控车、登山车等系列健身车类，产品销
+往美国、大陆地区。
+                        </div>
+                    </div>
+                </div>
+                <div class="brand_ys_co brand_left">
+                    <div class="brand_ys_co_bg">
+                        <div class="brand_ys_co_tit wow bounceInLeft" data-wow-delay="0.3s">
+                            健身小件
+                        </div>
+                        <div class="brand_ys_co_co wow fadeInRight" data-wow-delay="0.3s">
+                            哑铃、跳绳、握力器、哑铃凳、手环、体重秤、瑜伽垫、瑜伽砖、
+瑜伽巾、瑜伽带等，畅销国内市场。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="page page_4">
+            <div class="brand_hz">
+                <div class="brand_hz_tit wow bounceInRight" data-wow-delay="0.1s">合作伙伴</div>
+                <div class="brand_hz_co">
+                    <div class="brand_hz_co_tit wow fadeInDown" data-wow-delay="0.3s">
+                        国际市场
+                    </div>
+                    <div class="brand_hz_co_bg">
+                        <div class="brand_hz_co_left wow fadeInLeft" data-wow-delay="0.3s">
+                            线上：<br>
+                            与优秀电商平台亚马逊合作
+                        </div>
+                        <div class="brand_hz_co_right wow fadeInRight" data-wow-delay="0.3s">
+                            线下：与国际大卖场<br>
+                            Wal—mart（沃尔玛）<br>
+                            Kmart（凯马特）<br>
+                            Sears（西尔斯）<br>
+                            Costco（好市多）<br>
+                            四家合作。<br>
+                        </div>
+                    </div>
+                </div>
+                <div class="brand_hz_co">
+                    <div class="brand_hz_co_tit wow fadeInDown" data-wow-delay="0.3s">
+                        国内市场
+                    </div>
+                    <div class="brand_hz_co_bg">
+                        <div class="brand_hz_co_left wow fadeInLeft" data-wow-delay="0.3s">
+                            <br>
+                            线上：<br>
+                            <br>
+                            以天猫、淘宝为主
+                        </div>
+                        <div class="brand_hz_co_right wow fadeInRight" data-wow-delay="0.3s">
+                            <br>
+                            线下：<br>
+                            <br>
+                            大型卖场、渠道经销商
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="page page_5">
+            <div class="brand_sl">
+                <div class="brand_sl_tit wow fadeInDown" data-wow-delay="0.1s">胜路实力</div>
+                <div class="brand_sl_co">
+                    <ul>
+                        <li class="wow fadeInUp" data-wow-delay="0.1s">
+                            <img src="/Areas/Mobile/images/b/ico_5_1.png">
+                            由亚洲最大运动器材工厂出品
+                        </li>
+                        <li class="wow fadeInUp" data-wow-delay="0.2s">
+                            <img src="/Areas/Mobile/images/b/ico_5_2.png">
+                            汇聚顶尖技术 品质卓越 更舒适 
+更安全
+                        </li>
+                        <li class="wow fadeInUp" data-wow-delay="0.3s">
+                            <img src="/Areas/Mobile/images/b/ico_5_3.png">
+                            以用户为导向，兼顾美观与性能
+                        </li>
+                        <li class="wow fadeInUp" data-wow-delay="0.4s">
+                            <img src="/Areas/Mobile/images/b/ico_5_4.png">
+                            自主APP 享受智能监控云服务
+                        </li>
+                        <li class="wow fadeInUp" data-wow-delay="0.5s">
+                            <img src="/Areas/Mobile/images/b/ico_5_5.png">
+                            IH管理 智能健康管理系统
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="page page_6">
+            <div class="brand_cp">
+                <div class="brand_cp_tit wow fadeInDown" data-wow-delay="0.1s">
+                    cop烤漆工艺
+						<em>COP THE LACQUER THAT BAKE PROCESS
+三层烤漆工艺永不退色</em>
+                </div>
+                <div class="brand_cp_co wow fadeInLeft" data-wow-delay="0.3s">
+                    <img src="/Areas/Mobile/images/b/p_01.png">
+                </div>
+                <div class="brand_cp_co right wow  fadeInRight" data-wow-delay="0.5s">
+                    <img src="/Areas/Mobile/images/b/p_01.png">
+                </div>
+            </div>
+        </div>
+
+        <div class="page page_7">
+            <div class="brand_cp">
+                <div class="brand_cp_tit wow fadeInUp" data-wow-delay="0.1s">
+                    安全性认证
+						<em class="wow fadeInUp" data-wow-delay="0.3s">胜路所有产品均符合欧盟EN957和国际GB17498安规要求，
+整机做CE认证，原材料符合ROHS标准</em>
+                </div>
+            </div>
+        </div>
+
+        <div class="page page_8">
+            <div class="brand_cp">
+                <div class="brand_cp_tit wow fadeInUp" data-wow-delay="0.1s">
+                    与平台好友“约跑”起来
+						<em class="wow fadeInUp" data-wow-delay="0.3s"><span style="color: #0573c1;">胜路</span>独创“约跑”功能，突破限制，不论是艳阳天还是下雨天你都可以和好友一起享受运动的快乐。</span></em>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<script type="text/javascript">
+    new WOW().init();
+
+</script>

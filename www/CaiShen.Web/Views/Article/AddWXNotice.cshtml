@@ -1,0 +1,349 @@
+﻿@model Pannet.Models.Article
+@using Pannet.DAL
+@using Pannet.Models
+
+@{
+    ViewBag.Title = "文章管理 ";
+    List<ArticleType> listType = ViewBag.ArticleType;
+    List<ArticleType> listTypeSub = ViewBag.ArticleTypeSub;
+    List<Department> departmentList = ViewBag.Departments;
+}
+@section Js{
+    <script type="text/javascript">
+        var editor;
+        KindEditor.ready(function (K) {
+            editor = K.create('#Art_Content', {
+                //editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#Art_Image').val(),
+                        clickFn: function (url, title) {
+                            K('#Art_Image').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">微信模板消息</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>详情 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("AddWXNotice", "Article", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        //@Html.HiddenFor(m => m.ID, new { @value = ViewBag.ID })
+
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120"><font color="red">*</font>导语： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Art_ShortTitle, new { @class = "input-text", @Value = "您好，新一期课程开课啦！",style = "width:400px;"  })
+                    </td>
+                </tr>
+                <tr>
+                    <td width="120"><font color="red">*</font>课程标题： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Art_Title, new { @class = "input-text", style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.Art_Title)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.ArticleTypeID)： </td>
+                    <td>
+                        <select name="ArticleTypeID" id="ArticleTypeID" style="display: none;">
+                            @*<option value='0'>-请选择类型-</option>*@
+                            @if (listType != null)
+                            {
+                                foreach (ArticleType item in listType)
+                                {
+                                <option @(ViewBag.ArticleTypeID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.AT_Name</option>
+                                }
+                            }
+
+                        </select>
+                        @if (listTypeSub != null && listTypeSub.Count > 0)
+                        {
+                            <select name="ArticleTypeIDSub" id="ArticleTypeIDSub">
+                                <option value='0'>-请选择类型-</option>
+                                @foreach (ArticleType item in listTypeSub)
+                                {
+                                    <option @(ViewBag.ArticleTypeIDSub == item.ID ? "selected='selected'" : "") value="@item.ID">@item.AT_Name</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <select name="ArticleTypeIDSub" id="ArticleTypeIDSub" style="display: none;">
+                                <option value='0'>-请选择类型-</option>
+                            </select>
+                        }
+                        @Html.ValidationMessageFor(m => m.ArticleTypeID)
+
+                        <script>
+                            /*  类型相关 */
+                            $(function () {
+                                $("#ArticleTypeID").change(function () {
+                                    var parentid = $("#ArticleTypeID").val();
+                                    if (parseInt(parentid) != 0) {
+                                        GetCategorySubData();
+                                    }
+                                });
+                            });
+                            function ShowCategorySubHtml(dataJson) {
+                                var optionHtml = "<option value='0'>-请选择类型-</option>";
+                                if (dataJson.length > 0) {
+                                    $.each(dataJson, function (index, data) {
+                                        optionHtml += "<option value='" + data.ID + "'>" + data.AT_Name + "</option>";
+                                    });
+                                    $("#ArticleTypeIDSub").show();
+                                    $("#ArticleTypeIDSub").html(optionHtml);
+                                }
+                                else {
+                                    $("#ArticleTypeIDSub").hide();
+                                }
+                            }
+
+                            function GetCategorySubData() {
+                                var parentid = $("#ArticleTypeID").val();
+                                if (parseInt(parentid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetTypeJson", "ArticleType")',
+                                    data: { "parentid": parentid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowCategorySubHtml(data);
+                                    }
+                                });
+                            }
+
+                        </script>
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Art_Image)：</td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.Art_Image)" runat="server" width="100" /><br />
+                        @Html.TextBoxFor(m => m.Art_Image, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />
+                        (最佳规格：最小250*150像素，最大750*450像素)
+                        @Html.ValidationMessageFor(m => m.Art_Image)
+                    </td>
+                </tr>
+                <tr>
+                    <td>主讲：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Art_Author)
+                        @Html.ValidationMessageFor(m => m.Art_Author)
+                    </td>
+                </tr>
+              
+                <tr>
+                    <td>@Html.LabelFor(m => m.Art_IsUrl)： </td>
+                    <td>
+                        <select name="Art_IsUrl" id="Art_IsUrl">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Art_IsUrl.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Art_IsUrl)
+
+                        <script>
+                            /* 是否外链 */
+                            $(function () {
+                                $("#Art_IsUrl").change(function () {
+                                    var isurl = $("#Art_IsUrl").val();
+                                    if (parseInt(isurl) == 1) {
+                                        $("#tr_url").show();
+                                    }
+                                    else {
+                                        $("#tr_url").hide();
+                                    }
+                                });
+                            });
+                        </script>
+                    </td>
+                </tr>
+                <tr id="tr_url" style="@(Model != null && Model.Art_IsUrl == 1 ? "" : "display:none;")">
+                    <td>@Html.LabelFor(m => m.Art_Url)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Art_Url, new { style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.Art_Url)
+                    </td>
+                </tr>
+                <tr>
+                    <td>课程简介：</td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Art_Description, new { style = "width:500px;height:100px;" }) (<span class="red">微信消息展示课程内容</span>)
+                        @Html.ValidationMessageFor(m => m.Art_Description)
+                    </td>
+                </tr>
+                <tr>
+                    <td>结束语：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Art_Keywords, new { @Value = "请积极参与，感谢您的支持！",style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.Art_Keywords)
+                    </td>
+                </tr>
+                <tr>
+                    <td>课程内容：</td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Art_Content, new { style = "width:800px;height:200px;" })
+                        @Html.ValidationMessageFor(m => m.Art_Content)
+                    </td>
+                </tr>
+                <tr>
+                    <td>开课时间：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Art_From)
+                        @Html.ValidationMessageFor(m => m.Art_From)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Art_IsRecommend)： </td>
+                    <td>
+                        <select name="Art_IsRecommend" id="Art_IsRecommend">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Art_IsRecommend.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Art_IsRecommend)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Art_IsEnable)： </td>
+                    <td>
+                        <select name="Art_IsEnable" id="Art_IsEnable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Art_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Art_IsEnable)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Art_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Art_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.Art_Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Art_ShowTimes)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Art_ShowTimes, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Art_ShowTimes)
+                    </td>
+                </tr>
+                <tr>
+                    <td>发送对象： </td>
+                    <td>
+                        <select name="type" id="type">
+                            <option value="1" @(Model != null && 1 == Model.Art_WX_Type ? " selected='selected'" : "")>按部门发送</option>
+                            <option value="2" @(Model != null && 2 == Model.Art_WX_Type ? " selected='selected'" : "")>openid发送</option>
+                        </select>
+                        <script>
+                            $(function () {
+                                $("#type").change(function () {
+                                    showSendObject();
+                                });
+                                showSendObject();
+                            });
+                            function showSendObject()
+                            {
+                                var isurl = $("#type").val();
+                                if (parseInt(isurl) == 1) {
+                                    $("#tr_department").show();
+                                    $("#tr_openid").hide();
+                                }
+                                else {
+                                    $("#tr_department").hide();
+                                    $("#tr_openid").show();
+                                }
+                            }
+                        </script>
+                    </td>
+                </tr>
+                <tr id="tr_department">
+                    <td>发送对象所属部门： </td>
+                    <td>
+                        <select name="DepartmentID" id="DepartmentID">
+                            <option value="0">所有人</option>
+                            @if (departmentList != null)
+                            {
+                                foreach (Department item in departmentList.Where(m => m.Dep_FollowID == 0))
+                                {
+                                <option  value="@item.ID" @(Model != null && item.ID == Model.Art_WX_DepartmentID ? " selected='selected'" : "")>@item.Dep_Name</option>
+                                    foreach (Department itemSub in departmentList.Where(m => m.Dep_FollowID == item.ID))
+                                    {
+                                <option  value="@itemSub.ID"  @(Model != null && itemSub.ID == Model.Art_WX_DepartmentID ? " selected='selected'" : "")>|----@itemSub.Dep_Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr id="tr_openid" style="display: none;">
+                    <td>用户Openid： </td>
+                    <td>
+                        <textarea name="openid" id="openid" style="width: 500px; height: 60px;">@(Model.Art_WX_Openids)</textarea><span>(多人用逗号“,”隔开，最多10人)</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Art_CreateTime)： </td>
+                    <td>
+                        @Html.DisplayFor(m => m.Art_CreateTime)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                        {
+                            <span></span>
+                        }
+                        else
+                        {
+                            <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                        }
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

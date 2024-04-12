@@ -1,0 +1,716 @@
+﻿@model Pannet.Models.Goods
+
+@using Pannet.DAL.Repository
+@using Pannet.DAL
+@using Pannet.Models
+@using Pannet.Utility;
+
+@*@using StackExchange.Profiling;
+@MiniProfiler.RenderIncludes();*@
+@{
+    ViewBag.Title = "编辑产品";
+}
+@section Style{
+    <style>
+        .table ul { display: table; list-style: none; border-bottom: 1px solid #ddd; width: 100%; margin: 0; background-color: #fff; }
+        .table ul li { display: table-cell; padding: 10px; text-align: left; font-size: 13px; }
+        .table ul li.name { width: 100px; }
+        .table ul li input { width: 60px; margin-bottom: 4px; }
+        .table ul li span { display: inline-block; padding: 4px 8px; margin-right: 10px; border: 1px solid #ddd; cursor: pointer; margin-bottom: 4px; }
+        .table ul li span:hover { border: 1px solid #ff6a00; }
+        .table ul li span.active { border: 1px solid #ff6a00; background-color: #ff6a00; color: #fff; }
+        #SkuWrapper span { display: inline-block; width: 100%; min-height: 30px; float: left; overflow: hidden; border-right: 1px solid #ddd; border-bottom: 1px solid #ddd; }
+        #SkuWrapper table { }
+        #SkuWrapper td.col-2 { width: 100px; }
+        #SkuWrapper td.col-8 { }
+        #SkuWrapper table td input { width: 65px; }
+        #sku_batch_operate input { width: 90px; }
+        #SkuWrapper .table > tbody > tr > td, #SkuWrapper .table > tbody > tr > th, #SkuWrapper .table > tfoot > tr > td, #SkuWrapper .table > tfoot > tr > th, #SkuWrapper .table > thead > tr > td, #SkuWrapper .table > thead > tr > th { padding: 4px; }
+    </style>
+}
+@section Js{
+    <script type="text/javascript">
+        var editor;
+        KindEditor.ready(function (K) {
+            editor = K.create('#G_Desc', {
+                //editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            editor = K.create('#G_MobileDesc', {
+                //editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#G_Image').val(),
+                        clickFn: function (url, title) {
+                            K('#G_Image').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+            //图片
+            K('#btnImg2').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#G_MobileImage').val(),
+                        clickFn: function (url, title) {
+                            K('#G_MobileImage').val(url);
+                            $("#imgView2").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+
+
+
+        });
+    </script>
+}
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">产品管理</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                <span>编辑产品</span>
+            </small>
+        </h1>
+    </div>
+    <ul class="nav nav-tabs padding-18 tab-size-bigger">
+        <li class="active">
+            <a href="@Url.Action("Edit", new { ID = ViewBag.ID })">
+                <i class="blue icon-info bigger-120"></i>
+                产品信息
+            </a>
+        </li>
+        <li>
+            <a href="@Url.Action("EditPhotos", new { GoodsID = ViewBag.ID })">
+                <i class="blue icon-picture bigger-120"></i>
+                产品相册
+            </a>
+        </li>
+    </ul>
+
+    @using (Html.BeginForm("Edit", "Goods", FormMethod.Post, new { @class = "form-horizontal" }))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped">
+            <tbody>
+
+                <!--品牌-->
+                <tr>
+                    <td width="100">@Html.LabelFor(m => m.BrandID)： </td>
+                    <td>
+                        <select name="BrandID">
+                            @if (ViewBag.Brands != null)
+                            {
+                                foreach (Brand item in ViewBag.Brands)
+                                {
+                                <option @(Model.BrandID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.B_Name</option>
+                                }
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.BrandID)
+                    </td>
+                </tr>
+                <!--产品分类-->
+                <tr>
+                    <td>@Html.LabelFor(m => m.GoodsCategoryID)： </td>
+                    <td>
+                        <select name="GoodsCategoryID" id="GoodsCategoryID">
+                            <option value='0'>-请选择分类-</option>
+                            @if (ViewBag.GoodsCategorysParent != null)
+                            {
+                                foreach (GoodsCategory item in ViewBag.GoodsCategorysParent)
+                                {
+                                <option @(ViewBag.CategoryParentID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.GC_Name</option>
+                                }
+                            }
+
+                        </select>
+                        @if (ViewBag.GoodsCategorysSub != null)
+                        {
+                            <select name="GoodsCategoryIDSub" id="GoodsCategoryIDSub">
+                                <option value='0'>-请选择二级分类-</option>
+                                @foreach (GoodsCategory item in ViewBag.GoodsCategorysSub)
+                                {
+                                    <option @(ViewBag.CategorySubID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.GC_Name</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <select name="GoodsCategoryIDSub" id="GoodsCategoryIDSub" style="display: none;">
+                                <option value='0'>-请选择二级分类-</option>
+                            </select>
+                        }
+                        @Html.ValidationMessageFor(m => m.GoodsCategoryID)
+
+                        <script>
+                            /*  产品分类相关 */
+                            $(function () {
+                                $("#GoodsCategoryID").change(function () {
+                                    var parentid = $("#GoodsCategoryID").val();
+                                    if (parseInt(parentid) != 0) {
+                                        GetCategorySubData();
+                                    }
+                                });
+                            });
+                            function ShowCategorySubHtml(dataJson) {
+                                var optionHtml = "<option value='0'>-请选择二级分类-</option>";
+                                if (dataJson.length > 0) {
+                                    $.each(dataJson, function (index, data) {
+                                        optionHtml += "<option value='" + data.ID + "'>" + data.GC_Name + "</option>";
+                                    });
+                                    $("#GoodsCategoryIDSub").show();
+                                    $("#GoodsCategoryIDSub").html(optionHtml);
+                                }
+                                else {
+                                    $("#GoodsCategoryIDSub").hide();
+                                }
+                            }
+
+                            function GetCategorySubData() {
+                                var parentid = $("#GoodsCategoryID").val();
+                                if (parseInt(parentid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetCategoryJson", "GoodsCategory")',
+                                    data: { "parentid": parentid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowCategorySubHtml(data);
+                                    }
+                                });
+                            }
+
+                        </script>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Name)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_Name, new { style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.G_Name)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_Number)：
+                         @Html.TextBoxFor(m => m.G_Number)
+                        @Html.ValidationMessageFor(m => m.G_Number)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_IsExist)：</td>
+                    <td>
+                        <select name="G_IsExist" id="G_IsExist">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsExist.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+
+                        <!--现货显示仓库，否则显示供应商-->
+                        <span class="warehouse" style="@(Model != null && Model.G_IsExist == 1 ? "display:inline;" : "display:none;")">
+                            <!--默认仓库-->
+                            @Html.LabelFor(m => m.WarehouseID)：
+                        <select name="WarehouseID">
+                            @if (ViewBag.Warehouses != null)
+                            {
+                                foreach (Warehouse item in ViewBag.Warehouses)
+                                {
+                                <option @(Model.WarehouseID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Name</option>
+                                }
+                            }
+
+                        </select>
+                            @Html.ValidationMessageFor(m => m.WarehouseID)
+                        </span>
+                        <span class="supplier" style="@(Model != null && Model.G_IsExist == 1 ? "display:none;" : "display:inline;")">
+                            <!--默认供应商-->
+                            @Html.LabelFor(m => m.SupplierID)：
+                        <select name="SupplierID">
+                            @if (ViewBag.Suppliers != null)
+                            {
+                                foreach (Supplier item in ViewBag.Suppliers)
+                                {
+                                <option @(Model.SupplierID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Sup_Name</option>
+                                }
+                            }
+
+                        </select>
+                            @Html.ValidationMessageFor(m => m.SupplierID)
+                        </span>
+
+                        <script>
+                            /* 是否现货 */
+                            $(function () {
+                                $("#G_IsExist").change(function () {
+                                    var isexist = $("#G_IsExist").val();
+                                    if (parseInt(isexist) == 1) {
+                                        $(".warehouse").show();
+                                        $(".supplier").hide();
+                                        $(".tr_makedays").hide();
+                                        $(".tr_designfee").hide();
+                                    }
+                                    else {
+                                        $(".warehouse").hide();
+                                        $(".supplier").show();
+                                        $(".tr_makedays").show();
+                                        $(".tr_designfee").show();
+                                    }
+                                });
+                            });
+                        </script>
+                    </td>
+                </tr>
+                <tr class="tr_makedays">
+                    <td>@Html.LabelFor(m => m.G_MakeDays)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_MakeDays)  天
+                        @Html.ValidationMessageFor(m => m.G_MakeDays)
+                    </td>
+                </tr>
+                <tr class="tr_designfee">
+                    <td>@Html.LabelFor(m => m.G_IsDesign)：</td>
+                    <td>
+                        <select name="G_IsDesign" id="G_IsDesign">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsDesign.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        （<span class="red">如：定制产品设计费</span>）
+                        <div style="display: none;">
+                            @Html.LabelFor(m => m.G_DesignFee)：
+                            @Html.TextBoxFor(m => m.G_DesignFee) 元
+                            @Html.ValidationMessageFor(m => m.G_DesignFee)
+                        </div>
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.G_IsFixedPrice)：</td>
+                    <td>
+                        <select name="G_IsFixedPrice" id="G_IsFixedPrice">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsFixedPrice.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        <script>
+                            /* 一口价 */
+                            function CheckShowTrSKU() {
+                                var isfixed = $("#G_IsFixedPrice").val();
+                                if (parseInt(isfixed) == 1) {
+                                    $(".tr_sku_item").hide();
+                                }
+                                else {
+                                    $(".tr_sku_item").show();
+                                }
+                            }
+                            $(function () {
+                                $("#G_IsFixedPrice").change(function () {
+                                    CheckShowTrSKU();
+                                });
+                                CheckShowTrSKU();
+                            });
+                        </script>
+                    </td>
+                </tr>
+                <!--产品类型-->
+                <tr class="tr_sku_item">
+                    <td>@Html.LabelFor(m => m.GoodsTypeID)： </td>
+                    <td>
+                        <select name="GoodsTypeID" id="GoodsTypeID">
+                            <option value='0'>-请选择产品类型-</option>
+                            @if (ViewBag.GoodsTypes != null)
+                            {
+                                foreach (GoodsType item in ViewBag.GoodsTypes)
+                                {
+                                <option @(Model.GoodsTypeID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.GT_Name</option>
+                                }
+                            }
+
+                        </select>
+                        （<span class="red">产品类型用于设置销售属性，非必选</span>）
+                         @Html.ValidationMessageFor(m => m.GoodsTypeID)
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_IsWeight)：</td>
+                    <td>
+                        <select name="G_IsWeight" id="G_IsWeight">
+                            @foreach (var item in DataConfig.GoodsWeightStatus)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsWeight.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr class="tr_sku_item">
+                    <td>销售属性：</td>
+                    <td>
+                        <div id="PropertyWrapper">
+                        </div>
+                    </td>
+                </tr>
+                <tr class="tr_sku_item">
+                    <td>产品SKU：</td>
+                    <td>
+                        <!--批量赋值-->
+                        <div id="sku_batch_operate">
+                            <p class="form-inline">
+                                批量输入：
+                                <input name='sku_volume_batch' placeholder="体积(m³)" type="text" class="form-control" />
+                                <input name='sku_expandarea_batch' placeholder="面积(m²)" type="text" class="form-control" />
+                                <input name='sku_weight_batch' placeholder="重量(kg)" type="text" class="form-control" />
+                                <input name='sku_squareweight_batch' placeholder="平方克重(g)" type="text" class="form-control" />
+                                <input name='sku_costprice_batch' placeholder="成本价" type="text" class="form-control" />
+                                <input name='sku_shoppricerate_batch' placeholder="加盟商价比" type="text" class="form-control" />
+                                <input name='sku_shopprice_batch' placeholder="加盟商价" type="text" class="form-control" />
+                                <input name='sku_clientpricerate_batch' placeholder="终端价比" type="text" class="form-control" />
+                                <input name='sku_price_batch' placeholder="终端价" type="text" class="form-control" />
+                                <input name='sku_count_batch' placeholder="库存" type="text" class="form-control" />
+                                <input name='sku_shopcode_batch' placeholder="商家编码" type="text" class="form-control" />
+                                <input name='btn_batch' id="btn_batch_sku" value="批量赋值" type="button" class="btn btn-info btn-sm" />
+                            </p>
+                        </div>
+                        <div id="SkuWrapper">
+                        </div>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Count)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_Count)
+                        @Html.ValidationMessageFor(m => m.G_Count)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_Unit)：
+                        @Html.TextBoxFor(m => m.G_Unit)
+                        @Html.ValidationMessageFor(m => m.G_Unit)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_UnitCount)：
+                         @Html.TextBoxFor(m => m.G_UnitCount)
+                        @Html.ValidationMessageFor(m => m.G_UnitCount)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_UnitInfo)：
+                         @Html.TextBoxFor(m => m.G_UnitInfo)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Price)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_Price)
+                        @Html.ValidationMessageFor(m => m.G_Price)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_MarketPrice)：
+                        @Html.TextBoxFor(m => m.G_MarketPrice)
+                        @Html.ValidationMessageFor(m => m.G_MarketPrice)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Volume)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_Volume, new { Value = UtilityClass.ConvertToString(Model.G_Volume) })
+                        @Html.ValidationMessageFor(m => m.G_Volume)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_Weight)：
+                         @Html.TextBoxFor(m => m.G_Weight, new { Value = UtilityClass.ConvertToString(Model.G_Weight) })
+                        @Html.ValidationMessageFor(m => m.G_Weight)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_ExpandArea)：
+                         @Html.TextBoxFor(m => m.G_ExpandArea, new { Value = UtilityClass.ConvertToString(Model.G_ExpandArea) })
+                        @Html.ValidationMessageFor(m => m.G_ExpandArea)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_SquareWeight)：
+                         @Html.TextBoxFor(m => m.G_SquareWeight)
+                        @Html.ValidationMessageFor(m => m.G_SquareWeight)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Image)：</td>
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                    <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.G_Image)" width="100" /><br />
+                                    @Html.TextBoxFor(m => m.G_Image, new { @class = "input-text" })
+                                    <input id="btnImg" type="button" value="选择图片" />
+                                    @Html.ValidationMessageFor(m => m.G_Image)
+
+                                </td>
+                                <td valign="top">手机展示图片:</td>
+                                <td>
+                                    <img height="100" id="imgView2" alt="" src="@Html.DisplayFor(m => m.G_MobileImage)" width="100" /><br />
+                                    @Html.TextBoxFor(m => m.G_MobileImage, new { @class = "input-text" })
+                                    <input id="btnImg2" type="button" value="选择图片" />
+                                    @Html.ValidationMessageFor(m => m.G_MobileImage)
+
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Abstract)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_Abstract, new { style = "width:400px;",placeholder="产品简介或优势" })
+                        @Html.ValidationMessageFor(m => m.G_Abstract)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Tags)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_Tags, new { style = "width:400px;", placeholder = "用于产品检索、归类" })  多标签可以用逗号“,”隔开
+                        @Html.ValidationMessageFor(m => m.G_Tags)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Desc)：</td>
+                    <td>
+                        @Html.TextAreaFor(m => m.G_Desc, new { style = "width:100%;height:200px;" })
+                        @Html.ValidationMessageFor(m => m.G_Desc)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_MobileDesc)：</td>
+                    <td>
+                        @Html.TextAreaFor(m => m.G_MobileDesc, new { style = "width:100%;height:200px;" })
+                        @Html.ValidationMessageFor(m => m.G_MobileDesc)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_PrintLogoProductUrl)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_PrintLogoProductUrl, new { style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.G_PrintLogoProductUrl)
+                        <span class="">填写不带域名的绝对路径，如：/Goods/Index/70, 或外部链接以http://开始</span>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_OrderProductUrl)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_OrderProductUrl, new { style = "width:400px;" })
+                        (<span class="red">如果是现货产品，有对应定制产品，可填写定制产品链接，可为空</span>)@Html.ValidationMessageFor(m => m.G_OrderProductUrl)
+                        <br />
+                        <span class="">填写不带域名的绝对路径，如：/Goods/Index/70</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_IsMobile)</td>
+                    <td>
+                        <select name="G_IsMobile" id="G_IsMobile">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsMobile.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>推荐选项：</td>
+                    <td>
+                        @Html.LabelFor(m => m.G_IsHot)
+                        <select name="G_IsHot" id="G_IsHot">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsHot.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_IsNew)
+                        <select name="G_IsNew" id="G_IsNew">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsNew.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        &nbsp;
+
+                        @Html.LabelFor(m => m.G_IsRecommend)
+                        <select name="G_IsRecommend" id="G_IsRecommend">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsRecommend.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        &nbsp;
+
+                          @Html.LabelFor(m => m.G_IsRecommendMobile)
+                        <select name="G_IsRecommendMobile" id="G_IsRecommendMobile">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsRecommendMobile.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_IsZiti)</td>
+                    <td>
+                        <select name="G_IsZiti" id="G_IsZiti">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_IsZiti.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_ShippingTemplateID)</td>
+                    <td>
+                        <select name="G_ShippingTemplateID" id="G_ShippingTemplateID">
+                            @foreach (ShippingTemplate item in ViewBag.ShippingTemplates)
+                            {
+                                <option value="@item.ID" @(Model != null && item.ID == Model.G_ShippingTemplateID ? " selected='selected'" : "")>@item.ST_Title</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Status)：</td>
+                    <td>
+                        <select name="G_Status" id="G_Status">
+                            @foreach (var item in DataConfig.GoodsStatus)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.G_Status.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_SaleCount)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_SaleCount)
+                        @Html.ValidationMessageFor(m => m.G_SaleCount)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_ShowTimes)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_ShowTimes)
+                        @Html.ValidationMessageFor(m => m.G_ShowTimes)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_Sort)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.G_Sort)
+                        @Html.ValidationMessageFor(m => m.G_Sort)
+                        &nbsp;
+                        @Html.LabelFor(m => m.G_SortMobile)：
+                        @Html.TextBoxFor(m => m.G_SortMobile)
+                        @Html.ValidationMessageFor(m => m.G_SortMobile)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.G_CreateTime)：</td>
+                    <td>
+                        @Html.DisplayFor(m => m.G_CreateTime)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" onclick="javascript:return SaveSubmit();" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+    <script>
+
+        /*  产品属性相关 */
+        var $GoodsTypes = $("#GoodsTypeID");
+        var $PropertyWrapper = $("#PropertyWrapper");
+        var $SkuWrapper = $("#SkuWrapper");
+        var _propertyJson;
+        var _skulistJson = [];
+        var height = "30";//每行高
+        var goodsId = parseInt('@Model.ID');
+        var _existPropertyValueJson;//数据库已保存的产品属性值
+        var _existGoodsSKUJson;//数据库已保存的产品SKU
+
+        $(function () {
+
+            //改变类型执行事件
+            $GoodsTypes.change(function () {
+                GetPropertyData();
+                ShowSKUHtml();
+            });
+
+            //数据库已保存的产品属性值
+            GetGoodsPropertyValueData();
+
+            //获得当前产品类型属性 并 显示
+            GetPropertyData();
+
+            //数据库已保存的产品SKU
+            GetGoodsSKUData();
+
+            //显示SKU HTML
+            ShowSKUHtml();
+
+            BindEvent();
+
+            //SKU-价格被改动赋值
+            $SkuWrapper.delegate(".sku_price_set", "click", function () {
+                var $item = $(this);
+
+                var currentIndex = layer.open({
+                    type: 2,
+                    title: 'SKU价格配置',
+                    maxmin: true,
+                    shadeClose: true, //点击遮罩关闭层
+                    area: ['1000px', '500px'],
+                    content: '/GoodsSkuPrice/Index?SKU_ID=' + $item.data("id"),
+                    cancel: function () {
+                    },
+                    close: function () {
+                    },
+                    end: function () {
+                        //window.location.reload();
+                    }
+                });
+
+            });
+
+        });
+
+        function SaveSubmit() {
+            if (ExistSkuValueEmpty()) {
+                alert("SKU 价格和数量都不允许为空！");
+                return false;
+            }
+
+            //保存,产品所选属性值
+            SavePropertyValue();
+
+            //保存，产品SKU
+            SaveGoodsSKU();
+
+            return true;
+        }
+    </script>
+    <script src="~/Content/js/goods.js?v=0419"></script>
+</div>

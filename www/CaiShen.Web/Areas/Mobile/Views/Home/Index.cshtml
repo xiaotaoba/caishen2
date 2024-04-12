@@ -1,0 +1,142 @@
+﻿@using Pannet.Models
+@using Pannet.DAL.Repository
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "卓牧鸟康复";
+    List<Advertisement> homeBanner = ViewBag.homeBanner;
+}
+@section Js{
+    <script>
+        //location.href = "/Mobile/Member";
+    </script>
+}
+
+<div class="home_body">
+    <div class="bg"></div>
+    @*<div class="stl03_name">
+                        <h1></h1>
+                        <p class="yahei"></p>
+                    </div>*@
+    <ul class="menu">
+        <li>
+            <a href="/Mobile/Health">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_01.png?v=1" /></i>
+                <span>居家康复</span>
+            </a>
+        </li>
+        <li>
+            <a href="/Mobile/Goods">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_02.png" /></i>
+                <span>在线商城</span>
+            </a>
+        </li>
+        <li>
+            <a href="/Mobile/Article">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_03.png" /></i>
+                <span>康复课堂</span>
+            </a>
+        </li>
+        <li>
+            <a href="/Mobile/Article/Cases">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_04.png" /></i>
+                <span>案例见证</span>
+            </a>
+        </li>
+        <li>
+            <a href="/Mobile/Team">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_05.png" /></i>
+                <span>康复团队</span>
+            </a>
+        </li>
+        <li>
+            <a href="/Mobile/Article/Info/42">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_06.png" /></i>
+                <span>企业介绍</span>
+            </a>
+        </li>
+         <li>
+            <a href="/Mobile/Article/Index/19">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_07.png" /></i>
+                <span>养生堂</span>
+            </a>
+        </li>
+        <li>
+            <a href="/Mobile/Article/Index/20">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_08.png" /></i>
+                <span>专家会诊</span>
+            </a>
+        </li>
+        <li>
+            <a href="/Mobile/Article/Index/21">
+                <i class="syioc_cssimg">
+                    <img src="~/Areas/Mobile/images/h_ico_09.png" /></i>
+                <span>专家资讯</span>
+            </a>
+        </li>
+    </ul>
+
+    <!--搜索框-->
+    <div class="hot_box_style03">
+        <div class="hot_search ">
+            <div class="s_block">
+                <div class="s_block_l">
+                    <input type="text" name="keywords" value="" class="s_input keywords" placeholder="输入文章关键词搜索">
+                </div>
+                <div class="s_block_r s_but_sou">搜索</div>
+            </div>
+            <p>
+                @if (ViewBag.Keywords != null)
+                {
+                    List<Article> keyswordList = ViewBag.Keywords;
+                    foreach (Article item in keyswordList)
+                    {
+                    <a href="@(item.Art_IsUrl == 1 ? item.Art_Url : "/Mobile/Article/Detail/" + item.ID)">
+                        @item.Art_Title
+                    </a>
+                    }
+                }
+            </p>
+            <div class="clear"></div>
+            <p></p>
+        </div>
+    </div>
+    <!--搜索框 end-->
+
+    <div class="home_news">
+        <div class="new_list">
+            <h1><i class="iconfont icon-kangfuliliaoke"></i>康复资讯</h1>
+            @if (ViewBag.News != null)
+            {
+                List<Article> newsList = ViewBag.News;
+                foreach (Article item in newsList)
+                {
+                <dl>
+                    <a href="@(item.Art_IsUrl == 1 ? item.Art_Url : "/Mobile/Article/Detail/" + item.ID)">
+                        <dt>
+                            <img src="@item.Art_Image" alt="@item.Art_Title"></dt>
+                        <dd>
+                            <h3>@item.Art_Title</h3>
+                            <p>
+                                @Html.Raw(string.IsNullOrEmpty(item.Art_Description) ? UtilityClass.Left(UtilityClass.HtmlFilter(item.Art_Content), 50) : item.Art_Description)
+                            </p>
+                            <small>@item.Art_CreateTime.ToString("yyyy-MM-dd")</small>
+                        </dd>
+                    </a>
+                </dl>
+                }
+            }
+        </div>
+    </div>
+
+
+</div>

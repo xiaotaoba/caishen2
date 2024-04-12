@@ -1,0 +1,69 @@
+﻿@model Pannet.Models.AlipayConfig
+@using Pannet.DAL
+@using Pannet.Models
+
+@{
+    ViewBag.Title = "支付宝配置管理 ";
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">支付宝配置管理 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                <span>设置 </span>
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("AlipayConfig", "SystemInfo", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="150">@Html.LabelFor(m =>m.Seller_email)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Seller_email, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Seller_email)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Partner)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Partner, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Partner)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Key)： </td>
+                    <td>
+                        @Html.PasswordFor(m => m.Key, new {@value=Model.Key, style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Key)
+                    </td>
+                </tr>
+
+              
+                <tr>
+                    <td>@Html.LabelFor(m => m.Mainname)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Mainname, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Mainname)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

@@ -1,0 +1,159 @@
+﻿@model Pannet.Models.Questionnaire
+
+@using Pannet.DAL.Repository
+@using Pannet.DAL
+@using Pannet.Models
+@using Pannet.Utility;
+
+@{
+    ViewBag.Title = "编辑问卷调查";
+}
+
+@section Js{
+    <script type="text/javascript">
+        var editor;
+        KindEditor.ready(function (K) {
+            //editor = K.create('#Quest_Desc', {
+            editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#Quest_Image').val(),
+                        clickFn: function (url, title) {
+                            K('#Quest_Image').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">问卷调查管理</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+    @{
+        if (Model.ID != 0)
+        {
+            ViewBag.Action = "Edit";
+            ViewBag.Quest_ID = Model.ID;
+            Html.RenderPartial("_PartialMenu");
+        }
+    }
+
+    @using (Html.BeginForm("Add", "Questionnaire", FormMethod.Post, new { @class = "form-horizontal" }))
+    { 
+        <input type="hidden" name="ID" value="@ViewBag.Quest_ID" />
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <td style="width:120px;">@Html.LabelFor(m => m.Quest_Title)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Quest_Title, new { style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.Quest_Title)
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Quest_Image)：</td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.Quest_Image)" width="100" /><br />
+                        @Html.TextBoxFor(m => m.Quest_Image, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />  (最佳规格：最小250*150像素，最大750*450像素)
+                        @Html.ValidationMessageFor(m => m.Quest_Image)
+                    </td>
+                </tr>
+                 <tr>
+                    <td>@Html.LabelFor(m => m.Quest_URL)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Quest_URL, new {  style = "width:400px;" }) (<span class="red">外部问卷调查时填写</span>)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Quest_Description)：</td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Quest_Description, new { style = "width:600px;height:100px; ", placeholder = "请填写说明" })
+                        @Html.ValidationMessageFor(m => m.Quest_Description)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Quest_IsRecommend)：</td>
+                    <td>
+                        <select name="Quest_IsRecommend" id="Quest_IsRecommend">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Quest_IsRecommend.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Quest_Status)：</td>
+                    <td>
+                        <select name="Quest_Status" id="Quest_Status">
+                            @foreach (var item in DataConfig.IsEnableValues)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Quest_Status.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                   <tr>
+                    <td>@Html.LabelFor(m => m.Quest_Count)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Quest_Count)
+                        @Html.ValidationMessageFor(m => m.Quest_Count)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Quest_Sort)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Quest_Sort)
+                        @Html.ValidationMessageFor(m => m.Quest_Sort)
+                    </td>
+                </tr>
+                 <tr>
+                    <td>@Html.LabelFor(m => m.Quest_EndTime)：</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Quest_EndTime, new { @Value = Model.Quest_EndTime, onfocus = "new WdatePicker({dateFmt:'yyyy/MM/dd HH:mm:ss'})" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Quest_CreateTime)：</td>
+                    <td>
+                        @Html.DisplayFor(m => m.Quest_CreateTime)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" onclick="javascript:return SaveSubmit();" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+</div>

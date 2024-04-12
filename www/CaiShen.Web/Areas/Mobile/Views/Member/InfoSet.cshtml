@@ -1,0 +1,66 @@
+﻿@model Pannet.Models.User
+
+@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "基础设置";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+}
+@section Js{
+}
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_content">
+        <div id="infoset" class="tobx_items">
+            @using (Html.BeginForm("InfoSet", "Member", FormMethod.Post, new { @class = "form-horizontal" }))
+            { 
+                @Html.ValidationSummary(true)
+                <ul>
+                    <li>
+                        <span class="item_name"><i class="ico">
+                            <img src="/Areas/Mobile/images/member/ico_height.png" /></i>身高</span>
+                        <span class="item_value">
+                            <input type="text" class="tbox" name="U_Height" value="@Model.U_Height" /><em class="t_unit">CM</em>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="item_name"><i class="ico">
+                            <img src="/Areas/Mobile/images/member/ico_weight2.png" /></i>体重</span>
+                        <span class="item_value">
+                            <input type="text" class="tbox" name="U_Weight" value="@Model.U_Weight" /><em class="t_unit">KG</em>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="item_name"><i class="ico">
+                            <img src="/Areas/Mobile/images/member/ico_birth.png" /></i>生日</span>
+                        <span class="item_value">
+                            <input type="text" class="tbox" name="U_Birthday" value="@Model.U_Birthday" /><em class="t_unit"></em>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="item_name"><i class="ico">
+                            <img src="/Areas/Mobile/images/member/ico_weight3.png" /></i>目标体重</span>
+                        <span class="item_value">
+                            <input type="text" class="tbox" name="U_HopeWeight" value="@Model.U_HopeWeight" /><em class="t_unit">KG</em>
+                        </span>
+                    </li>
+                </ul>
+                <div>
+                    <div class="block">
+                        @Html.Raw(ViewBag.MessageInfo)
+                    </div>
+                    <button type="submit" name="btnSubmit" id="btnSubmit" class="btn_save">保存</button>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+<!--/container-->

@@ -1,0 +1,3 @@
+2019-01-07 17:00:04,user:15168370673 ——>:CheckLoginController，user为null：false,openid:
+2019-01-07 17:00:12,user:15168370673 ——>:CheckLoginController，user为null：false,openid:
+2019-01-07 17:03:54,user:15168370673 ——>:CheckLoginController，user为null：false,openid:

@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A8BF18AE-2F47-4293-A7F1-A71E132EBCC7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pannet.DAL</RootNamespace>
+    <AssemblyName>Pannet.DAL</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\YinXia\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.Extended, Version=6.0.0.0, Culture=neutral, PublicKeyToken=05b7e29bdd433584, processorArchitecture=MSIL">
+      <HintPath>..\YinXia\packages\EntityFramework.Extended.6.1.0.168\lib\net45\EntityFramework.Extended.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\YinXia\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataConfig.cs" />
+    <Compile Include="GenericRepository.cs" />
+    <Compile Include="IGenericRepository.cs" />
+    <Compile Include="Migrations\201901040548074_addInit.cs" />
+    <Compile Include="Migrations\201901040548074_addInit.Designer.cs">
+      <DependentUpon>201901040548074_addInit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201901070147424_addFieldOfGoods3.cs" />
+    <Compile Include="Migrations\201901070147424_addFieldOfGoods3.Designer.cs">
+      <DependentUpon>201901070147424_addFieldOfGoods3.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="PannetContext.cs" />
+    <Compile Include="PannetDBInitializer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\GoodsPriceAreaService.cs" />
+    <Compile Include="Repository\LogService.cs" />
+    <Compile Include="Repository\ManagerService.cs" />
+    <Compile Include="Repository\ShippingCompanyService.cs" />
+    <Compile Include="Repository\UserRoleService.cs" />
+    <Compile Include="Repository\UserLevelService.cs" />
+    <Compile Include="Repository\UserAmountHistoryService.cs" />
+    <Compile Include="Repository\UserScoreHistoryService.cs" />
+    <Compile Include="Repository\GoodsTypeService.cs" />
+    <Compile Include="Repository\GoodsCategoryService.cs" />
+    <Compile Include="Repository\PropertyService.cs" />
+    <Compile Include="Repository\GoodsPhotoService.cs" />
+    <Compile Include="Repository\GoodsService.cs" />
+    <Compile Include="Repository\WarehouseAreaService.cs" />
+    <Compile Include="Repository\ArticleTypeService.cs" />
+    <Compile Include="Repository\AdvertisementTypeService.cs" />
+    <Compile Include="Repository\UserService.cs" />
+    <Compile Include="Repository\UserShopService.cs" />
+    <Compile Include="Repository\SystemInfoService.cs" />
+    <Compile Include="Repository\SiteService.cs" />
+    <Compile Include="Repository\AdvertisementService.cs" />
+    <Compile Include="Repository\ArticleService.cs" />
+    <Compile Include="Repository\CartService.cs" />
+    <Compile Include="Repository\OrderCommentService.cs" />
+    <Compile Include="Repository\OrderService.cs" />
+    <Compile Include="Repository\UserAddressService.cs" />
+    <Compile Include="Repository\ShopGuaranteeHistoryService.cs" />
+    <Compile Include="Repository\UserShopGoodsDownService.cs" />
+    <Compile Include="Repository\OrderDetailService.cs" />
+    <Compile Include="Repository\WarehouseService.cs" />
+    <Compile Include="Repository\SupplierService.cs" />
+    <Compile Include="Repository\ShippingTemplateService.cs" />
+    <Compile Include="Repository\ShippingAreaService.cs" />
+    <Compile Include="Repository\ReturnOrderService.cs" />
+    <Compile Include="Repository\ReturnOrderShippingService.cs" />
+    <Compile Include="Repository\UserLogService.cs" />
+    <Compile Include="Repository\SupplierGoodsService.cs" />
+    <Compile Include="Repository\UserScoreProductService.cs" />
+    <Compile Include="Repository\ScoreProductService.cs" />
+    <Compile Include="Repository\HongBaoService.cs" />
+    <Compile Include="Repository\CouponService.cs" />
+    <Compile Include="Repository\UserHongBaoService.cs" />
+    <Compile Include="Repository\OrderFeeListService.cs" />
+    <Compile Include="Repository\UserCouponService.cs" />
+    <Compile Include="Repository\WarehouseGoodsService.cs" />
+    <Compile Include="Repository\SupplierAreaService.cs" />
+    <Compile Include="Repository\OrderChangeLogService.cs" />
+    <Compile Include="Repository\GoodsSKUService.cs" />
+    <Compile Include="Repository\UserShopGoodsSetService.cs" />
+    <Compile Include="Repository\InvoiceLogService.cs" />
+    <Compile Include="Repository\UserInvoiceAmountService.cs" />
+    <Compile Include="Repository\AreaService.cs" />
+    <Compile Include="Repository\GoodsSKUPriceService.cs" />
+    <Compile Include="Repository\OrderDetailLogService.cs" />
+    <Compile Include="Repository\NavigationService.cs" />
+    <Compile Include="Repository\BrowseRecordService.cs" />
+    <Compile Include="Repository\TiXianService.cs" />
+    <Compile Include="Repository\UserRoleHistoryService.cs" />
+    <Compile Include="Repository\DesignWorkPhotoService.cs" />
+    <Compile Include="UnitOfWork.cs" />
+    <Compile Include="WebSiteConfig.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CaiShen.Models\CaiShen.Models.csproj">
+      <Project>{de8d836b-c762-4f56-bdca-607c3e74d17e}</Project>
+      <Name>CaiShen.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CaiShen.Utility\CaiShen.Utility.csproj">
+      <Project>{5ea34284-8f35-4089-87e7-ac23925935e6}</Project>
+      <Name>CaiShen.Utility</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201901040548074_addInit.resx">
+      <DependentUpon>201901040548074_addInit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201901070147424_addFieldOfGoods3.resx">
+      <DependentUpon>201901070147424_addFieldOfGoods3.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

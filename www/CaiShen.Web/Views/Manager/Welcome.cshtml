@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "后台管理首页";
+}
+<div class="page-content">
+    <div class="page-header">
+        <h1>后台管理首页
+        </h1>
+    </div>
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-success" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>@(ViewBag.Message)</div>
+        
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>欢迎使用 @Pannet.DAL.WebSiteConfig.WebSiteName</div>
+    }
+    <table class="table table-striped table-hover">
+        <tbody>
+            <tr>
+                <th class="bg_tr" height="25">系统信息统计
+                </th>
+            </tr>
+            <tr>
+                <td width="50%" height="23">图文信息数量：<span class="TableRow2" style="color: Red;"><span id="lblNews">0</span></span>
+                </td>
+            </tr>
+            <tr>
+                <td width="50%" height="23">产品数量：<span class="TableRow2" style="color: Red;"><span id="lblProducts">0</span></span>
+                </td>
+            </tr>
+
+            <tr style="display: none;">
+                <td>网站制作：<span class="TableRow2"> <a href="http://www.pannet.cn" target="_blank">盘网互联</a></span></td>
+            </tr>
+            <tr>
+                <td>
+                    <button onclick="location.href='/Manager/Fanli'" class="btn btn-danger">手动返利</button></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,163 @@
+﻿@model Pannet.Models.Order
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "支付页面";
+    List<Order> orderList = ViewBag.Orders;
+    User loginUserModel = ViewBag.LoginUser;
+
+    string tips = "请及时完成支付！";
+    string pay_amount_title = "支付金额";
+    decimal pay_amount = Model.O_PayAmount;
+
+    if (Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.货到付款))
+    {
+        tips = "您的订单已生成，收货后请及时完成支付！";
+        pay_amount = 0;
+    }
+    else if (Model.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.待付款) && Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.预付定金))
+    {
+        tips = "您的订单已生成，请及时支付定金！";
+        pay_amount_title = "支付定金";
+    }
+    else if (Model.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.已支付定金) && Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.预付定金))
+    {
+        tips = "如您的货物已签收，请及时支付尾款！";
+        pay_amount_title = "支付尾款";
+        pay_amount = Model.O_RestPayAmount;
+    }
+    else
+    {
+        tips = "您的订单已生成，请及时完成支付！";
+    }
+    
+}
+@section Style{
+    <style>
+        body { background-color: #eee; }
+        #footer { display: none; }
+        .pc_bottom { display: none; }
+    </style>
+}
+<!--主区域-->
+<div id="container">
+
+    <div id="pay" class="base">
+        <dl class="pay_order_success">
+            <dt>支付页面</dt>
+            <dd>
+                <div class="tips">
+                    <i class="iconfont icon-dizhiguanliyigouxuan"></i>
+                    <span>@tips</span>
+                </div>
+                <table border="1">
+                    <tr class="tr_th">
+                        <td>订单号</td>
+                        @* <td>配送方式</td>
+                        <td>送货时间</td>*@
+                        <td>应付金额</td>
+                        @*<td>支付方式</td>*@
+                    </tr>
+                    @foreach (var item in orderList)
+                    {
+                        <tr>
+                            <td>@item.O_OrderNo</td>
+                            @*   <td>@(DataConfig.OrderShippingWay.Find(m => m.Value == item.O_ShippingWay.ToString()).Name)</td>
+                            <td>@(DataConfig.OrderShippingTime.Find(m => m.Value == item.O_ShippingTime.ToString()).Name)</td>*@
+                            <td><span class="red">@(SiteService.GetPrice(item.O_PayAmount))</span>元</td>
+                            @*<td>@(DataConfig.OrderPayWay.Find(m => m.Value == item.O_PayWay.ToString()).Name)</td>*@
+                        </tr>
+                    }
+                </table>
+            </dd>
+        </dl>
+        @using (Html.BeginForm("Pay", "Pay", FormMethod.Post))
+        {
+
+            if (Model.O_PayWay != Convert.ToInt32(DataConfig.OrderPayWayEnum.货到付款))
+            {
+            <dl class="pay_payway_name">
+                <dd class="on">
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_alipay.png" /></span>
+                        <input name="payway" type="radio" checked="checked" value="alipay" />
+                        支付宝支付
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+                <dd>
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_wepay.png" /></span>
+                        <input name="payway" type="radio" value="wxpay" />
+                        微信支付
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+                <dd>
+                    <label>
+                        <span class="ico">
+                            <img src="~/Areas/Mobile/images/ico_yxpay.png" /></span>
+                        <input name="payway" type="radio" value="yue" />
+                        账户支付(余额：<span class="red">￥@(loginUserModel.U_Amount)</span>)
+                        <i class="iconfont icon-circle"></i>
+                        <i class="iconfont icon-gouxuan"></i>
+                    </label>
+                </dd>
+            </dl>
+            <div class="pay_submit_line">
+                <div class="total_price_pay">
+                    @pay_amount_title <span class="red">￥</span><i class="money">@pay_amount</i>
+                </div>
+                <button class="btn_pay" type="submit">立即支付</button>
+                <a class="back_cart" href="@Url.Action("Index", "Member")">取消</a>
+                <input type="hidden" value="@pay_amount" name="pay_amount" />
+                <input type="hidden" value="@Model.O_OrderNo" name="order_no" />
+            </div>
+            }
+        }
+    </div>
+
+</div>
+<!--/container-->
+
+
+@section FootJs{
+
+    <script>
+
+        var $payway_name = $("[name='payway']");
+
+        $(function () {
+            $(".pay_item").click(function () {
+                $(this).addClass("active");
+                //$(this).siblings().removeClass("active");
+                $(".pay_item").not($(this)).removeClass("active");
+            });
+            // $(".btn_pay ").click(function () {
+            //      location.href = "@Url.Action("Success", "Pay")";
+            //  });
+
+            //付款方式
+            $payway_name.click(function () {
+                var $payitem = $(this);
+                if ($payitem.is(':checked')) {
+                    $payitem.parents("dd").addClass("on");
+                    $payitem.parents("dd").siblings("dd").removeClass("on");
+                }
+                else {
+                    $payitem.parents("dd").removeClass("on");
+                }
+            });
+
+        });
+
+    </script>
+}

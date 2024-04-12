@@ -1,0 +1,176 @@
+﻿@model Pannet.Models.SystemInfo
+@using Pannet.DAL
+@using Pannet.Models
+
+@{
+    ViewBag.Title = "网站信息管理 ";
+}
+@section Js{
+    <script type="text/javascript">
+        var editor;
+        KindEditor.ready(function (K) {
+            editor = K.create('#Sys_Copyright', {
+                //editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true,
+                items: [
+						'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+						'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+						'insertunorderedlist', '|', 'emoticons', 'image', 'link']
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#Sys_LogoUrl').val(),
+                        clickFn: function (url, title) {
+                            K('#Sys_LogoUrl').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+
+        });
+    </script>
+}
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">网站信息 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                <span>设置 </span>
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("Index", "SystemInfo", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        @Html.HiddenFor(m => m.ID)
+
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="150"><font color="red">*</font>@Html.LabelFor(m => m.Sys_SiteName)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sys_SiteName, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Sys_SiteName)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_LogoUrl)：</td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.Sys_LogoUrl)" runat="server" width="100" /><br />
+                        @Html.TextBoxFor(m => m.Sys_LogoUrl, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />
+                        @Html.ValidationMessageFor(m => m.Sys_LogoUrl)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_WebTitle)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sys_WebTitle, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Sys_WebTitle)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_WebKeywords)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Sys_WebKeywords, new { style = "width:400px;height:80px;" })
+                        @Html.ValidationMessageFor(m => m.Sys_WebKeywords)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_WebDescription)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Sys_WebDescription, new { style = "width:400px;height:80px;" })
+                        @Html.ValidationMessageFor(m => m.Sys_WebDescription)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_Copyright)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Sys_Copyright, new { style = "width:600px;height:120px;" })
+                        @Html.ValidationMessageFor(m => m.Sys_Copyright)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_Company)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sys_Company, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Sys_Company)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_Address)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sys_Address, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Sys_Address)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_Tel)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sys_Tel, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Sys_Tel)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_Domain)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sys_Domain, new { style = "width:400px" })
+                        @Html.ValidationMessageFor(m => m.Sys_Domain)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sys_Is_Enable)： </td>
+                    <td>
+                        <select name="Sys_Is_Enable" id="Sys_Is_Enable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Sys_Is_Enable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Sys_Is_Enable)
+                        <script>
+                            /* 是否启用 */
+                            $(function () {
+                                $("#Sys_Is_Enable").change(function () {
+                                    var isurl = $("#Sys_Is_Enable").val();
+                                    if (parseInt(isurl) == 0) {
+                                        $("#tr_close").show();
+                                    }
+                                    else {
+                                        $("#tr_close").hide();
+                                    }
+                                });
+                            });
+                        </script>
+                    </td>
+                </tr>
+                <tr id="tr_close" style="@(Model != null && Model.Sys_Is_Enable == 0 ? "" : "display:none;")">
+                    <td>@Html.LabelFor(m => m.Sys_CloseReason)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Sys_CloseReason, new { style = "width:400px;height:80px;" })
+                        @Html.ValidationMessageFor(m => m.Sys_CloseReason)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

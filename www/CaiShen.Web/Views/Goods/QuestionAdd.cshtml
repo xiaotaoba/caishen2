@@ -1,0 +1,248 @@
+﻿@model Pannet.Models.Question
+@using Pannet.DAL
+@using Pannet.Utility
+@using Pannet.Models
+
+@{
+    ViewBag.Title = "课程试题管理 ";
+    List<GoodsArticle> GoodsArticles = ViewBag.GoodsArticles;
+}
+@section Js{
+    <script src="~/My97DatePicker/WdatePicker.js"></script>
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">课程试题管理 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+    @{
+        ViewBag.Action = "QuestionAdd";
+        Html.RenderPartial("_PartialMenu");
+    }
+    @using (Html.BeginForm("QuestionAdd", "Goods", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <input type="hidden" name="GoodsID" value="@ViewBag.GoodsID" />
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120">关联课程目录： </td>
+                    <td>
+                        <select name="Q_GroupItemSubID" id="Q_GroupItemSubID">
+                            <option value="0">不关联</option>
+                            @if (GoodsArticles != null && GoodsArticles.Count > 0)
+                            {
+                                foreach (var item in GoodsArticles)
+                                {
+                                <option value="@item.ID" @(Model != null && item.ID == Model.Q_GroupItemSubID ? " selected='selected'" : "")>@item.GA_Title</option>
+                                }
+                            }
+                        </select>
+                        (<span class="red">没有课程目录情况下可不选</span>)
+                    </td>
+                </tr>
+                <tr>
+                    <td width="120">@Html.LabelFor(m => m.Q_Title)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Q_Title, new { @class = "input-text", style = "width:400px;" })
+                        @Html.ValidationMessageFor(m => m.Q_Title)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Q_Description)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Q_Description, new { @class = "input-text", style = "width:600px;height:100px;" })
+                        @Html.ValidationMessageFor(m => m.Q_Description)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Q_Type)： </td>
+                    <td>
+                        <select name="Q_Type" id="Q_Type">
+                            @foreach (var item in DataConfig.QuestionType)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Q_Type.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <script>
+                    var $Q_Type = $("#Q_Type");
+                    /*题型 */
+                    $(function () {
+
+                        $Q_Type.change(function () {
+                            var typeid = $(this).val();
+                            showDefaultTypeTr(typeid);
+                        });
+
+                        showDefaultTypeTr($Q_Type.val());
+
+                        function showDefaultTypeTr(typeid) {
+                            if (parseInt(typeid) == 2) {//判断题
+                                $("#tr_panduan").show();
+                                $("#tr_wenda").hide();
+                                $("#tr_answer").hide();
+                            }
+                            else if (parseInt(typeid) == 3) {//问答题
+                                $("#tr_wenda").show();
+                                $("#tr_panduan").hide();
+                                $("#tr_answer").hide();
+                            }
+                            else {
+                                $("#tr_wenda").hide();
+                                $("#tr_panduan").hide();
+                                $("#tr_answer").show();
+                            }
+                        }
+                    });
+                </script>
+                <tr id="tr_panduan" style="display: none;">
+                    <td>@Html.LabelFor(m => m.Q_IsTrue)： </td>
+                    <td>
+                        <select name="Q_IsTrue" id="Q_IsTrue">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Q_IsTrue.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr id="tr_wenda" style="display: none;">
+                    <td>@Html.LabelFor(m => m.Q_Answer)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Q_Answer, new { @class = "input-text", style = "width:600px;height:100px;" })
+                        @Html.ValidationMessageFor(m => m.Q_Answer)
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Q_Analysis)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Q_Analysis, new { @class = "input-text", style = "width:600px;height:100px;" })
+                        @Html.ValidationMessageFor(m => m.Q_Analysis)
+                    </td>
+                </tr>
+
+
+                @*  <tr id="tr_image" style="display: none;">
+                    <td>@Html.LabelFor(m => m.GA_Image)：</td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.GA_Image)" runat="server" width="100" /><br />
+                        @Html.TextBoxFor(m => m.GA_Image, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />
+                        @Html.ValidationMessageFor(m => m.GA_Image)
+                    </td>
+                </tr>*@
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Q_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Q_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.Q_Sort)
+                    </td>
+                </tr>
+                <tr id="tr_answer">
+                    <td>选项： </td>
+                    <td>
+                        <table style="width: 600px;" class="table table-striped table-bordered table_choose">
+                            <tr>
+                                <th>选项内容</th>
+                                <th>是否正确选项</th>
+                                <th>排序号(大->小)</th>
+                                <th>操作</th>
+                            </tr>
+                            <tr class="tr_choose">
+                                <td>
+                                    <input type="text" name="answer[0].answer" style="width: 300px;" />
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="answer[0].istrue" value="1" /></td>
+                                <td>
+                                    <input type="text" name="answer[0].sort" style="width: 60px" />
+                                </td>
+                                <td>&nbsp;
+                                </td>
+                            </tr>
+                            <tr class="tr_choose">
+                                <td>
+                                    <input type="text" name="answer[1].answer" style="width: 300px;" />
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="answer[1].istrue" value="1" /></td>
+                                <td>
+                                    <input type="text" name="answer[1].sort" style="width: 60px" />
+                                </td>
+                                <td>&nbsp;
+                                </td>
+                            </tr>
+                            <tr class="tr_choose">
+                                <td>
+                                    <input type="text" name="answer[2].answer" style="width: 300px;" />
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="answer[2].istrue" value="1" /></td>
+                                <td>
+                                    <input type="text" name="answer[2].sort" style="width: 60px" />
+                                </td>
+                                <td>&nbsp;
+                                </td>
+                            </tr>
+                        </table>
+                        <a href="javascript:void(0)" class="btn btn-info btn-xs add_choose"><i class="glyphicon glyphicon-plus"></i>新增选项</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+    <script>
+        var $table_choose = $(".table_choose");
+        var choose_index = 3;
+        $(function () {
+            $(".add_choose").click(function () {
+                addChoose();
+            });
+            $table_choose.delegate(".del_choose", "click", function () {
+                $(this).parent().parent().remove();
+                resetChooseIndex();
+            });
+        });
+
+        function addChoose() {
+            $table_choose.append('<tr class="tr_choose"><td><input type="text" name="answer[' + choose_index + '].answer" style="width:300px;" /></td><td><input type="checkbox" name="answer[' + choose_index + '].istrue"  value="1" /></td><td><input type="text" name="answer[' + choose_index + '].sort" style="width:60px" /></td><td><a href="javascript:void(0)" class="btn btn-danger btn-xs del_choose">删除</a></td></tr>');
+            choose_index++;
+            resetChooseIndex();
+        }
+        function resetChooseIndex() {
+            //重新设置序号
+            $table_choose.find(".tr_choose").each(function (index) {
+                var $tr = $(this);
+                $tr.find("[name$='.answer']").attr("name", "answer[" + index + "].answer");
+                $tr.find("[name$='.istrue']").attr("name", "answer[" + index + "].istrue");
+                $tr.find("[name$='.sort']").attr("name", "answer[" + index + "].sort");
+            });
+        }
+    </script>
+</div>

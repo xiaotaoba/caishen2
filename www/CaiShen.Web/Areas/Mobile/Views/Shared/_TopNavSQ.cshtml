@@ -1,0 +1,36 @@
+﻿<div class="op_wrap">
+    <ul>
+        <li class="@(ViewBag.TopAction == "club" ? "op_liSel" : "")"><a href="http://www.ybsxy.cn" >
+            <dl>
+                <dt><i class="icon iconfont icon-taolun"></i></dt>
+                <dd class="op_ddSmall">小部落微社区</dd>
+            </dl>
+        </a></li>
+        <li class="@(ViewBag.TopAction == "design" ? "op_liSel" : "")"><a href="/Mobile/Design">
+            <dl>
+                <dt><i class="icon iconfont icon-yunkutubiao"></i></dt>
+                <dd>设计云库</dd>
+            </dl>
+        </a></li>
+        <li class="@(ViewBag.TopAction == "questionnaire" ? "op_liSel" : "")"><a href="/Mobile/Questionnaire">
+            <dl>
+                <dt><i class="icon iconfont icon-WikiEvent"></i></dt>
+                <dd>问卷调查</dd>
+            </dl>
+        </a></li>
+    </ul>
+</div>
+<script src="~/Areas/Mobile/js/jquery.cookie.js"></script>
+<script>
+    //function gotoBBS()
+    //{
+    //    var islogin = $.cookie('MyUserName');
+    //    if (islogin == null || islogin == "" || islogin == "undefined") {
+    //        location.href = "/mobile/login?returnurl=" + encodeURI("http://www.ybsxy.cn");
+    //    }
+    //    else { 
+    //        location.href = "http://www.ybsxy.cn";
+    //    }
+    //}
+    
+</script>

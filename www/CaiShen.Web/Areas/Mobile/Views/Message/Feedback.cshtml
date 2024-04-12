@@ -1,0 +1,58 @@
+﻿@using Pannet.Models
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "意见反馈";
+}
+@section Style
+{
+}
+@section Js{
+}
+<div id="container">
+    <div class="head_menu">
+        <ul>
+            <li><a href="/article/faq">常见设备问题</a></li>
+            <li class="active"><a href="/message/feedback">意见反馈</a></li>
+        </ul>
+    </div>
+    <div class="tobx_items feedback">
+        <ul>
+            <li>
+                <span class="item_name">姓名：</span>
+                <span class="item_value">
+                    <input type="text" class="tbox" name="height" placeholder="请输入您的姓名" />
+                </span>
+            </li>
+            <li>
+                <span class="item_name">性别：</span>
+                <span class="item_value">
+                    <input type="text" class="tbox" name="height"  placeholder="请输入意见内容"/>
+                </span>
+            </li>
+            <li>
+                <span class="item_name">电话：</span>
+                <span class="item_value">
+                    <input type="text" class="tbox" name="height" placeholder="请输入联系电话" />
+                </span>
+            </li>
+            <li>
+                <span class="item_name">地址：</span>
+                <span class="item_value">
+                    <input type="text" class="tbox" name="height" placeholder="请输入联系地址" />
+                </span>
+            </li>
+            <li class="height_auto">
+                <span class="item_name">意见：</span>
+                <span class="item_value">
+                    <textarea class="tabox" placeholder="请输入意见内容"></textarea>
+                </span>
+            </li>
+        </ul>
+        <div>
+            <div class="block"></div>
+            <button type="submit" name="btnSubmit" id="btnSubmit" class="btn_save">确定提交</button>
+        </div>
+    </div>
+</div>

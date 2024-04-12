@@ -1,0 +1,28 @@
+﻿@model Pannet.Models.Article
+
+@using Pannet.Models
+@using Pannet.Utility
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = Model.Art_Title;
+    User LoginUser = ViewBag.LoginUser;
+}
+<style>
+    .about_img { }
+</style>
+<div class="box">
+    <div class="about_img">
+        @if (!string.IsNullOrEmpty(Model.Art_Image))
+        { 
+            <img src="@(Model.Art_Image)" />
+        }
+    </div>
+    <div class="bsd_box">
+        <div class="bsd_content">
+            @Html.Raw(Model.Art_Content)
+        </div>
+    </div>
+</div>

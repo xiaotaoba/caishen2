@@ -1,0 +1,103 @@
+﻿@model Pannet.Models.Tag
+
+@using Pannet.DAL
+@using Pannet.Models
+@using Pannet.Utility
+
+@{
+    ViewBag.Title = "标签 ";
+    List<Tag> parentList = ViewBag.Parents;
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">标签 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("Add", "Tag", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        //@Html.HiddenFor(m => m.ID, new { @value = ViewBag.ID })
+
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td>@Html.LabelFor(m => m.T_Type)： </td>
+                    <td>
+                        <select name="T_Type">
+                            @foreach (var item in DataConfig.TagType)
+                            {
+                                <option value="@item.Value" @(item.Value == Model.T_Type.ToString() ? "selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                    <tr>
+                        <td width="120"><font color="red">*</font>@Html.LabelFor(m => m.T_Name)： </td>
+                        <td>
+                            @Html.TextBoxFor(m => m.T_Name, new { @class = "input-text" })
+                            @Html.ValidationMessageFor(m => m.T_Name)
+                        </td>
+                    </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.T_FollowID)： </td>
+                    <td>
+                        <select name="T_FollowID">
+                            <option value="0">做为一级标签</option>
+                            @{
+                            if (parentList != null && parentList.Count() > 0)
+                            {
+                                foreach (var item in parentList)
+                                {
+                                <option value="@item.ID"  @(item.ID == Model.T_FollowID ? "selected='selected'" : "")>@item.T_Name</option>
+                                }
+                            }
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.T_FollowID)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.GC_IsEnable)： </td>
+                    <td>
+                        <select name="GC_IsEnable" id="GC_IsEnable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.GC_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.GC_IsEnable)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.T_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.T_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.T_Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

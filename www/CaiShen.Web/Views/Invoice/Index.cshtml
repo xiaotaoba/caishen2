@@ -1,0 +1,89 @@
+﻿@model PagedList.PagedList<Pannet.Models.InvoiceLog>
+
+@using Pannet.DAL.Repository;
+@using Pannet.DAL;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "申请发票管理";    
+}
+
+<div class="page-content">
+    <div class="page-header">
+
+        <h1>
+            <span id="lblTitle">申请发票管理</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                列表
+            </small>
+        </h1>
+    </div>
+    <div class="form-inline">
+        <div class="dropdown pull-right">
+            <a class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="icon-cog"></i>操作菜单<i class="icon-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu pull-right" role="menu">
+                <li>
+                    <a href="@Url.Action("Index")"><i class="icon-group"></i>申请发票管理</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="javascript:window.location.reload();">
+                        <i class="icon-refresh"></i>刷新页面</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <p></p>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                @*<th width="20" align="right"></th>*@
+                <th width="120">开票金额</th>
+                <th width="120">申请时间</th>
+                <th>发票信息</th>
+                <th>开票内容</th>
+                <th>收件人信息</th>
+                <th width="100">状态</th>
+                <th class="dr_option">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+            }
+            @foreach (var item in Model)
+            {
+                <tr id="dr_row_@i">
+                    @*<td align="right">
+                                        <input name="ids[]" type="checkbox" class="dr_select toggle md-check" value="1" disabled=""></td>*@
+                    <td>@(item.Inv_Amount)</td>
+                    <td>@(item.CreateTime)</td>
+                    <td>发票类型：@(DataConfig.InvoiceType.Find(m => m.Value == item.Inv_InvoiceType.ToString()).Name)<br />
+                        发票抬头：@item.Inv_Title<br />
+                        纳税人识别号：@item.Inv_BusinessTax<br />
+                        开户行：@item.Inv_BankName<br />
+                        开户账号：@item.Inv_BankNumber
+                    </td>
+                    <td>@item.Inv_Content</td>
+                    <td>
+                        @item.Inv_Addressee &nbsp; @item.Inv_Tel<br />
+                        @item.Inv_Address
+                    </td>
+                    <td class="@(item.Inv_Status == 0 || item.Inv_Status == 1 ? "red" : item.Inv_Status == 2 ||item.Inv_Status == 3 ? "green" : "")">
+                        @(DataConfig.InvoiceStatus.Find(m => m.Value == item.Inv_Status.ToString()).Name)
+                    </td>
+                    <td class="dr_option">
+                        <a class="aedit" href="@Url.Action("Detail", "Invoice", new { ID = item.ID })"><i class="icon-edit"></i>详情</a>
+                    </td>
+                </tr>
+                i++;
+            }
+            <tr>
+                <td colspan="20" align="right">@Html.PagedListPager(Model, page => Url.Action("Invoice", new { page }))</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+

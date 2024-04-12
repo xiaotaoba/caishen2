@@ -1,0 +1,243 @@
+﻿@model Pannet.Models.GoodsCategory
+@using Pannet.DAL
+@using Pannet.Utility
+@using Pannet.Models
+
+@{
+    ViewBag.Title = "商品分类 ";
+    List<Pannet.Models.GoodsCategory> listParentType = ViewBag.GoodsTypeParents as List<Pannet.Models.GoodsCategory>;
+    List<Department> departmentList = ViewBag.Departments;
+}
+@section Js{
+    <script type="text/javascript">
+        var editor;
+        var editor2;
+        KindEditor.ready(function (K) {
+            //editor = K.create('#G_Desc', {
+                editor = K.editor({
+                uploadJson: '/editor/asp.net/upload_json.ashx',
+                fileManagerJson: '/editor/asp.net/file_manager_json.ashx',
+                allowFileManager: true
+            });
+            //图片
+            K('#btnImg').click(function () {
+                editor.loadPlugin('image', function () {
+                    editor.plugin.imageDialog({
+                        fileUrl: K('#GC_Image').val(),
+                        clickFn: function (url, title) {
+                            K('#GC_Image').val(url);
+                            $("#imgView").attr("src", url);
+                            editor.hideDialog();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">商品分类 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑信息 </span>
+                }
+                else
+                {
+                    <span>新增信息</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("GoodsCategoryAdd", "GoodsCategory", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped table-hover">
+            <tbody>
+
+                <tr>
+                    <td width="120"><font color="red">*</font>@Html.LabelFor(m => m.GC_Name)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GC_Name, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.GC_Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td width="120">所属类型： </td>
+                    <td>
+                        <select name="GC_Type" id="GC_Type">
+                            <option value='0'>-请选择商品类型-</option>
+                            @if (ViewBag.GoodsTypes != null)
+                            {
+                                foreach (GoodsType item in ViewBag.GoodsTypes)
+                                {
+                                <option @(Model.GC_Type == item.ID ? "selected='selected'" : "") value="@item.ID">@item.GT_Name</option>
+                                }
+                            }
+
+                        </select>
+                        @Html.ValidationMessageFor(m => m.GC_Type)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.GC_ParentID)： </td>
+                    <td>
+                        <select name="GC_ParentID">
+                            <option value="0">做为一级分类 </option>
+                            @{
+                            if (listParentType != null && listParentType.Count() > 0)
+                            {
+                                foreach (var item in listParentType)
+                                {
+                                    if (Model != null && Model.GC_ParentID == item.ID)
+                                    { 
+                                <option value="@item.ID" selected="selected">@item.GC_Name</option>
+                                    }
+                                    else
+                                    {
+                                <option value="@item.ID">@item.GC_Name</option>
+                                    }
+                                }
+                            }
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.GC_ParentID)
+                    </td>
+                </tr>
+
+                  <tr>
+                    <td>@Html.LabelFor(m => m.GC_Image)：</td>
+                    <td>
+                        <img height="100" id="imgView" alt="" src="@Html.DisplayFor(m => m.GC_Image)" width="100" /><br />
+                        @Html.TextBoxFor(m => m.GC_Image, new { @class = "input-text" })
+                        <input id="btnImg" type="button" value="选择图片" />
+                        @Html.ValidationMessageFor(m => m.GC_Image)
+                    </td>
+                </tr>
+
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.GC_IsRecommend)： </td>
+                    <td>
+                        @* <select name="GC_IsRecommend" id="GC_IsRecommend">
+                            @foreach (var item in DataConfig.IsRecommendValues)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.GC_IsRecommend.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>*@
+                        @Html.TextBoxFor(m => m.GC_IsRecommend, new { @class = "input-text", Value = "1" })
+                        @Html.ValidationMessageFor(m => m.GC_IsRecommend)
+                    </td>
+                </tr>
+
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.GC_IsEnable)： </td>
+                    <td>
+                        @*<select name="GC_IsEnable" id="GC_IsEnable">
+                            @foreach (var item in DataConfig.IsEnableValues)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.GC_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>*@
+                        @Html.TextBoxFor(m => m.GC_IsEnable, new { @class = "input-text", Value = "1" })
+
+                        @Html.ValidationMessageFor(m => m.GC_IsEnable)
+                    </td>
+                </tr>
+
+                <tr style="display:none;">
+                    <td>@Html.LabelFor(m => m.GC_Department)： </td>
+                    <td>
+                    @if (departmentList != null)
+                    {
+                        foreach (Department item in departmentList.Where(m => m.Dep_FollowID == 0))
+                        {
+                            string[] ids = Model.GC_Department != null ? Model.GC_Department.Split(',') : null;
+                            <div>
+                            <label style="font-weight:bold;"><input type="checkbox" value="@(item.ID)" name="selectAll"  @(ids != null && ids.Contains(item.ID.ToString()) ?"checked='checked'" :"") />@item.Dep_Name</label>
+                            @foreach (Department itemSub in departmentList.Where(m => m.Dep_FollowID == item.ID))
+                            {
+                             <label><input type="checkbox" value="@(itemSub.ID)" name="limit"  @(ids != null && ids.Contains(itemSub.ID.ToString()) ?"checked='checked'" :"") />@itemSub.Dep_Name</label>
+                            }
+                            </div>
+                        }
+                    }
+                        <input type="hidden" value="@Model.GC_Department" name="GC_Department"/>
+                        @Html.ValidationMessageFor(m => m.GC_Department)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.GC_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GC_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.GC_Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>
+
+<script>
+
+    var $all = $("[name='selectAll']");
+    //var $limits = $("[name='limit']");
+    var $select_limits = $("[name='GC_Department']");
+    var $btn_submit = $("#btnSubmit");
+    $(function () {
+
+        $all.each(function () {
+            var $itemA = $(this);
+            $itemA.click(function () {
+                var $limits = $itemA.parent().parent().find("[name='limit']");
+                if ($itemA.prop('checked')) {
+                    $limits.prop('checked', true);
+                }
+                else {
+                    $limits.prop('checked', false);
+                }
+            });
+        });
+        
+
+        $btn_submit.click(function () {
+            var limits = "";
+            $("[name='limit']:checked").each(function () {
+                limits += $(this).val() + ",";
+            });
+            $("[name='selectAll']:checked").each(function () {
+                limits += $(this).val() + ",";
+            });
+            //if (limits == "") {
+            //    alert("请选择开放部门！");
+            //    return false;
+            //} else {
+            //    limits = limits.substring(0, limits.length - 1);
+            //}
+            $select_limits.val(limits);
+            //return false;
+        });
+        //InitLimit();
+    });
+    //function InitLimit() {
+    //    var limits_str = $select_limits.val();
+    //    var limits_arr = limits_str.split(',');
+    //    for (var i = 0; i < limits_arr.length; i++) {
+    //        if (limits_arr[i] != "") {
+    //            $("[value='" + limits_arr[i] + "']").prop('checked', true);
+    //        }
+    //    }
+    //}
+</script>

@@ -1,0 +1,252 @@
+﻿@model Pannet.Models.ManagerGroup
+@{
+    ViewBag.Title = "管理员角色";
+}
+<style>
+    .limits label { margin-left: 10px; }
+</style>
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">角色信息</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null)
+                {
+                    <span>编辑角色</span>
+                }
+                else
+                {
+                    <span>新增角色</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("GroupAdd", "Manager", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="100"><font color="red">*</font>名称： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Name, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td>角色描述： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Desc, new { @class = "form-control", style = "width:200px;" })
+                        @Html.ValidationMessageFor(m => m.Desc)
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td>角色权限：</td>
+                    <td>
+                        <div class="limits">
+                            @*<legend>系统设置</legend>*@
+                            <p>
+                                <b>1、系统设置</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="11" name="limit" />网站信息设置</label>
+                                <label>
+                                    <input type="checkbox" value="12" name="limit" />微信接口配置</label>
+                                <label>
+                                    <input type="checkbox" value="13" name="limit" />系统参数设置</label>
+                                <label>
+                                    <input type="checkbox" value="14" name="limit" />邮箱设置</label>
+                                <label>
+                                    <input type="checkbox" value="15" name="limit" />培训需求报名记录</label>
+                                <label>
+                                    <input type="checkbox" value="16" name="limit" />标签管理</label>
+                                <label>
+                                    <input type="checkbox" value="17" name="limit" />部门管理</label>
+                                <br />
+
+                                <b>2、管理员管理</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="21" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="22" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="23" name="limit" />编辑</label>
+                                <label>
+                                    <input type="checkbox" value="24" name="limit" />删除</label>
+                                <label>
+                                    <input type="checkbox" value="25" name="limit" />操作记录</label>
+                                <label>
+                                    <input type="checkbox" value="26" name="limit" />角色</label>
+                                <br />
+
+                                <b>3、会员管理</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="31" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="32" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="33" name="limit" />编辑</label>
+                                <label>
+                                    <input type="checkbox" value="34" name="limit" />删除</label>
+                                <label>
+                                    <input type="checkbox" value="35" name="limit" />导入</label>
+                                <label>
+                                    <input type="checkbox" value="36" name="limit" />角色</label>
+                                <label>
+                                    <input type="checkbox" value="37" name="limit" />用户统计</label>
+                                <br />
+                                <b>4、课程管理</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="41" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="42" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="43" name="limit" />编辑</label>
+                                <label>
+                                    <input type="checkbox" value="44" name="limit" />删除</label>
+                                <label>
+                                    <input type="checkbox" value="45" name="limit" />课程分类</label>
+                                <label>
+                                    <input type="checkbox" value="46" name="limit" />学习记录</label>
+                                <label>
+                                    <input type="checkbox" value="47" name="limit" />课程评价</label>
+                                <label>
+                                    <input type="checkbox" value="48" name="limit" />测试记录</label>
+                                <label>
+                                    <input type="checkbox" value="49" name="limit" />课程统计</label>
+                                <br />
+                                <b>5、培训活动</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="51" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="52" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="53" name="limit" />编辑</label>
+                                <label>
+                                    <input type="checkbox" value="54" name="limit" />删除</label>
+                                <label>
+                                    <input type="checkbox" value="55" name="limit" />活动类型</label>
+                                <label>
+                                    <input type="checkbox" value="56" name="limit" />报名记录</label>
+                                <br />
+                                <b>6、设计云库</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="61" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="62" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="63" name="limit" />编辑</label>
+                                <label>
+                                    <input type="checkbox" value="64" name="limit" />删除</label>
+                                <br />
+                                <b>7、问卷调查</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="71" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="72" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="73" name="limit" />编辑</label>
+                                <label>
+                                    <input type="checkbox" value="74" name="limit" />删除</label>
+                                <label>
+                                    <input type="checkbox" value="75" name="limit" />调查记录</label>
+                                <br />
+                                <b>8、作业本通知</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="81" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="82" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="83" name="limit" />编辑</label>
+                                <label>
+                                    <input type="checkbox" value="84" name="limit" />删除</label>
+                                <br />
+                                <b>9、微信模板消息</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="91" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="92" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="93" name="limit" />详细</label>
+                                <label>
+                                    <input type="checkbox" value="94" name="limit" />删除</label>
+                                <br />
+                                <b>10、文章管理</b> &nbsp;
+                                <label>
+                                    <input type="checkbox" value="101" name="limit" />新增</label>
+                                <label>
+                                    <input type="checkbox" value="102" name="limit" />列表</label>
+                                <label>
+                                    <input type="checkbox" value="103" name="limit" />编辑</label>
+                                <label>
+                                    <input type="checkbox" value="104" name="limit" />删除</label>
+                                <br />
+                            </p>
+                            <input type="hidden" value="@Model.Limits" name="limits"/>
+                            <label>
+                                <input type="checkbox" value="" name="selectAll" />全选</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+    <script>
+
+        var $all = $("[name='selectAll']");
+        var $limits = $("[name='limit']");
+        var $select_limits = $("[name='limits']");
+        var $btn_submit = $("#btnSubmit");
+        var groupid = parseInt('@(Model.ID)');
+        $(function () {
+            if (groupid == 1) {
+                //$limits.attr("disabled", "disabled");
+                //$all.attr("disabled", "disabled");
+                //$all.attr("checked", "checked");
+            }
+            $all.click(function () {
+                if ($all.prop('checked')) {
+                    $limits.prop('checked', true);
+                }
+                else {
+                    $limits.prop('checked', false);
+                }
+            });
+
+            $btn_submit.click(function () {
+                var limits = "";
+                $("[name='limit']:checked").each(function () {
+                    limits += $(this).val() + ",";
+                });
+                if (limits == "") {
+                    alert("请选择分配权限！");
+                    return false;
+                } else {
+                    limits = limits.substring(0, limits.length - 1);
+                }
+                $select_limits.val(limits);
+                //return false;
+            });
+            InitLimit();
+        });
+        function InitLimit() {
+            var limits_str = $select_limits.val();
+            var limits_arr = limits_str.split(',');
+            for (var i = 0; i < limits_arr.length; i++) {
+                if (limits_arr[i] != "") {
+                    $("[value='" + limits_arr[i] + "']").prop('checked', true);
+                }
+            }
+        }
+    </script>
+</div>

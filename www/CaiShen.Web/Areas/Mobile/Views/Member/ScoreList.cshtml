@@ -1,0 +1,85 @@
+﻿@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository;
+@using PagedList.Mvc;
+
+@model PagedList.PagedList<Pannet.Models.UserScoreHistory>
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "我的积分";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+}
+
+<!--主区域-->
+<div id="container">
+    <div class="base">
+        @{
+            Html.RenderPartial("_PartialMemberLeft");
+        }
+        <div class="mc_right">
+            <div class="m_location">
+                当前位置：<a href="/Member">会员中心</a>»&nbsp;我的积分
+            </div>
+            <ul class="home_user">
+                <li class="account">
+                    <div>
+                        <i class="iconfont icon-yue"></i>账户积分<span class="red"></span><em class="money">@LoginUser.U_Score</em>
+                        <a href="@Url.Action("Recharge", "Member")" class="btn_chongzhi">充值</a>
+                    </div>
+
+                </li>
+                <li class="account">
+                    <div>
+                        <i class="iconfont icon-yue lock"></i>不可用积分<span class="red"></span><em class="money">@LoginUser.U_LockScore</em>
+                    </div>
+                </li>
+            </ul>
+            <dl class="amount_history">
+                <dt>积分收支记录</dt>
+                <dd>
+                    <table class="table">
+                        <tr>
+                            <th>创建时间</th>
+                            <th>说明</th>
+                            <th>事项</th>
+                            <th>收支积分</th>
+                            <th>剩余积分</th>
+                            <th>变动不可用积分</th>
+                            <th>剩余不可用积分</th>
+                            <th>操作</th>
+                        </tr>
+                        @if (Model.Count() > 0)
+                        {
+                            foreach (var item in Model)
+                            {
+                            <tr>
+                                <td>@(item.Time.ToString("yyyy.MM.dd HH:mm:ss"))</td>
+                                <td>@item.Thing</td>
+                                <td>@item.Category</td>
+                                <td>@Html.Raw(item.Type == 1 ? "<span class='red'>+" + item.Score + "</span>" : "<span class='green'>-" + item.Score + "</span>")</td>
+                                <td>@item.TotalScore</td>
+                                <td>@Html.Raw(item.Type == 1 ? "<span class='red'>+" + item.LockScore + "</span>" : "<span class='green'>-" + item.LockScore + "</span>")</td>
+                                <td>@item.LockTotalScore</td>
+                                <td class="dr_option">
+                                    <a class="adel" href="@Url.Action("UserScoreHistoryDelete", "Member", new { ID = item.ID })" data-confirm="delete" title="删除"><i class="iconfont icon-iconfontshanchu"></i></a>
+                                </td>
+                            </tr>
+                            }
+                            <tr>
+                                <td colspan="20" align="right">@Html.PagedListPager(Model, page => Url.Action("ScoreList", new { page }))</td>
+                            </tr>
+                        }
+
+                    </table>
+                </dd>
+            </dl>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+</div>
+<!--/container-->

@@ -1,0 +1,77 @@
+﻿@model Pannet.Models.Goods
+
+@using Pannet.Models
+@using Pannet.Utility
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = Model.G_Name;
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+}
+
+<!--主区域-->
+<div id="container">
+    <div id="pro_detail">
+        <div class="pro_detail_img">
+            @if (ViewBag.Photos != null)
+            {
+                List<GoodsPhoto> goodsPhotos = ViewBag.Photos;
+                var photoFirst = goodsPhotos.OrderByDescending(m => m.GP_IsFirst).ThenByDescending(m => m.GP_Sort).FirstOrDefault();
+                if (photoFirst == null)
+                {
+                    photoFirst = new GoodsPhoto();
+                }
+                <div id="thumblist">
+                    <div class="bd">
+                        @foreach (GoodsPhoto item in goodsPhotos)
+                        {
+                            <ul>
+                                <li><a href="javascript:void(0);">
+                                    <img src="@(item.GP_Image)"></a></li>
+                            </ul>
+                        }
+                    </div>
+                    <div class="hd">
+                        <ul>
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!--产品属性-->
+        <div class="pro_detail_info">
+            <h1 class="pro_title">@Model.G_Name</h1>
+            <div class="pro_profile">@Model.G_Abstract</div>
+        </div>
+
+        <!--产品描述-->
+        <div id="pro_description">
+            <div class="base">
+                <div class="pro_tabs">
+                    <ul>
+                        <li class="active">产品参数</li>
+                        <!-- <li>累积评价</li> -->
+                    </ul>
+                </div>
+
+                <div class="pro_content">
+                    <!--描述-->
+                    <div class="pro_content_tab">
+                        @Html.Raw(UtilityClass.ImgAddDomain(Model.G_Desc, WebSiteConfig.ImgDomain))
+                    </div>
+                    <!--/描述-->
+                    <!--评价-->
+                    <div class="pro_content_tab" style="display: none;">
+                    </div>
+                    <!--/评价-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/container-->

@@ -1,0 +1,116 @@
+﻿@model Pannet.Models.UserLevel
+@{
+    ViewBag.Title = "用户等级管理";
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">用户等级信息</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null)
+                {
+                    <span>编辑用户等级</span>
+                }
+                else
+                {
+                    <span>新增用户等级</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("UserLevelAdd", "UserLevel", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="150"><font color="red">*</font>@Html.LabelFor(m => m.Level_Name)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Level_Name, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Level_Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Level_Desc)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Level_Desc, new { @class = "form-control", style = "width:300px;" })
+                        @Html.ValidationMessageFor(m => m.Level_Desc)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Level_Discount_Percent)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Level_Discount_Percent, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Level_Discount_Percent) （取值范围：0~100）
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Level_Is_Enable)： </td>
+                    <td>
+                        @*@Html.CheckBoxFor(m => m.Level_Is_Enable == 1 , new { @class = "input-text" })*@
+                        <select name="Level_Is_Enable" id="Level_Is_Enable">
+                            @foreach (var item in Pannet.DAL.DataConfig.LevelIsEnable)
+                            {
+                                <option  @(Model != null && Model.Level_Is_Enable.ToString() == item.Value ? "selected='selected'" : "") value="@item.Value">@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Level_Is_Enable)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Level_Is_Special)： </td>
+                    <td>
+                        <select name="Level_Is_Special" id="Level_Is_Special">
+                            @foreach (var item in Pannet.DAL.DataConfig.LevelIsSpecial)
+                            {
+                                <option  @(Model != null && Model.Level_Is_Special.ToString() == item.Value ? "selected='selected'" : "") value="@item.Value">@item.Name</option>
+                            }
+                        </select>
+                        @*@Html.CheckBoxFor(m => m.Level_Is_Special == 1, new { @class = "input-text" })*@
+                        @Html.ValidationMessageFor(m => m.Level_Is_Special) (特殊等级：不随着充值多少变动)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Level_Money_Begin)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Level_Money_Begin, new { @class = "input-text" }) 元
+                        @Html.ValidationMessageFor(m => m.Level_Money_Begin) (一次性充值大于等于“充值金额下限”，并小于等于“充值金额上限”，自动升级为该级别)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Level_Money_End)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Level_Money_End, new { @class = "input-text" }) 元
+                        @Html.ValidationMessageFor(m => m.Level_Money_End)
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Level_Partner_Rebate_Percent)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Level_Partner_Rebate_Percent, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Level_Partner_Rebate_Percent) （取值范围：0~100）
+                    </td>
+                </tr>
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.Level_Shop_Rebate_Percent)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Level_Shop_Rebate_Percent, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Level_Shop_Rebate_Percent) （取值范围：0~100）
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

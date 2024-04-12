@@ -1,0 +1,288 @@
+﻿@using Pannet.Models;
+@using Pannet.DAL.Repository;
+@using PagedList.Mvc
+
+@model PagedList.PagedList<Pannet.Models.CartVModel>
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "购物车";
+}
+<!--主区域-->
+<div id="container">
+    <dl id="cart" class="base">
+        @*    <dt>
+            <h3>全部商品<em>(@cartCount)</em></h3>
+        </dt>*@
+        <dd class="cart_list">
+            @if (Model != null && Model.Count > 0)
+            {
+                <table class="cart_table">
+                    @foreach (CartVModel item in Model)
+                    {
+                        <tr>
+                            <td class="td_checkbox">
+                                <label>
+                                    <input type="checkbox" name="ckbitem" value="@item.Cart.ID" />
+                                    <i class="iconfont icon-circle"></i>
+                                    <i class="iconfont icon-gouxuan"></i>
+                                </label>
+                            </td>
+                            <td class="cart_product_img">
+                                <a href="@Url.Action("Index", "Goods", new { ID = item.Cart.GoodsID })" target="_blank">
+                                    <img src="@(SiteService.GetImgUrl(item.PhotoUrl))" width="85"/>
+                                </a>
+                            </td>
+                            <td class="cart_product_info">
+                                <span class="cart_product_name">@item.Title</span>
+                                <span class="cart_property">@item.Cart.PropertiesName</span>
+                                <span class="cart_unitprice">￥<i>@(SiteService.GetPrice(item.Cart.CartTotalPrice / item.Cart.Count))</i></span>
+                                <span class="cart_count_box">
+                                    <button class="cart_btn_reduce" onclick="changenum('@item.Cart.ID',-1)">-</button>
+                                    <input name="cart_count" id="goods_number_@item.Cart.ID" type="text" class="cart_count" value="@item.Cart.Count" />
+                                    <button class="cart_btn_plus"onclick="changenum('@item.Cart.ID',1)">+</button>
+                                </span>
+                                <a href="@Url.Action("Delete", "Cart", new { ID = item.Cart.ID })" class="btn_del">×</a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+            else
+            {
+                <div class="nothing">还未选购商品.</div>
+            }
+
+            <div id="page_nav" style="display: none;">
+                @Html.PagedListPager(Model, page => Url.Action("Index", new { page }))
+                @*<ul class="pagination">
+                <li><a href="?mer=3&amp;pt=0&amp;pf=5&amp;range=&amp;key=&amp;so=new&amp;page=1">首页</a></li>
+                <li><a href="?mer=3&amp;pt=0&amp;pf=5&amp;range=&amp;key=&amp;so=new&amp;page=1">上一页</a></li>
+                <li><a class="active">1</a></li>
+                <li><a href="?mer=3&amp;pt=0&amp;pf=5&amp;range=&amp;key=&amp;so=new&amp;page=1">下一页</a></li>
+                <li><a href="?mer=3&amp;pt=0&amp;pf=5&amp;range=&amp;key=&amp;so=new&amp;page=1">尾页</a></li>
+            </ul>*@
+            </div>
+        </dd>
+        <dd class="cart_operate_line">
+            <div class="batch_operate fl">
+                <label>
+                    <input type="checkbox" name="ckbitemall" />
+                    <i class="iconfont icon-circle"></i>
+                    <i class="iconfont icon-gouxuan"></i>
+                    全选
+                </label>
+                @*<a href="javascript:void(0)" class="btn_delte_batch">删除</a>*@
+                @*<a href="#">加入收藏</a>*@
+            </div>
+            <button class="btn_pay fr">结算</button>
+            <div class="total_line fr">
+                <span class="total_count" style="display: none;">已选<i class="count">0</i>件</span>
+                <span class="total_price">合计：<span>￥</span><i class="money">0</i> </span>
+            </div>
+            <div class="clear"></div>
+        </dd>
+    </dl>
+</div>
+<!--/container-->
+
+@section FootJs{
+
+    <script>
+        var $ckbAll = $("[name='ckbitemall']");
+        var $ckbitem = $("[name='ckbitem']");
+        $(function () {
+            $(".btn_pay ").click(function () {
+
+                var ids = GetSelectItemIds();
+
+                if (ids == "") {
+                    alert("请选择购买商品！");
+                    return;
+                }
+                location.href = '@(Url.Action("Index", "Order") + "?cart=")' + ids;
+
+            });
+
+            //全选
+            $ckbAll.click(function () {
+                if ($(this).is(':checked')) {
+                    $ckbitem.attr("checked", "checked")
+                    $ckbAll.attr("checked", "checked")
+                    $(".td_checkbox").addClass("on");
+                    $ckbAll.parents(".batch_operate").addClass("on");
+
+                }
+                else {
+                    $ckbitem.removeAttr("checked")
+                    $ckbAll.removeAttr("checked")
+                    $(".td_checkbox").removeClass("on");
+                    $ckbAll.parents(".batch_operate").removeClass("on");
+                }
+                GetPriceAndShow();
+            });
+
+            $ckbitem.click(function () {
+                var $ckbitem = $(this);
+                if ($ckbitem.is(':checked')) {
+                    $ckbitem.parents(".td_checkbox").addClass("on");
+                }
+                else {
+                    $ckbitem.parents(".td_checkbox").removeClass("on");
+                }
+                GetPriceAndShow();
+            });
+
+            //加入收藏
+            $(".btn_joinfav ").click(function () {
+
+                AddFavorite($(this));
+
+            });
+
+            //批量删除
+            $(".btn_delte_batch ").click(function () {
+
+                var ids = GetSelectItemIds();
+
+                if (ids == "") {
+                    alert("请选择操作项！");
+                    return;
+                }
+                //console.log("ids:" + ids);
+                DeleteCartBatch(ids);
+            });
+        });
+
+        //改变数量
+        function changenum(rec_id, diff) {
+            var num = parseInt(document.getElementById('goods_number_' + rec_id).value);
+            var goods_number = num + Number(diff);
+            if (goods_number <= 1) {
+                goods_number = 1;
+            }
+            document.getElementById('goods_number_' + rec_id).value = goods_number;//更新数量
+            change_goods_number(rec_id, goods_number);
+        }
+        function change_goods_number(rec_id, goods_number) {
+            $.ajax({
+                url: "@Url.Action("UpdateCount", "Cart")",
+                type: "POST",
+                async: true,
+                cache: false,
+                data: { "id": rec_id, "count": goods_number },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")");
+                    if (json_rs == null || json_rs.status == null) {//返回错误
+                        //showAlert("warning", "系统错误！", null);
+                        // alert("系统错误！");
+                    }
+                    else if (json_rs.status == "success") {
+                        //alert(unescape(decodeURI(json_rs.body))+"");
+                        //alert("加入成功！");
+                        GetPriceAndShow();
+                        if (callback != null)
+                            callback(json_rs.cartid);
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                },
+                error: function (xmlhttp) {
+                    //alert("系统错误！<br/>" + xmlhttp.responseText);
+                }
+            });
+        }
+
+        //计算价格
+        function GetPriceAndShow() {
+            var totalcount = 0;//选中
+            var totalcountAll = 0;//购物车所有
+            var totalprice = 0;
+            $(".cart_table .cart_product_info").each(function () {
+                var $item = $(this);
+                if ($item.siblings("td.td_checkbox").find("[name='ckbitem']").is(':checked')) {
+                    totalcount += parseInt($item.find(".cart_count").val());
+                    totalprice += parseFloat($item.find(".cart_unitprice>i").text()) * parseInt($item.find(".cart_count").val());
+                }
+                totalcountAll += parseInt($item.find(".cart_count").val());
+            });
+            $(".total_count").find(".count").text(totalcount);
+            $(".total_price").find(".money").text(parseFloat(totalprice).toFixed(2));
+            $("#footer .icon-gouwuche em").text(totalcountAll);
+        }
+
+
+        function GetSelectItemIds() {
+            var ids = "";
+            $("[name='ckbitem']:checked").each(function () {
+                ids = ids + $(this).val() + ",";
+            });
+            return ids;
+        }
+
+        function AddFavorite($obj, callback) {
+            $.ajax({
+                url: "@Url.Action("Add", "Favorite")",
+                type: "GET",
+                async: true,
+                cache: false,
+                data: { "GoodsID": $obj.data("gid"), "ShopID": $obj.data("sid") },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")");
+                    if (json_rs == null || json_rs.status == null) {//返回错误
+                        //showAlert("warning", "系统错误！", null);
+                        // alert("系统错误！");
+                    }
+                    else if (json_rs.status == "success") {
+                        //alert(unescape(decodeURI(json_rs.body))+"");
+                        //alert("加入成功！");
+                        alert(json_rs.msg);
+
+                        if (callback != null)
+                            callback();
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                },
+                error: function (xmlhttp) {
+                    //alert("系统错误！<br/>" + xmlhttp.responseText);
+                }
+            });
+        }
+
+        function DeleteCartBatch(ids) {
+            location.href = "@(Url.Action("DeleteBatch", "Cart") + "?ckbitem=")" + ids;
+           @* $.ajax({
+                url: "@Url.Action("DeleteBatch", "Cart")",
+                type: "POST",
+                async: true,
+                cache: false,
+                data: { "ckbitem": ids },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")");
+                    if (json_rs == null || json_rs.status == null) {//返回错误
+                        //showAlert("warning", "系统错误！", null);
+                        // alert("系统错误！");
+                    }
+                    else if (json_rs.status == "success") {
+                        //alert(unescape(decodeURI(json_rs.body))+"");
+                        //alert("加入成功！");
+
+                        alert(json_rs.msg);
+
+                        if (callback != null)
+                            callback();
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                },
+                error: function (xmlhttp) {
+                    //alert("系统错误！<br/>" + xmlhttp.responseText);
+                }
+            });*@
+        }
+    </script>
+}

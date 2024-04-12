@@ -1,0 +1,115 @@
+﻿@model Pannet.Models.GoodsType
+@using Pannet.DAL
+@using Pannet.Utility
+
+@{
+    ViewBag.Title = "商品类型";
+    List<Pannet.Models.GoodsType> listParentType = ViewBag.GoodsTypeParents as List<Pannet.Models.GoodsType>;
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">商品类型</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑信息 </span>
+                }
+                else
+                {
+                    <span>新增信息</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("GoodsTypeAdd", "GoodsType", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120"><font color="red">*</font>@Html.LabelFor(m => m.GT_Name)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GT_Name, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.GT_Name)
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td>@Html.LabelFor(m => m.GT_ParentID)： </td>
+                    <td>
+                        <select name="GT_ParentID">
+                            <option value="0">做为一级类型</option>
+                            @{
+        if (listParentType != null && listParentType.Count() > 0)
+        {
+            foreach (var item in listParentType)
+            {
+                if (Model != null && Model.GT_ParentID == item.ID)
+                { 
+                                <option value="@item.ID" selected="selected">@item.GT_Name</option>
+                }
+                else
+                {
+                                <option value="@item.ID">@item.GT_Name</option>
+                }
+            }
+        }
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.GT_ParentID)
+                    </td>
+                </tr>
+
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.GT_IsRecommend)： </td>
+                    <td>
+                        @* <select name="GT_IsRecommend" id="GT_IsRecommend">
+                            @foreach (var item in DataConfig.IsRecommendValues)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.GT_IsRecommend.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>*@
+                        @Html.TextBoxFor(m => m.GT_IsRecommend, new { @class = "input-text", Value = "1" })
+                        @Html.ValidationMessageFor(m => m.GT_IsRecommend)
+                    </td>
+                </tr>
+
+                <tr style="display: none;">
+                    <td>@Html.LabelFor(m => m.GT_IsEnable)： </td>
+                    <td>
+                        @*<select name="GT_IsEnable" id="GT_IsEnable">
+                            @foreach (var item in DataConfig.IsEnableValues)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.GT_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>*@
+                        @Html.TextBoxFor(m => m.GT_IsEnable, new { @class = "input-text", Value = "1" })
+
+                        @Html.ValidationMessageFor(m => m.GT_IsEnable)
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.GT_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.GT_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.GT_Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

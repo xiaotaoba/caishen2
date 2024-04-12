@@ -1,0 +1,156 @@
+﻿@model Pannet.Models.Order
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "支付页面";
+    List<Order> orderList = ViewBag.Orders;
+    User loginUserModel = ViewBag.LoginUser;
+
+    string tips = "请及时完成支付！";
+    string pay_amount_title = "支付金额";
+    decimal pay_amount = Model.O_PayAmount;
+
+    if (Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.货到付款))
+    {
+        tips = "您的订单已生成，收货后请及时完成支付！";
+        pay_amount = 0;
+    }
+    else if (Model.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.待付款) && Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.预付定金))
+    {
+        tips = "您的订单已生成，请及时支付定金！";
+        pay_amount_title = "支付定金";
+    }
+    else if (Model.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.已支付定金) && Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.预付定金))
+    {
+        tips = "如您的货物已签收，请及时支付尾款！";
+        pay_amount_title = "支付尾款";
+        pay_amount = Model.O_RestPayAmount;
+    }
+    else
+    {
+        tips = "您的订单已生成，请及时完成支付！";
+    }
+    
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div id="location" class="base">
+        当前位置：<a href="/">首页</a> > 订单支付
+    </div>
+
+    <div id="pay" class="base">
+        <dl class="pay_order_success">
+            <dt>订单已生成</dt>
+            <dd>
+                <div class="tips">
+                    <i class="iconfont icon-dizhiguanliyigouxuan"></i>
+                    <span>@tips</span>
+                </div>
+                <table border="1">
+                    <tr class="tr_th">
+                        <td>您的订单号</td>
+                        <td>配送方式</td>
+                        <td>送货时间</td>
+                        <td>应付金额</td>
+                        <td>支付方式</td>
+                    </tr>
+                    @foreach (var item in orderList)
+                    {
+                        <tr>
+                            <td>@item.O_OrderNo</td>
+                            <td>@(DataConfig.OrderShippingWay.Find(m => m.Value == item.O_ShippingWay.ToString()).Name)</td>
+                            <td>@(DataConfig.OrderShippingTime.Find(m => m.Value == item.O_ShippingTime.ToString()).Name)</td>
+                            <td><span class="red">@(SiteService.GetPrice(item.O_PayAmount))</span>元</td>
+                            <td>@(DataConfig.OrderPayWay.Find(m => m.Value == item.O_PayWay.ToString()).Name)</td>
+                        </tr>
+                    }
+                </table>
+            </dd>
+        </dl>
+        @using (Html.BeginForm("Pay", "Pay", FormMethod.Post))
+        {
+
+            if (Model.O_PayWay != Convert.ToInt32(DataConfig.OrderPayWayEnum.货到付款))
+            {
+            <dl class="pay_way">
+                <dt>支付方式
+                </dt>
+                <dd>
+                    <ul>
+
+                        <li class="col_tit">
+                            <label style="font-size: 14px;">在线支付：</label>
+                        </li>
+                        <li>
+                            <div class="pay_item pay_alipay @Html.Raw(Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.在线支付) ? "active" : "")">
+                                <label>
+                                    <input type="radio" name="payway" @Html.Raw(Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.在线支付) ? "checked='checked'" : "") value="alipay" /><i class="iconfont icon-zhifubao"></i> 支付宝</label>
+                            </div>
+                            <div class="pay_item pay_weixin">
+                                <label>
+                                    <input type="radio" name="payway" value="wxpay" /><i class="iconfont icon-weixinzhifu"></i> 微信支付</label>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul>
+
+                        <li class="col_tit">
+                            <label style="font-size: 14px;">余额支付：</label>
+                        </li>
+                        <li class="pay_item_yu">
+                            <div class="pay_item pay_yinxia @Html.Raw(Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.账户余额) ? "active" : "")">
+                                <label>
+                                    <input type="radio" name="payway" value="yinxia"  @Html.Raw(Model.O_PayWay == Convert.ToInt32(DataConfig.OrderPayWayEnum.账户余额) ? "checked='checked'" : "") />账户余额</label>
+                            </div>
+                            <span>可用余额：<i class="red">￥@(loginUserModel.U_Amount)</i></span>
+                        </li>
+                    </ul>
+                    <ul class="pay_item_amount">
+                        <li class="col_tit">
+                            <label>@pay_amount_title：</label>
+                        </li>
+                        <li>
+                            <span class="money">@pay_amount</span> @("元")
+                            <input type="hidden" value="@pay_amount" name="pay_amount" />
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="col_tit">
+                            <label>&nbsp;</label>
+                        </li>
+                        <li>
+                            <input type="hidden" value="@Model.O_OrderNo" name="order_no" />
+                            <button class="btn_pay">立即支付</button>
+                        </li>
+                    </ul>
+                </dd>
+            </dl>
+            }
+        }
+    </div>
+
+</div>
+<!--/container-->
+
+
+@section FootJs{
+
+    <script>
+        $(function () {
+            $(".pay_item").click(function () {
+                $(this).addClass("active");
+                //$(this).siblings().removeClass("active");
+                $(".pay_item").not($(this)).removeClass("active");
+            });
+            // $(".btn_pay ").click(function () {
+            //      location.href = "@Url.Action("Success", "Pay")";
+            //  });
+        });
+    </script>
+}

@@ -1,0 +1,178 @@
+﻿@model Pannet.Models.Goods
+
+@using Pannet.Models
+@using Pannet.Utility
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = Model.G_Name;
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <style>
+        #container { background-color: #eee; }
+    </style>
+}
+
+<!--主区域-->
+<div id="container">
+    <div id="detail_nav">
+        <ul>
+             @if (ViewBag.Catagorys != null)
+            {
+                 List<GoodsCategory> list  =ViewBag.Catagorys;
+                 foreach (GoodsCategory item in list.Take(6).ToList())
+                {
+                 <li><a href="@Url.Action("Index","Health", new { cat = item.ID })">@Html.Raw(item.GC_Name.Replace("康复","<br>康复"))</a></li>
+                }
+            }
+        </ul>
+    </div>
+
+    <!--图片-->
+    <div class="kf_banner">
+        <img src="@(Model.G_Image)" />
+    </div>
+
+    <!--价格房型栏目-->
+    <div class="kf_detail_one">
+        <dl>
+            <dt>@(Model.G_Name)<br />
+                <em>@(Model.G_Abstract)@(Model.G_Name)</em>
+            </dt>
+            <dd>
+                <span class="price">￥@(Model.G_Price)</span>
+                <span><i class="iconfont icon-time1"></i>@(Model.G_ServiceTime)</span>
+                <span><i class="iconfont icon-gouxuan"></i>@Model.G_SaleCount 人浏览</span>
+            </dd>
+            <dd>
+                <span><i class="iconfont icon-gouxuan"></i>五星服务</span>
+                <span><i class="iconfont icon-gouxuan"></i>品质保障</span>
+                <span><i class="iconfont icon-gouxuan"></i>快速接单</span>
+            </dd>
+        </dl>
+    </div>
+
+    <!--房间简介-->
+    <dl class="kf_detail_three">
+        <dt>服务简介
+        </dt>
+        <dd>
+            @Html.Raw(Model.G_Desc)
+        </dd>
+    </dl>
+
+
+    <div class="pro_list_4 pro_list_list">
+        <h1>案例见证</h1>
+        <div class="">
+            <ul class="page">
+                @if (ViewBag.Cases != null)
+                {
+                    List<Article> newsList = ViewBag.Cases;
+                    foreach (Article item in newsList)
+                    {
+                    <li>
+                        <div class="img" onclick="location='@(item.Art_IsUrl == 1 ? item.Art_Url : "/Mobile/Article/Detail/" + item.ID)'">
+                            <img src="@item.Art_Image">
+                        </div>
+                        <p class="pro_info"><span onclick="location='@(item.Art_IsUrl == 1 ? item.Art_Url : "/Mobile/Article/Detail/" + item.ID)'">@item.Art_Title</span></p>
+                    </li>
+                    }
+                }
+
+
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="kf_news">
+        <div class="new_list">
+            <h1>康复资讯</h1>
+            @if (ViewBag.News != null)
+            {
+                List<Article> newsList = ViewBag.News;
+                foreach (Article item in newsList)
+                {
+                <dl>
+                    <a href="@(item.Art_IsUrl == 1 ? item.Art_Url : "/Mobile/Article/Detail/" + item.ID)">
+                        <dt>
+                            <img src="@item.Art_Image" alt="@item.Art_Title"></dt>
+                        <dd>
+                            <h3>@item.Art_Title</h3>
+                            <p>
+                                @Html.Raw(string.IsNullOrEmpty(item.Art_Description) ? UtilityClass.Left(UtilityClass.HtmlFilter(item.Art_Content), 50) : item.Art_Description)
+                            </p>
+                            <small>@item.Art_CreateTime.ToString("yyyy-MM-dd")</small>
+                        </dd>
+                    </a>
+                </dl>
+                }
+            }
+        </div>
+    </div>
+
+
+    @* <div id="kf_detail">
+        <div class="kf_detail_img">
+            @if (ViewBag.Photos != null)
+            {
+                List<GoodsPhoto> goodsPhotos = ViewBag.Photos;
+                var photoFirst = goodsPhotos.OrderByDescending(m => m.GP_IsFirst).ThenByDescending(m => m.GP_Sort).FirstOrDefault();
+                if (photoFirst == null)
+                {
+                    photoFirst = new GoodsPhoto();
+                }
+                <div id="thumblist">
+                    <div class="bd">
+                        @foreach (GoodsPhoto item in goodsPhotos)
+                        {
+                            <ul>
+                                <li><a href="javascript:void(0);">
+                                    <img src="@(item.GP_Image)"></a></li>
+                            </ul>
+                        }
+                    </div>
+                    <div class="hd">
+                        <ul>
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!--产品属性-->
+        <div class="kf_detail_info">
+            <h1 class="kf_title">@Model.G_Name</h1>
+            <div class="kf_profile">@Model.G_Abstract</div>
+        </div>
+
+        <!--产品描述-->
+        <div id="kf_description">
+            <div class="base">
+                <div class="kf_tabs">
+                    <ul>
+                        <li class="active">产品参数</li>
+                        <!-- <li>累积评价</li> -->
+                    </ul>
+                </div>
+
+                <div class="kf_content">
+                    <!--描述-->
+                    <div class="kf_content_tab">
+                        @Html.Raw(UtilityClass.ImgAddDomain(Model.G_Desc, WebSiteConfig.ImgDomain))
+                    </div>
+                    <!--/描述-->
+                    <!--评价-->
+                    <div class="kf_content_tab" style="display: none;">
+                    </div>
+                    <!--/评价-->
+                </div>
+            </div>
+        </div>
+    </div>*@
+</div>
+<!--/container-->

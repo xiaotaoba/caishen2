@@ -1,0 +1,49 @@
+﻿@model PagedList.PagedList<Pannet.Models.AdvertisementRecordVModel>
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.Utility
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "培训活动报名记录";
+    User LoginUser = ViewBag.LoginUser;
+}
+
+<div class="box">
+    <div class="bsb_box">
+        <div class="bm_list">
+            <ul>
+                @if (Model != null && Model.Count > 0)
+                {
+                    int i = 1;
+                    foreach (var item in Model)
+                    {
+                    <li>
+                        <div class="bm_number">@i</div>
+                        <div class="bm_info">
+                            <dl>
+                                <dd>
+                                    <div class="bm_title">
+                                        @(item.Title)<br />
+                                        <span class="time">报名时间：@(item.AdvertisementRecord.ADR_CreateTime)</span>
+                                    </div>
+                                    <div class="bm_state @(item.AdvertisementRecord.ADR_State==1?"green":item.AdvertisementRecord.ADR_State==2?"red":"orange")">@(DataConfig.AdvertisementRecordStatus.Find(m => m.Value == item.AdvertisementRecord.ADR_State.ToString()).Name)</div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </li> 
+                        i++;
+                    }
+                }
+                else
+                {
+                    <li>
+                        <div class="nothing">暂无记录</div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

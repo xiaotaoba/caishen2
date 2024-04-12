@@ -1,0 +1,525 @@
+﻿@model PagedList.PagedList<Pannet.Models.DesignWork>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+@using Senparc.Weixin.MP.Helpers
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "设计云库";
+    User LoginUser = ViewBag.LoginUser;
+    List<Tag> DesignTypes = ViewBag.DesignTypes;
+    List<Tag> DesignStyles = ViewBag.DesignStyles;
+    List<Tag> DesignTags = ViewBag.DesignTags;
+    JsSdkUiPackage jssdkUiPackage = ViewBag.jssdkUiPackage;
+    List<Area> provinceList = ViewBag.Provinces;
+    List<Area> cityList = ViewBag.Citys;
+    string defaultProvince = "浙江省";
+    string defaultCity = "杭州市";
+    int provinceid = ViewBag.province;
+    int cityid = ViewBag.city;
+    if (provinceList != null && provinceList.Count() > 0 && provinceid != 0)
+    {
+        defaultProvince = provinceList.Find(m => m.ID == provinceid).Area_Name;
+    }
+    if (cityList != null && cityList.Count() > 0 && cityid != 0)
+    {
+        defaultCity = cityList.Find(m => m.ID == cityid).Area_Name;
+    }
+}
+@*<link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />*@
+@section Style{
+    <style>
+        .dn_conhoose dl { margin-bottom: 2px; }
+        .dn_conhoose dl.nomargin dd { margin-top: 0; }
+        .dn_conhoose .dn_conC_th { float: none; width: 90%; }
+        .dn_conhoose .dn_conC_th select { padding: 0 10px; border-radius: 6px; height: 65px; line-height: 65px; }
+        .dn_conhoose .dn_conC_th select:last-child { margin-right: 0; }
+        .dn_conhoose dd:first-child {line-height:40px;font-size:24px; }
+    </style>
+}
+<div class="box">
+    @{
+        ViewBag.TopAction = "design";
+        Html.RenderPartial("_TopNavSQ");
+    }
+    <div class="bsb_box">
+        <div class="dn_location" style="display:none;">
+            <dl>
+                <dt><i class="icon iconfont icon-dingwei"></i></dt>
+                <dd>当前定位：<span class="cur_location">@(defaultProvince)--@(defaultCity)</span></dd>
+            </dl>
+        </div>
+        <div class="dn_content">
+            <div class="dn_conhoose">
+                <dl class="nomargin" style="display:none;">
+                    @*<dd>选择其他城市</dd>*@
+                    <dd>
+                        <div class="dn_conC_th">
+                            <select name="province" id="province">
+                                <option value="0">请选择省份</option>
+                                @if (ViewBag.Provinces != null)
+                                {
+                                    foreach (var item in ViewBag.Provinces)
+                                    {
+                                    <option @(ViewBag.province == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                    }
+                                }
+                            </select>
+                            <select name="city" id="city">
+                                <option value="0">请选择城市</option>
+                                @if (ViewBag.Citys != null)
+                                {
+                                    foreach (var item in ViewBag.Citys)
+                                    {
+                                    <option @(ViewBag.city == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="dn_conC_btn" style="display: none;">
+                            <input type="button" value="确认" id="btnSelectedArea">
+                        </div>
+                        <script>
+
+                            $(function () {
+                                $("#province").change(function () {
+                                    var provinceid = $("#province").val();
+                                    if (parseInt(provinceid) != 0) {
+                                        GetCityData();
+                                        //GetRegionData();
+                                    }
+                                });
+                                $("#city").change(function () {
+                                    var cityid = $("#city").val();
+                                    //if (parseInt(cityid) != 0) {
+                                    //GetRegionData();
+                                    localStorage.setItem("use_dw", "false");//不使用定位
+                                    location.href = "/Mobile/Design?type=@(ViewBag.type)&style=@(ViewBag.style)&tag=@(ViewBag.tag)&province=" + $("#province").val() + "&city=" + $("#city").val();
+                                    //}
+                                });
+
+                                $("#btnSelectedArea").click(function () {
+                                    location.href = "/Mobile/Design?type=@(ViewBag.type)&style=@(ViewBag.style)&tag=@(ViewBag.tag)&province=" + $("#province").val() + "&city=" + $("#city").val();
+                                });
+                            });
+
+                            function ShowCityHtml(cityJson) {
+                                var cityHtml = "<option value='0'>请选择城市</option>";
+                                //alert(cityJson);
+                                $.each(cityJson, function (index, data) {
+                                    cityHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                });
+                                $("#city").html(cityHtml);
+                            }
+
+                            function GetCityData() {
+                                var provinceid = $("#province").val();
+                                if (parseInt(provinceid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": provinceid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowCityHtml(data);
+                                    }
+                                });
+                            }
+                            //function ShowRegionHtml(regionJson) {
+                            //    var regionHtml = "<option value='0'>-请选择地区-</option>";
+                            //    //alert(regionJson);
+                            //    $.each(regionJson, function (index, data) {
+                            //        regionHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                            //    });
+                            //    $("#Shop_Region").html(regionHtml);
+                            //}
+                            @* function GetRegionData() {
+                                 var cityid = $("#city").val();
+                                 if (parseInt(cityid) == 0)
+                                     return null;
+
+                                 $.ajax({
+                                     type: 'POST',
+                                     url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": cityid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowRegionHtml(data);
+                                    }
+                                });
+                            }*@
+                        </script>
+                    </dd>
+                </dl>
+                <dl class="nomargin">
+                    @*<dd>选择装修风格</dd>*@
+                    <dd>
+                        <div class="dn_conC_th">
+                            @*<ul>
+                            @foreach (var item in DesignStyles)
+                            {
+                                <li class="@Html.Raw(ViewBag.style == item.ID ? "dn_liSel" : "")"><a href="@Url.Action("Index", new { ViewBag.type, style = item.ID, ViewBag.province, ViewBag.city })">
+                                    <div class="dn_conC_black">@item.T_Name</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                            }
+                        </ul>*@
+                            <select name="style">
+                                <option  data-href="@Url.Action("Index", new { ViewBag.type, style = 0, ViewBag.province, ViewBag.city, ViewBag.tag })">选择装修风格</option>
+                                @foreach (var item in DesignStyles)
+                                {
+                                    <option @Html.Raw(ViewBag.style == item.ID ? "selected='selected'" : "") data-href="@Url.Action("Index", new { ViewBag.type, style = item.ID, ViewBag.province, ViewBag.city, ViewBag.tag })" >
+                                        @item.T_Name
+                                    </option>
+                                }
+                            </select>
+                            <select name="type">
+                                <option  data-href="@Url.Action("Index", new { ViewBag.style, type = 0, ViewBag.province, ViewBag.city, ViewBag.tag })">选择空间户型</option>
+                                @foreach (var item in DesignTypes)
+                                {
+                                    <option @Html.Raw(ViewBag.type == item.ID ? "selected='selected'" : "") data-href="@Url.Action("Index", new { ViewBag.style, type = item.ID, ViewBag.province, ViewBag.city, ViewBag.tag })" >
+                                        @item.T_Name
+                                    </option>
+                                }
+                            </select>
+
+                        </div>
+                        <script>
+
+                            $(function () {
+                                $("[name='style']").change(function () {
+                                    location.replace($("[name='style']").find("option:selected").attr("data-href"));
+                                });
+                                $("[name='type']").change(function () {
+                                    location.replace($("[name='type']").find("option:selected").attr("data-href"));
+                                });
+                            });
+                        </script>
+                    </dd>
+                </dl>
+                @* <dl>
+                    <dd>选择空间户型</dd>
+                    <dd>
+                        <ul>
+                            @foreach (var item in DesignTypes)
+                            {
+                                <li class="@Html.Raw(ViewBag.type == item.ID ? "dn_liSel" : "")"><a href="@Url.Action("Index", new { ViewBag.style, type = item.ID, ViewBag.province, ViewBag.city })">
+                                    <div class="dn_conC_black">@item.T_Name</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                            }
+                        </ul>
+                    </dd>
+                </dl>*@
+                <dl>
+                    <dd>选择产品分类</dd>
+                    <dd>
+                        <ul>
+                            @foreach (var item in DesignTags)
+                            {
+                                string tags = ViewBag.tag;
+                                List<string> tagList = tags.Split(',').ToList();
+                                bool select = tagList.Contains(item.ID.ToString());
+
+                                //如果选择则取消,否则累加
+                                if (select)
+                                {
+                                    tagList.Remove(item.ID.ToString());
+                                }
+                                else
+                                {
+                                    tagList.Add(item.ID.ToString());
+                                }
+                                <li class="@Html.Raw(select ? "dn_liSel" : "")"><a href="@Url.Action("Index", new { ViewBag.style, ViewBag.type, ViewBag.province, ViewBag.city, tag = string.Join(",", tagList) })">
+                                    <div class="dn_conC_black">@item.T_Name</div>
+                                    <div class="dn_conC_sel"><i class="icon iconfont icon-gou"></i></div>
+                                </a></li>
+                            }
+                        </ul>
+                    </dd>
+                </dl>
+            </div>
+            <div class="dn_conShow">
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                    <ul>
+                        <li class="design_img">
+                            <a href="@Url.Action("Detail", new { ID = item.ID })">
+                                <img src="@item.DW_Image" alt="@item.DW_Name" /></a></li>
+                        <li class="design_name">@item.DW_Name</li>
+                    </ul>
+                    }
+                }
+                else
+                {
+                    List<DesignWork> tjList = ViewBag.ListTJ;
+                    if (tjList != null && tjList.Count > 0)
+                    {
+                    <div style="text-align: center; padding-bottom: 20px;">未查询到相关数据，为您推荐：</div>
+                        foreach (var item in tjList)
+                        {
+                    <ul>
+                        <li class="design_img">
+                            <a href="@Url.Action("Detail", new { ID = item.ID })">
+                                <img src="@item.DW_Image" alt="@item.DW_Name" /></a></li>
+                        <li class="design_name">@item.DW_Name</li>
+                    </ul>
+                        }
+                    }
+                    else
+                    {
+                    <div class="nothing">暂无数据。</div>
+                    }
+                }
+
+            </div>
+        </div>
+        @* <div class="bsb_conMore">
+            <a href="#">
+                <p>加载更多活动</p>
+                <i class="icon iconfont icon-xiala"></i>
+            </a>
+        </div>*@
+    </div>
+</div>
+@*<script src="~/Content/js/bootstrap.min.js"></script>*@
+@if (jssdkUiPackage != null)
+{
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script>
+
+        var getLocation = {
+            ////浏览器原生获取经纬度方法  
+            //latAndLon: function (callback, error) {
+            //    var that = this;
+            //    if (navigator.geolocation) {
+            //        navigator.geolocation.getCurrentPosition(function (position) {
+            //            var latitude = position.coords.latitude;
+            //            var longitude = position.coords.longitude;
+            //            localStorage.setItem("latitude", latitude);
+            //            localStorage.setItem("longitude", longitude);
+            //            var data = {
+            //                latitude: latitude,
+            //                longitude: longitude
+            //            };
+            //            if (typeof callback == "function") {
+            //                callback(data);
+            //            }
+            //        },
+            //            function () {
+            //                if (typeof error == "function") {
+            //                    error();
+            //                }
+            //            });
+            //    } else {
+            //        if (typeof error == "function") {
+            //            error();
+            //        }
+            //    }
+            //},
+
+            //微信JS-SDK获取经纬度方法  
+            weichatLatAndLon: function (callback, error) {
+                var that = this;
+
+                //微信接口配置  
+                wx.config({
+                    debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。  
+                    appId: '@(jssdkUiPackage.AppId)', // 必填，公众号的唯一标识  
+                    timestamp: '@(jssdkUiPackage.Timestamp)', // 必填，生成签名的时间戳  
+                    nonceStr: '@(jssdkUiPackage.NonceStr)', // 必填，生成签名的随机串  
+                    signature: '@(jssdkUiPackage.Signature)',// 必填，签名，见附录1  
+                    jsApiList: ['checkJsApi',
+                        'getLocation'
+                    ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2  
+                });
+
+                //参见微信JS SDK文档：http://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html  
+                wx.ready(function () {
+
+                    wx.getLocation({
+                        success: function (res) {
+                            var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90  
+                            var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。  
+                            var speed = res.speed; // 速度，以米/每秒计  
+                            var accuracy = res.accuracy; // 位置精度  
+                            localStorage.setItem("latitude", latitude);
+                            localStorage.setItem("longitude", longitude);
+                            var data = {
+                                latitude: latitude,
+                                longitude: longitude
+                            };
+                            if (typeof callback == "function") {
+                                callback(data);
+                            }
+                        },
+                        cancel: function () {
+                            //这个地方是用户拒绝获取地理位置  
+                            if (typeof error == "function") {
+                                error();
+                            }
+                        }
+                    });
+
+                });
+                wx.error(function (res) {
+                    if (typeof error == "function") {
+                        error();
+                    }
+                });
+            },
+            //将经纬度转换成城市名和街道地址，参见百度地图接口文档：http://developer.baidu.com/map/index.php?title=webapi/guide/webservice-geocoding  
+            cityname: function (latitude, longitude, callback) {
+                $.ajax({
+                    url: 'http://api.map.baidu.com/geocoder/v2/?ak=H1sd3r9b46MSFfLfQihyEpcCH7TM4Wbm&callback=renderReverse&location=' + latitude + ',' + longitude + '&output=json&pois=1',
+                    type: "get",
+                    dataType: "jsonp",
+                    jsonp: "callback",
+                    async: true,
+                    success: function (data) {
+                        console.log(data);
+                        var province = data.result.addressComponent.province;
+                        var cityname = (data.result.addressComponent.city);
+                        var district = data.result.addressComponent.district;
+                        var street = data.result.addressComponent.street;
+                        var street_number = data.result.addressComponent.street_number;
+                        var formatted_address = data.result.formatted_address;
+                        localStorage.setItem("province", province);
+                        localStorage.setItem("cityname", cityname);
+                        localStorage.setItem("district", district);
+                        localStorage.setItem("street", street);
+                        localStorage.setItem("street_number", street_number);
+                        localStorage.setItem("formatted_address", formatted_address);
+                        //domTempe(cityname,latitude,longitude);  
+                        var data = {
+                            latitude: latitude,
+                            longitude: longitude,
+                            province: province,
+                            cityname: cityname
+                        };
+                        if (typeof callback == "function") {
+                            callback(data);
+                        }
+
+                    }
+                });
+            },
+            //设置默认城市  
+            setDefaultCity: function (callback) {
+                //alert("获取地理位置失败！");
+                //默认经纬度  
+                var latitude = "31.337882";
+                var longitude = "120.616634";
+                var cityname = "杭州";
+                localStorage.setItem("latitude", latitude);
+                localStorage.setItem("longitude", longitude);
+                localStorage.setItem("cityname", cityname);
+                localStorage.setItem("province", "浙江");
+                localStorage.setItem("district", "");
+                localStorage.setItem("street", "");
+                localStorage.setItem("street_number", "");
+                localStorage.setItem("formatted_address", "浙江杭州");
+                var data = {
+                    latitude: latitude,
+                    longitude: longitude,
+                    cityname: cityname
+                };
+                if (typeof callback == "function") {
+                    callback(data);
+                }
+            },
+            //更新地理位置  
+            refresh: function (callback) {
+                var that = this;
+                //重新获取经纬度和城市街道并设置到localStorage  
+                that.latAndLon(
+                    function (data) {
+                        that.cityname(data.latitude, data.longitude, function (datas) {
+                            if (typeof callback == "function") {
+                                callback();
+                            }
+                        });
+                    },
+                    function () {
+                        that.setDefaultCity(function () {
+                            if (typeof callback == "function") {
+                                callback();
+                            }
+                        });
+                    });
+            }
+        };
+
+        ////原生浏览器获取经纬度方法  
+        //getLocation.latAndLon(
+        //    function (data) {
+        //        //data包含经纬度信息  
+        //        AGG.getLocation.cityname(data.latitude, data.longitude, function (datas) {
+        //            //datas包含经纬度信息和城市  
+        //        });
+        //    },
+        //    function () {
+        //        AGG.getLocation.setDefaultCity(
+        //            function (defaultData) {
+        //                //设置默认城市  
+        //            }
+        //        );
+        //    }
+        //);
+
+        var provinceid = '@ViewBag.province';
+        var cityid = '@ViewBag.city';
+        var use_dw = localStorage.getItem("use_dw");//是否使用定位，收到切换过城市就不使用定位
+        //if (use_dw != "false") {
+        //localStorage.clear();
+        if (provinceid == 0 && cityid == 0)//未筛选城市
+        {
+            if (localStorage.getItem("cityname") == null || localStorage.getItem("cityname") == "") {//无本地数据，微信获取地址信息
+                ////localStorage.setItem("use_dw","false");
+                ////微信JS-SDK获取经纬度方法  
+                //getLocation.weichatLatAndLon(
+                //    function (data) {
+                //        //data包含经纬度信息  
+                //        getLocation.cityname(data.latitude, data.longitude, function (datas) {
+                //            //datas包含经纬度信息和城市  
+                //            $(".cur_location").text(datas.province + "——" + datas.cityname);
+                //            $("#province").find("option:contains('" + datas.province.replace("省", "") + "')").attr("selected", true);
+                //            GetCityData();
+                //            $("#city").find("option:contains('" + datas.cityname.replace("市", "") + "')").attr("selected", true);
+                //            $("#btnSelectedArea").trigger("click");
+                //        });
+                //    },
+                //    function () {
+                //        getLocation.setDefaultCity(
+                //            function (defaultData) {
+                //                //设置默认城市  
+                //            }
+                //        );
+                //    }
+                //);
+            }
+            else {//有本地数据，默认显示本地数据
+                @* var province_name = localStorage.getItem("province");
+                var city_name = localStorage.getItem("cityname");
+                $(".cur_location").text(province_name + "——" + city_name);
+                $("#province").find("option:contains('" + province_name.replace("省", "") + "')").attr("selected", true);
+                provinceid = $("#province").find("option:contains('" + province_name.replace("省", "") + "')").attr("value");
+                GetCityData();
+                $("#city").find("option:contains('" + city_name.replace("市", "") + "')").attr("selected", true);
+                cityid = $("#city").find("option:contains('" + city_name.replace("市", "") + "')").attr("value");
+                //$("#btnSelectedArea").trigger("click");
+                location.href = "/Mobile/Design?type=@(ViewBag.type)&style=@(ViewBag.style)&tag=@(ViewBag.tag)&province=" + provinceid + "&city=" + cityid;*@
+            }
+        }
+        //}
+    </script>
+}

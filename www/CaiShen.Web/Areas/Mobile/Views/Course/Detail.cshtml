@@ -1,0 +1,315 @@
+﻿@model Pannet.Models.Goods
+
+@using Pannet.Models
+@using Pannet.Utility
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    List<Test> existTests = ViewBag.UserTests;
+    User LoginUser = ViewBag.LoginUser;
+    List<GoodsArticle> listArticle = ViewBag.Articles;
+    GoodsArticle articleModel = ViewBag.ArticleModel;
+    GoodsCategory categoryModel = ViewBag.GoodsCategoryModel;
+    string videoUrl = Model.G_OrderProductUrl;
+    string title = Model.G_Name;
+    string content = Model.G_Desc;
+    int showTimes = Model.G_ShowTimes;
+    int article_id = 0;
+    if (articleModel != null)
+    {
+        videoUrl = articleModel.GA_VideoUrl;
+        showTimes = articleModel.GA_ShowTimes;
+        title = articleModel.GA_Title;
+        content = articleModel.GA_Content;
+        article_id = articleModel.ID;
+    }
+    ViewBag.Title = title;
+    ViewBag.GoodsID = Model.ID;
+    bool hasLimit = false;//是否有权限
+}
+@section Style{
+    <style>
+        .vd_banner {
+            position: relative;
+        }
+
+        .needDonePrevFirstTips {
+            background-color: #232323;
+            color: #f5f5f5;
+            margin: 0 auto;
+            position: absolute;
+            height: 500px;
+            width: 100%;
+        }
+
+            .needDonePrevFirstTips .p1 {
+                font: 30px/40px "\5FAE\8F6F\96C5\9ED1";
+                text-align: left;
+                padding: 50px;
+                color: #733613;
+                background-color: #FFA14E;
+                margin-top: 150px;
+            }
+    </style>
+}
+@section Js{
+    <script src="~/Scripts/ckplayer/ckplayer.js"></script>
+}
+<div class="box">
+    @{
+        ViewBag.TopAction = "video";
+        Html.RenderPartial("_TopNavKC");
+    }
+    <div class="vd_banner">
+        @if (LoginUser != null && categoryModel != null)
+        {
+            string limits = categoryModel.GC_Department;
+            if (string.IsNullOrEmpty(limits))
+            {
+                hasLimit = false;
+            }
+            else
+            {
+                string[] limitArr = limits.Split(',');
+                if (limitArr.Contains(LoginUser.U_DepartmentID.ToString()))
+                {
+                    hasLimit = true;
+                }
+            }
+        }
+        @if (hasLimit)
+        {
+            if (ViewBag.prevIsDone)
+            { 
+            <div id="h_video_hide" style="height: 500px;">
+            </div>
+
+            <script type='text/javascript'>
+                var flashvars = { f: '@(videoUrl)', c: 0 };
+                var video = ['@(videoUrl)->video/mp4'];
+                $(function () {
+                    CKobject.embed('/Scripts/ckplayer/ckplayer.swf', 'h_video_hide', 'ckplayer_a1', '100%', '500', false, flashvars, video);
+                });
+            </script>
+            }
+            else
+            {   
+            <div class="needDonePrevFirstTips">
+                <div class="p1">
+                    先学习上一课程并测试合格，才能继续学习下一个课程视频。
+                </div>
+            </div>
+            }
+        }
+        else
+        {   
+            <div class="needDonePrevFirstTips">
+                <div class="p1">
+                    这个课程不是给你准备的，去学习其他课程吧
+                </div>
+            </div>
+        }
+    </div>
+    <div class="bsd_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle" id="articleTitle">@title</div>
+            <div class="bsd_hText">
+                <span>发布：@Model.G_CreateTime.ToString("yyyy-MM-dd")</span>
+                <span>浏览：@showTimes</span>
+                @*<span>：@Model.G_Author</span>*@
+            </div>
+        </div>
+        <div class="vd_content">
+            <div class="vd_conHeader">
+                <ul>
+                    <li class="vd_conSel" data-href="info"><a href="#info">介绍</a></li>
+                    <li data-href="catalog"><a href="#catalog">目录</a></li>
+                    @if (ViewBag.prevIsDone)
+                    { 
+                        <li><a data-url="@Url.Action("Test", new { goods_id = Model.ID, article_id })" href="javascript:void(0)" id="btn_test">考试</a></li>
+                    }
+                    else
+                    {
+                        <li><a href="javascript:alert('请先学习上一课程并测试合格！');">考试</a></li>
+                    }
+                </ul>
+            </div>
+            <div class="tab_content vi_conBox">
+                @if (hasLimit)
+                {
+                    if (ViewBag.prevIsDone)
+                    { 
+                         @Html.Raw(content)
+                    }
+                    else
+                    {   
+                    <div>
+                        <div class="p1">
+                            先学习上一课程并测试合格，才能继续学习下一个课程视频。
+                        </div>
+                    </div>
+                    }
+                }
+                else
+                {   
+                    <div>
+                        <div class="p1">
+                            这个课程不是给你准备的，去学习其他课程吧
+                        </div>
+                    </div>
+                }
+               
+                <!--评价-->
+                @*  <div class="pro_content_tab" style="display: none;">
+                    <div class="m-comment-box J_commentList">
+                        <ul class="m-comment-list J_listBody">
+                        </ul>
+                        <div class="comment-more"><a class="load-more J_loadMore" href="javascript:;" style="display: block;">加载更多</a> </div>
+                    </div>
+                    <script>
+                        var c_page = 1;
+                        var $c_listbody = $(".J_listBody");
+                        var $c_loadmore = $(".J_loadMore");
+                        var official_img = '@(UserService.GetThumbnail(""))';
+                        var c_pagesize = 10;
+                        $(function () {
+                            loadComment(c_page);
+                            $c_loadmore.click(function () {
+                                loadComment(c_page + 1);
+                            });
+                        });
+                        function loadComment(page) {
+                            $.ajax({
+                                type: 'POST',
+                                url: '@Url.Action("GetComments", "Goods")',
+                                data: { "page": page, "pagesize": c_pagesize, "goodsID": '@Model.ID' },
+                                dataType: "json",
+                                async: false,
+                                cache: false,
+                                success: function (data) {
+                                    //console.log("GetUVClientPrice:" + JSON.stringify(data));
+                                    if (data != null && data.list.length > 0) {
+                                        showComment(data.list);
+                                        c_page++;
+                                    }
+                                    else {
+                                        if (c_page == 1) {
+                                            $c_listbody.html("暂无评价.");
+                                        }
+                                        $c_loadmore.hide();
+                                    }
+                                }
+                            });
+                        }
+                        function showComment(listJson) {
+                            var c_html = "";
+                            $.each(listJson, function (index, item) {
+                                c_html += '<li class="com-item J_resetImgCon J_canZoomBox"><a class="user-img" href="javascript:void(0)"><img src="' + item.UserImg + '"></a>';
+                                c_html += '<div class="comment-info"><a class="user-name" href="javascript:void(0)">' + item.NickName + '</a><p class="time">' + item.Time + '</p></div>';
+                                c_html += '<div class="comment-eval"><div class="comment-star star-' + item.ScoreGoods + '"></div></div>';
+                                c_html += '<div class="comment-txt">' + item.Content + '</div>';
+                                c_html += '<div class="m-img-list clearfix h-img-list">';
+                                if (item.Photos != null && item.Photos.length > 0) {
+                                    for (var i = 0; i < item.Photos.length; i++) {
+                                        c_html += '<div class="img-item img-item1  showimg"><a href="' + item.Photos[i] + '" data-lightbox="comment-img"><img src="' + item.Photos[i] + '"></a></div>';
+                                    }
+                                }
+                                c_html += '</div>';
+                                if (item.ReplyContent != "") {
+                                    c_html += '<div class="comment-answer"><div class="answer-item"><img class="answer-img" src="' + official_img + '"><div class="answer-content"><h3 class="official-name">官方回复</h3><p>' + item.ReplyContent + '</p></div></div></div>';
+                                }
+                                c_html += '</li>';
+                            });
+                            $c_listbody.append(c_html);
+                        }
+                    </script>
+                </div>*@
+                <!--/评价-->
+                @{
+                    Html.RenderPartial("_PartialComment");
+                }
+
+            </div>
+            <div class="tab_content vc_conBox" style="display: none;">
+                @if (listArticle != null)
+                {
+                    int i = 1;
+                    foreach (var item in listArticle)
+                    {
+                
+                    <dl class="@(item.ID == ViewBag.ga_id ? "on" : "")">
+                        <dd>课时@(i)——@item.GA_ShortTitle</dd>
+                        <dd>
+                            @if (existTests != null && existTests.Where(m => m.T_GoodsArticleID == item.ID).Count() > 0)
+                            {
+                                var test = existTests.Where(m => m.T_GoodsArticleID == item.ID).OrderByDescending(m => m.T_State).First();
+                                if (test != null && test.T_State == 1)
+                                {
+                                <a  style="background-color: #82b900" href="@Url.Action("Detail", new { ID = Model.ID, ga_id = item.ID })#catalog">
+                                    <span>合格</span>
+                                </a>
+                                }
+                                else
+                                {
+                                <a  style="background-color: #f6cc20" href="@Url.Action("Detail", new { ID = Model.ID, ga_id = item.ID })#catalog">
+                                    <span>已观看</span>
+                                </a>
+                                }
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Detail", new { ID = Model.ID, ga_id = item.ID })#catalog">
+                                    <span>观看</span>
+                                </a>
+                            }
+                        </dd>
+                    </dl>
+                            i++;
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var video_length = parseInt('@(articleModel != null ? articleModel.GA_TimeLength : 0)');
+    var enter_time = new Date().getTime();//进入时间
+    var $btn_test = $("#btn_test");
+    var urlhash = location.hash;
+
+    $(function () {
+        video_length = video_length * 1000;//转成毫秒
+        $btn_test.click(function () {
+            var now_time = new Date().getTime();
+            if (now_time < (enter_time + video_length))//没看完
+            {
+                $("#h_video_hide").hide();
+                alert("请先观看完视频，再考试！", function () {
+                    $("#h_video_hide").show();
+                });
+                return;
+            }
+            else {
+                location.href = $btn_test.attr("data-url");
+            }
+
+        });
+
+        $(".vd_conHeader li").each(function (index) {
+            var $li = $(this);
+            $li.click(function () {
+                $li.addClass("vd_conSel");
+                $li.siblings("li").removeClass("vd_conSel");
+                $(".tab_content").eq(index).show();
+                $(".tab_content").eq(index).siblings(".tab_content").hide();
+            });
+        });
+        //console.log(urlhash);
+        if (urlhash != "") {
+            urlhash = urlhash.replace("#", "");
+            $("[data-href='" + urlhash + "']").trigger("click");
+        }
+    });
+</script>

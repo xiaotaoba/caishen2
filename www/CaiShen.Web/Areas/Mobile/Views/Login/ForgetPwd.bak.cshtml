@@ -1,0 +1,227 @@
+﻿@model Pannet.Models.UserForgetPwdVModel
+@using Pannet.DAL;
+
+@{
+    ViewBag.Title = "重置密码";
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+}
+@section Style{
+    <style>
+        html { background: #f8f8f8!important; }
+        .pc_bottom {display:none; }
+    </style>
+}
+
+@using (Html.BeginForm("ForgetPwd", "Login", FormMethod.Post))
+{ 
+    @Html.Raw(ViewBag.MessageInfo)
+    @Html.ValidationSummary(true)
+    <input type="hidden" name="returnurl" value="@ViewBag.returnurl" />
+    <div class="box">
+        <div class="u_banner">
+            <img src="/Areas/Mobile/images/u_banBg.jpg" alt="" /></div>
+        <div class="u_content">
+            <div class="u_info">
+                <dl>
+                    <dt><i class="icon iconfont icon-yonghu"></i></dt>
+                    <dd>
+                        <input type="text" placeholder="请输入您的手机号" name="U_Phone" id="U_Phone"><span></span></dd>
+                </dl>
+                <dl class="rr_vCode">
+                    <dt><i class="icon iconfont icon-anquan"></i></dt>
+                    <dd>
+                        <input type="text" placeholder="验证码" name="U_Code" id="U_Code"><input type="button" id="vCodeGet" value="获取验证码"><span></span></dd>
+                </dl>
+                <dl>
+                    <dt><i class="icon iconfont icon-suo"></i></dt>
+                    <dd>
+                        <input type="password" placeholder="新密码" name="U_Pwd" id="U_Pwd"><span></span></dd>
+                </dl>
+                <dl>
+                    <dt><i class="icon iconfont icon-suo"></i></dt>
+                    <dd>
+                        <input type="password" placeholder="确认密码" name="U_Pwd2" id="U_Pwd2"><span></span></dd>
+                </dl>
+            </div>
+            <div class="u_btn">
+                <div class="u_submit">
+                    <input type="submit" value="确认提交" id="btnSubmit"></div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section FootJs{
+    <script>
+        var $username = $("#U_Phone");
+        var $password = $("#U_Pwd");
+        var $passwordAgain = $("#U_Pwd2");
+        var $tcode = $("#U_Code");
+        var $btnGetTCode = $("#vCodeGet");
+        var $agreement = $("#agreement");
+        //var $btnGetTCodeAgain = $("#btnGetTCodeAgain");
+        var leftSecond = 60;
+        var timeout = null;
+        var regPwd = /^[\w]{6,20}$/
+        var regMobile = /^[\w]{11}$/
+
+        $(function () {
+            $("#btnSubmit").click(function () {
+                if ($username.val() == "") {
+                    alert("请输入手机号码！");
+                    return false;
+                }
+                if (!$username.val().match(regMobile)) {
+                    alert("请输入正确的手机号码！");
+                    return false;
+                }
+                if ($tcode.val() == "") {
+                    alert("请输入手机验证码！");
+                    return false;
+                }
+                if (!CheckMobileCode()) {
+                    alert("手机验证码错误！");
+                    return false;
+                }
+                return true;
+                //Register();
+            });
+
+            $btnGetTCode.click(function () {
+
+                if (!CheckUserName()) {
+                    return false;
+                }
+                if ($password.val() == "") {
+                    alert("请输入密码！");
+                    return false;
+                }
+                if (!$password.val().match(regPwd)) {
+                    alert("密码为6-20位数字及字母！");
+                    return false;
+                }
+                if ($password.val().toLowerCase() != $passwordAgain.val().toLowerCase()) {
+                    alert("确认密码不一致！");
+                    return false;
+                }
+                SendMobileCode();
+            });
+        });
+
+
+        function SendMobileCode() {
+            $.ajax({
+                url: "@Url.Action("SendMobileCode", "Register")",
+                type: "GET",
+                async: false,
+                cache: false,
+                data: { mobile: $username.val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")"); //JSON.parse(result);
+                    if (json_rs == null || json_rs.status == "-1") {//返回错误
+                        alert(json_rs.msg);
+                    }
+                    else if (json_rs.status == "success") {
+                        ResetTime();
+                        if (json_rs.msg != "") {
+                            alert(json_rs.msg);
+                        }
+                    }
+                    //location.href = "regTwo.aspx?username=" + encodeURI($("#username").val());
+
+                },
+                error: function (xmlhttp) {
+                    alert(xmlhttp.responseText);
+                }
+            });
+        }
+
+        //验证用户名,存在true,不存在false
+        function CheckUserName() {
+
+            if ($username.val() == "") {
+                alert("请输入手机号码！");
+                return false;
+            }
+            var isExist = false;
+            $.ajax({
+                url: "@Url.Action("ExistMobile", "Login")",
+                type: "GET",
+                async: false,
+                cache: false,
+                data: { mobile: $username.val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")"); //JSON.parse(result);
+                    if (json_rs == null || json_rs.status == "-1") {//返回错误
+                        alert(json_rs.msg);
+                        isExist = false;
+                    }
+                    else if (json_rs.status == "success") {
+                        isExist = true;
+                    }
+                },
+                error: function (xmlhttp) {
+                    alert(xmlhttp.responseText);
+                }
+            });
+            if (isExist) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+
+        //一致true,不一致false
+        function CheckMobileCode() {
+
+            var return_flag = false;
+
+            if ($tcode.val() == "") {
+                return false;
+            }
+            $.ajax({
+                url: "@Url.Action("CheckMobileCode", "Register")",
+                type: "GET",
+                async: false,
+                cache: false,
+                data: { mobile: $username.val(), code: $tcode.val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")"); //JSON.parse(result);
+                    if (json_rs == null || json_rs.status == "-1") {//返回错误
+                        return_flag = false;
+                    }
+                    else if (json_rs.status == "success") {
+                        return_flag = true;
+                    }
+                },
+                error: function (xmlhttp) {
+                    alert(xmlhttp.responseText);
+                }
+            });
+
+            return return_flag;
+        }
+
+        function ResetTime() {
+            if (leftSecond == 0) {
+                clearTimeout(timeout);
+                $btnGetTCode.val("获取验证码");
+                $btnGetTCode.removeAttr("disabled");
+                $btnGetTCode.removeClass("hui");
+                $btnGetTCode.addClass("orange");
+                leftSecond = 60;
+            }
+            else {
+                $btnGetTCode.attr("disabled", "disabled");
+                $btnGetTCode.removeClass("orange");
+                $btnGetTCode.addClass("hui")
+                $btnGetTCode.val("重新获取(" + leftSecond + "s)");
+                leftSecond--;
+                timeout = setTimeout("ResetTime()", 1000);
+            }
+        }
+
+    </script>
+}

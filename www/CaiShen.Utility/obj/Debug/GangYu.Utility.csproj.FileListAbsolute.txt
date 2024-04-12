@@ -1,0 +1,9 @@
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\bin\Debug\Pannet.Utility.dll.config
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\bin\Debug\Pannet.Utility.dll
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\bin\Debug\Pannet.Utility.pdb
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\bin\Debug\aliyun-net-sdk-core.dll
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\bin\Debug\aliyun-net-sdk-dysmsapi.dll
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\bin\Debug\OpenSmtp.dll
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\bin\Debug\ThoughtWorks.QRCode.dll
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\obj\Debug\Pannet.Utility.dll
+E:\luheng\2018项目\g杭州钢宇\GangYu\GangYu.Utility\obj\Debug\Pannet.Utility.pdb

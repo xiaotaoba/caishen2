@@ -1,2 +1,2 @@
-# caishen2
-caishen2
+# caishen
+财神主程序

@@ -1,0 +1,104 @@
+﻿@model PagedList.PagedList<Pannet.Models.QuestionAnswerVModel>
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "视频类";
+    User LoginUser = ViewBag.LoginUser;
+    Goods goodsModel = ViewBag.Goods;
+}
+
+<div class="box">
+    @{
+        ViewBag.TopAction = "video";
+        Html.RenderPartial("_TopNavKC");
+    }
+    <div class="bsd_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle">@goodsModel.G_Name</div>
+            <div class="bsd_hText">
+                <span>@goodsModel.G_CreateTime.ToString("yyyy-MM-dd")</span>
+                <span>浏览：@goodsModel.G_ShowTimes</span>
+                <span>发布：@goodsModel.G_Author</span>
+            </div>
+        </div>
+        <div class="vt_content">
+            <div class="vt_conBox">
+                <ul>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        int i = 1;
+                        foreach (var item in Model)
+                        {
+                        <li>
+                            <div class="vt_conB_header">
+                                <span>@(i.ToString().PadLeft(2, '0'))：@item.Question.Q_Title</span>
+                                <span>（@(DataConfig.QuestionType.Find(m => m.Value == item.Question.Q_Type.ToString()).Name)）</span>
+                            </div>
+                            <div class="vt_conB_th">
+                                @if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.判断题))
+                                {
+                                    <dl>
+                                        <dd>
+                                            <input type="radio" name="a_@(item.Question.ID)_0" value="1">
+                                        </dd>
+                                        <dd>对</dd>
+                                    </dl>
+                                    <dl>
+                                        <dd>
+                                            <input type="radio" name="a_@(item.Question.ID)_0" value="0">
+                                        </dd>
+                                        <dd>错</dd>
+                                    </dl>
+                                }
+                                else if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.问答题))
+                                {
+                                    <dl>
+                                        <dd>
+                                            <input type="text" name="a_@(item.Question.ID)_0" />
+                                        </dd>
+                                    </dl>
+                                }
+                                else
+                                {
+                                    foreach (var itemA in item.AnswerList.OrderByDescending(m => m.A_Sort).ThenBy(m => m.ID))
+                                    {
+                                    <dl>
+                                        <dd>
+                                            @if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.单选题))
+                                            {
+                                                <input type="radio" name="a_@(item.Question.ID)_@(itemA.ID)" value="@itemA.ID">
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" name="a_@(item.Question.ID)_@(itemA.ID)" value="@itemA.ID">
+                                            }
+                                        </dd>
+                                        <dd>@itemA.A_Answer</dd>
+                                    </dl>
+                                    }
+                                }
+                            </div>
+                        </li>
+                                i++;
+                        }
+                    }
+                    else
+                    {
+                        <li>
+                            <div class="nothing">暂无相关测试题.</div>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="vt_submit">
+                <input type="submit" value="确认提交">
+            </div>
+        </div>
+    </div>
+</div>

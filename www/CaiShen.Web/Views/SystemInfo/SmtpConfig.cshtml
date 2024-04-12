@@ -1,0 +1,76 @@
+﻿@using Pannet.DAL
+@using Pannet.Models
+
+@model Pannet.Models.SMTPConfig
+
+@{
+    ViewBag.Title = "发件邮件设置";
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">发件邮件参数 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                <span>设置 </span>
+            </small>
+        </h1>
+    </div>
+
+    @using (Html.BeginForm("SmtpConfig", "SystemInfo", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+
+        <table class="table table-striped table-hover">
+            <tbody>
+
+                <tr>
+                    <td width="120">@Html.LabelFor(m => m.Server)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Server, new { style = "width:300px" })
+                        @Html.ValidationMessageFor(m => m.Server)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Authentication)： </td>
+                    <td>
+                        <select name="Authentication" id="Authentication">
+                            <option value="true" @(Model.Authentication=="true"?"selected='selected'":"")>是</option>
+                            <option value="false" @(Model.Authentication=="false"?"selected='selected'":"")>否</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sender)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sender, new { style = "width:300px" })
+                        @Html.ValidationMessageFor(m => m.Sender)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.User)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.User, new { style = "width:300px" })
+                        @Html.ValidationMessageFor(m => m.User)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Password)： </td>
+                    <td>
+                        @Html.PasswordFor(m => m.Password, new {@value=Model.Password,  style = "width:300px" })
+                        @Html.ValidationMessageFor(m => m.Password)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

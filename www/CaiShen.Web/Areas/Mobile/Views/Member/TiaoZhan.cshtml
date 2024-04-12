@@ -1,0 +1,94 @@
+﻿@model PagedList.PagedList<Pannet.Models.TiXian>
+
+@using Pannet.DAL.Repository;
+@using PagedList.Mvc;
+@using Pannet.Models;
+@using Pannet.DAL;
+
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "挑战记录";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div class="tiaozhan">
+        <ul>
+            <li>
+                <span class="user_img">
+                    <img src="content/images/member/pic_01-04.jpg" />
+                </span>
+                <div class="user_info">
+                    <span class="user_name">积分</span>
+                    <span class="user_role">15000</span>
+                    <span class="user_level"></span>
+                    <i class="iconfont icon-jiantou"></i>
+
+                </div>
+                <a href="@Url.Action("Info", "Member")" class="tiaozhan_rule">挑战规则</a>
+            </li>
+            <li>
+                <a href="#" class="btn btn-danger btn-lg">发起挑战</a>
+            </li>
+        </ul>
+    </div>
+    <div class="tiaozhan_tabs">
+        <ul>
+            <li class="active">
+                <a href="#">参与挑战</a>
+            </li>
+            <li>
+                <a href="#">挑战记录</a>
+            </li>
+        </ul>
+    </div>
+    <div class="tiaozhan_list">
+        <div class="tiaozhan_item">
+            <div class="tiaozhan_user">发起人：<em>往事随风</em></div>
+            <ul>
+                <li>
+                    <span class="item_name">时间</span>
+                    <span class="item_value">2018-05-03</span>
+                </li>
+                <li>
+                    <span class="item_name">目标</span>
+                    <span class="item_value">7000步</span>
+                </li>
+                <li>
+                    <span class="item_name">奖励</span>
+                    <span class="item_value">3000积分</span>
+                </li>
+                <li>
+                    <a class="btn btn-danger" href="#">挑战</a>
+                </li>
+            </ul>
+        </div>
+        <div class="tiaozhan_item">
+            <div class="tiaozhan_user">发起人：<em>往事随风</em></div>
+            <ul>
+                <li>
+                    <span class="item_name">时间</span>
+                    <span class="item_value">2018-05-03</span>
+                </li>
+                <li>
+                    <span class="item_name">目标</span>
+                    <span class="item_value">7000步</span>
+                </li>
+                <li>
+                    <span class="item_name">奖励</span>
+                    <span class="item_value">3000积分</span>
+                </li>
+                <li>
+                    <a class="btn btn-danger" href="#">挑战</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!--/container-->

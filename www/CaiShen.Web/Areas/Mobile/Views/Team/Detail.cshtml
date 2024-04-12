@@ -1,0 +1,61 @@
+﻿@model Pannet.Models.DesignWork
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = Model.DW_Name;
+    User LoginUser = ViewBag.LoginUser;
+    List<DesignWorkPhoto> topScroll = ViewBag.ScrollPhotos;
+}
+
+@section Js{
+    <script src="~/Areas/Mobile/js/TouchSlide.1.1.js"></script>
+}
+<div class="box">
+    @*@{
+        ViewBag.TopAction = "design";
+        Html.RenderPartial("_TopNavSQ");
+    }*@
+@*    @if (topScroll != null)
+    { 
+        <div class="ho_banner" id="ho_banner">
+            <div class="bd">
+                @if (topScroll != null)
+                {
+                    foreach (var item in topScroll)
+                    {
+                    <ul>
+                        <li>
+                            <img src="@(item.DWP_Image)" alt="@item.DWP_Title" /></li>
+                    </ul>
+                    }
+                }
+            </div>
+            <div class="hd">
+                <ul></ul>
+            </div>
+        </div>
+    }*@
+    <div class="bsd_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle">@Model.DW_Name</div>
+            <div class="bsd_hText">
+                <span>浏览次数：@Model.DW_ShowTimes</span>
+                <span>@Model.DW_CreateTime.ToString("yyyy-MM-dd")</span>
+            </div>
+        </div>
+        <div class="vt_content">
+            <div class="vt_conBox">
+                <ul>
+                    <li>
+                        @Html.Raw(Model.DW_Desc)
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

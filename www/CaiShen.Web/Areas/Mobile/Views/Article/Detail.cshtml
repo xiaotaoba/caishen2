@@ -1,0 +1,28 @@
+﻿@model Pannet.Models.Article
+
+@using Pannet.Models
+@using Pannet.Utility
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = Model.Art_Title;
+    User LoginUser = ViewBag.LoginUser;
+}
+
+<div class="box">
+    <div class="bsd_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle">@Model.Art_Title</div>
+            <div class="bsd_hText">
+                <span>发布时间：@Model.Art_CreateTime.ToString("yyyy-MM-dd")</span>
+                <span>浏览：@Model.Art_ShowTimes</span>
+                @*<span>：@Model.Art_Author</span>*@
+            </div>
+        </div>
+        <div class="bsd_content">
+            @Html.Raw(Model.Art_Content)
+        </div>
+    </div>
+</div>

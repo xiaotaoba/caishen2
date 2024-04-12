@@ -1,0 +1,74 @@
+﻿@model Pannet.Models.Order
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "支付页面";
+    List<Order> orderList = ViewBag.Orders;
+    
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div id="location" class="base">
+        当前位置：<a href="/">首页</a> > 二维码支付
+    </div>
+
+    <div id="pay" class="base">
+        <dl class="pay_order_success">
+            <dt>二维码支付</dt>
+            <dd>
+                <div class="tips">
+                    @if (string.IsNullOrEmpty(ViewBag.QRCodeImage))
+                    {
+                        <div class="red">参数错误!</div>
+                    }
+                    else
+                    { 
+                        <i class="iconfont icon-dizhiguanliyigouxuan"></i>
+                        <span>请扫描下面二维码完成支付！</span>
+                        <br />
+                        <img src="@("/wxpay/MakeQRCode.aspx?data="+HttpUtility.UrlEncode(ViewBag.QRCodeImage))" />
+                    }
+                </div>
+                <table border="1">
+                    <tr class="tr_th">
+                        <td>交易单号</td>
+                        <td>交易金额</td>
+                    </tr>
+                    <tr>
+                        <td>@ViewBag.trade_no</td>
+                        <td align="center"><span class="red">@(SiteService.GetPrice(ViewBag.total_fee))</span>元</td>
+                    </tr>
+                </table>
+
+                <div class="center-block">
+                    <a href="/Member/AmountList">已完成支付</a>
+                </div>
+            </dd>
+        </dl>
+
+    </div>
+
+</div>
+<!--/container-->
+
+
+@section FootJs{
+
+    <script>
+        $(function () {
+            $(".pay_item").click(function () {
+                $(this).addClass("active");
+                $(this).siblings().removeClass("active");
+            });
+            // $(".btn_pay ").click(function () {
+            //      location.href = "@Url.Action("Success", "Pay")";
+            //  });
+        });
+    </script>
+}

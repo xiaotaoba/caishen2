@@ -1,0 +1,232 @@
+﻿@model Pannet.Models.Warehouse
+
+@using Pannet.DAL
+@using Pannet.Models
+@using Pannet.Utility
+
+@{
+    ViewBag.Title = "仓库管理 ";
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">仓库管理 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                <span>新增</span>
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("Add", "Warehouse", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120"><font color="red">*</font>@Html.LabelFor(m => m.Name)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Name, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Number)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Number, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Number)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.URL)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.URL, new { @class = "input-text", style = "width:300px;" })
+                        @Html.ValidationMessageFor(m => m.URL)
+                    </td>
+                </tr>
+             
+                <tr>
+                    <td>@Html.LabelFor(m => m.UserName)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.UserName)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Tel)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Tel, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Tel)
+                    </td>
+                </tr>
+                <tr>
+                    <td>所在地区： </td>
+                    <td>
+                        <select name="Province" id="Province">
+                            <option value="0">-请选择省份-</option>
+                            @if (ViewBag.Provinces != null)
+                            {
+                                foreach (var item in ViewBag.Provinces)
+                                {
+                                <option @(Model.Province == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                }
+                            }
+                        </select>
+                        <select name="City" id="City">
+                            <option value="0">-请选择城市-</option>
+                            @if (ViewBag.Citys != null)
+                            {
+                                foreach (var item in ViewBag.Citys)
+                                {
+                                <option @(Model.City == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                }
+                            }
+                        </select>
+                        <select name="Region" id="Region">
+                            <option value="0">-请选择地区-</option>
+                            @if (ViewBag.Regions != null)
+                            {
+                                foreach (var item in ViewBag.Regions)
+                                {
+                                <option @(Model.Region == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                }
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Province)
+                        @Html.ValidationMessageFor(m => m.City)
+                        @Html.ValidationMessageFor(m => m.Region)
+                        <script>
+
+                            $(function () {
+                                $("#Province").change(function () {
+                                    var provinceid = $("#Province").val();
+                                    if (parseInt(provinceid) != 0) {
+                                        GetCityData();
+                                        GetRegionData();
+                                    }
+                                });
+                                $("#City").change(function () {
+                                    var cityid = $("#City").val();
+                                    if (parseInt(cityid) != 0) {
+                                        GetRegionData();
+                                    }
+                                });
+                            });
+
+                            function ShowCityHtml(cityJson) {
+                                var cityHtml = "<option value='0'>-请选择城市-</option>";
+                                //alert(cityJson);
+                                $.each(cityJson, function (index, data) {
+                                    cityHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                });
+                                $("#City").html(cityHtml);
+                            }
+                            function ShowRegionHtml(regionJson) {
+                                var regionHtml = "<option value='0'>-请选择地区-</option>";
+                                //alert(regionJson);
+                                $.each(regionJson, function (index, data) {
+                                    regionHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                });
+                                $("#Region").html(regionHtml);
+                            }
+                            function GetCityData() {
+                                var provinceid = $("#Province").val();
+                                if (parseInt(provinceid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": provinceid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowCityHtml(data);
+                                    }
+                                });
+                            }
+                            function GetRegionData() {
+                                var cityid = $("#City").val();
+                                if (parseInt(cityid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": cityid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowRegionHtml(data);
+                                    }
+                                });
+                            }
+                        </script>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.Address)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Address, new { @class = "input-text", style = "width:300px;" })
+                        @Html.ValidationMessageFor(m => m.Address)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Desc)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.Desc, new { style = "width:750px;height:200px;" })
+                        @Html.ValidationMessageFor(m => m.Desc)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.ShippingTemplateID)</td>
+                    <td>
+                        <select name="ShippingTemplateID" id="ShippingTemplateID">
+                            <option value='0'>-请选择运费模板-</option>
+                            @foreach (ShippingTemplate item in ViewBag.ShippingTemplates)
+                            {
+                                <option value="@item.ID" @(Model != null && item.ID == Model.ShippingTemplateID ? " selected='selected'" : "")>@item.ST_Title</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Is_Enable)： </td>
+                    <td>
+                        <select name="Is_Enable" id="Is_Enable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.Is_Enable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+              
+                <tr>
+                    <td>@Html.LabelFor(m => m.CreateTime)： </td>
+                    <td>
+                        @Html.DisplayFor(m => m.CreateTime)
+                    </td>
+                </tr>
+                @*  <tr>
+                    <td>@Html.LabelFor(m => m.Tel)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.B_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.B_Sort)
+                    </td>
+                </tr>*@
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

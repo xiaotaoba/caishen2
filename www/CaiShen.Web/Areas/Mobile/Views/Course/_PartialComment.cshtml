@@ -1,0 +1,320 @@
+﻿@using Pannet.Models
+@{
+    User LoginUser = ViewBag.LoginUser;
+    int goods_id = ViewBag.GoodsID;
+    
+        
+}
+<!--发布评论-->
+<div class="message" id="messagePanel">
+    <!--发布评论-->
+    <div class="message_box">
+        <textarea name="content" id="content" cols="10" placeholder="评论内容~" rows="10" maxlength="200"></textarea>
+        <div class="sendline">
+            @if (LoginUser != null)
+            { 
+                <a href='javascript:void(0);' class='headpic'>
+                    <img src='@(LoginUser.U_Thumbnail)' /></a> <a href='javascript:void(0);' class='sender'>@LoginUser.U_NickName</a>
+            }
+            <a href="javascript:void(0);" class="replyUserName"></a>
+            <input type="button" class="btn" value="发布评论" id="btnSendComment" />
+            <span class="tips" style="display: none;">还可以输入 <span class="red" id="leftCount">200</span> 个字符</span>
+        </div>
+    </div>
+    <!--评论列表-->
+    <dl class="message_list">
+        <dt>
+            <h3>全部评论(<span id="totalCommentCount">0</span>)</h3>
+            @*<span class="sort"><a href="javascript:void(0);" class="on" data-sort="time">时间</a> <a href="javascript:void(0);" data-sort="hot">热度</a> </span>*@</dt>
+
+    </dl>
+</div>
+<!--/发布评论-->
+
+<script type="text/javascript">
+
+    var $content = $("#content");
+    var $messContainer = $(".message_list");
+    var $leftCount = $("#leftCount");
+    var $totalCommentCount = $("#totalCommentCount");
+    var $send = $("#btnSendComment");
+    var $replyUserName = $(".replyUserName");
+    var $addFavorite = $("#addFavorite");
+    var $articleTitle = $("#articleTitle");
+
+    var replyId = 0;
+    var sort = "time";
+    var nid = '@(goods_id)';
+    var loginId = '@(LoginUser == null ? 0 : LoginUser.ID)';
+
+    $(function () {
+
+        if ($("#messagePanel").css("display") != "none") {
+            GetPageComments(1);
+        }
+        //发布事件
+        $send.click(function () {
+            if ($.trim($content.val()) == "") {
+                alert("评论内容不能为空！");
+                return;
+            }
+            SendComment();
+
+        });
+
+        //点赞事件
+        $("body").delegate(".zan[data-writer!='" + loginId + "']", "click", function () {
+            SetZan($(this).attr("data-cid"));
+        });
+
+        //点击回复事件
+        $messContainer.delegate(".reply[data-writer!='" + loginId + "']", "click", function () {
+
+            $replyUserName.text("@@" + $(this).attr("data-writer"));
+            replyId = $(this).attr("data-cid");
+
+            $(".reply_box_line").hide();
+            $(this).parent().parent().parent().next().show();
+
+        });
+
+        //点击提交回复
+        $messContainer.delegate(".reply_box[data-writer!='" + loginId + "'] .btnReply", "click", function () {
+            var $replayContent = $(this).parent().parent().find("[name='content']");
+            if ($.trim($replayContent.val()) == "") {
+                alert("回复内容不能为空！");
+                return;
+            }
+            content = "<span>@@" + $(this).attr("data-writer") + "</span>" + $replayContent.val();
+            SendReplyContent(content);
+            $(this).find("textarea").text("");
+        });
+
+        //点击排序事件
+        $messContainer.find("dt>.sort>a").click(function () {
+            $(this).addClass("on");
+            $(this).siblings().removeClass("on");
+            sort = $(this).attr("data-sort");
+
+            GetPageComments(1);
+        });
+
+        //添加收藏事件
+        $addFavorite.click(function () {
+            AddFavorite();
+        });
+
+        ////firefox下检测状态改变只能用oninput,且需要用addEventListener来注册事件。 
+        //if (/msie/i.test(navigator.userAgent))//ie浏览器 
+        //{
+        //    document.getElementById('content').onpropertychange = contentChangeHandle;
+        //}
+        //else {//非ie浏览器，比如Firefox 
+        //    document.getElementById('content').addEventListener("input", contentChangeHandle, false);
+        //}
+        //$content.on("keyup", function (event) {
+        //    if (event.which == 8) {
+        //        contentChangeHandle();
+        //    }
+        //});
+    });
+
+    //当状态改变的时候执行的函数 
+    function contentChangeHandle() {
+        //alert($.trim($content.val())+"-count2:" + $.trim($content.val()).length);
+        var leftCount = 0;
+        if ($.trim($content.val()).length >= 200) {
+            $content.val($.trim($content.val()).substr(0, 200));
+        }
+        leftCount = 200 - $.trim($content.val()).length;
+        if (leftCount < 0)
+            leftCount = 0;
+        $leftCount.text(leftCount);
+    }
+
+    //加载评论
+    function GetPageComments(pageindex) {
+
+        var pagesize = 50;
+
+        $.ajax({
+            url: "/Mobile/Comment/GetPageComments",
+            type: "POST",
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: { "pid": nid, "pagesize": pagesize, "pageindex": pageindex, "sort": sort, type: "1" },
+            success: function (result) {
+
+                var json_rs = result;// eval("(" + result + ")"); //JSON.parse(result);
+                if (typeof (json_rs) == "undefined" || json_rs == null || json_rs.status == "") {
+                    alert("获取信息失败!");
+                }
+                else {
+                    if (json_rs.status == "error") {
+                        alert(json_rs.msg);
+                    }
+                    else {
+                        $messContainer.find("dd").remove();
+                        $messContainer.append(json_rs.body);
+                        $totalCommentCount.text(json_rs.totalCount);
+                    }
+                }
+
+            },
+            error: function (xmlhttp) {
+                alert(xmlhttp.responseText);
+            }
+
+        });
+    }
+
+    //发布评论
+    function SendComment() {
+        var content = $content.val();
+        if (replyId != "0") {
+            content = "<span>" + $replyUserName.text() + "</span>" + content;
+        }
+        $.ajax({
+            url: "/Mobile/Comment/AddComment",
+            type: "POST",
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: { "pid": nid, "content": content, "replyId": replyId, "title": $articleTitle.text(), type: "1" },
+            success: function (result) {
+                var json_rs = result;// eval("(" + result + ")"); //JSON.parse(result);
+                if (json_rs == null || json_rs.status == "") {//返回错误
+
+                    alert("操作失败!");
+                }
+                else {
+                    if (json_rs.status == "error") {
+                        alert(json_rs.msg);
+                    }
+                    else {
+                        //alert(json_rs.msg);
+                        //alert("评论成功，请等待审核！")
+                        $content.val("");
+                        $leftCount.text("200");
+                        GetPageComments(1);
+                    }
+                }
+            },
+            error: function (xmlhttp) {
+                alert(xmlhttp.responseText);
+            }
+
+        });
+    }
+    //发布回复
+    function SendReplyContent(content, callback) {
+
+        $.ajax({
+            url: "/Mobile/Comment/AddComment",
+            type: "POST",
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: { "pid": nid, "content": content, "replyId": replyId, "title": $articleTitle.text(), type: "1" },
+            success: function (result) {
+                var json_rs = result;// eval("(" + result + ")"); //JSON.parse(result);
+                if (json_rs == null || json_rs.status == "") {//返回错误
+
+                    alert("操作失败!");
+                }
+                else {
+                    if (json_rs.status == "error") {
+                        alert(json_rs.msg);
+                    }
+                    else {
+                        //alert(json_rs.msg);
+                        //alert("回复成功，请等待审核！")
+                        if (callback != null) {
+                            callback();
+                        }
+                        GetPageComments(1);
+                    }
+                }
+            },
+            error: function (xmlhttp) {
+                alert(xmlhttp.responseText);
+            }
+
+        });
+    }
+
+    //点赞
+    function SetZan(cid) {
+
+        $.ajax({
+            url: "/Mobile/Comment/AddZan",
+            type: "GET",
+            async: false,
+            cache: false,
+            dataType: "json",
+            data: { "pid": nid, "zanId": "1", "title": $articleTitle.text(), type: "1" },
+            success: function (result) {
+                var json_rs = result;// eval("(" + result + ")"); //JSON.parse(result);
+                if (json_rs == null || json_rs.status == "") {//返回错误
+
+                    alert("操作失败!");
+                }
+                else {
+                    if (json_rs.status == "error") {
+                        alert(json_rs.msg);
+                    }
+                    else {
+                        ///alert(json_rs.msg);
+                        ZanPlus(cid);
+                    }
+                }
+            },
+            error: function (xmlhttp) {
+                alert(xmlhttp.responseText);
+            }
+
+        });
+    }
+    //赞加一
+    function ZanPlus(cid) {
+        var $curZan = $(".pro_zan_count").find("em");
+        var curCount = parseInt($curZan.text()) + 1;
+        $(".pro_zan_count").addClass("on");
+        $curZan.text(curCount);
+        //$("[data-cid='" + cid + "']").unbind();
+    }
+
+    //添加收藏
+    function AddFavorite() {
+
+        $.ajax({
+            url: "/Ajax/FavoriteHandler.ashx",
+            type: "GET",
+            async: false,
+            cache: false,
+            data: { action: "AddFavorite", "pid": nid, "pname": $articleTitle.text(), type: "1" },
+            success: function (result) {
+                var json_rs = eval("(" + result + ")"); //JSON.parse(result);
+                if (json_rs == null || json_rs.status == "") {//返回错误
+
+                    alert("操作失败!");
+                }
+                else {
+                    if (json_rs.status == "error") {
+                        alert(json_rs.msg);
+                    }
+                    else {
+                        alert(json_rs.msg);
+                        $addFavorite.text("[已收藏]")
+
+                    }
+                }
+            },
+            error: function (xmlhttp) {
+                alert(xmlhttp.responseText);
+            }
+
+        });
+    }
+</script>

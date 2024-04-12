@@ -1,0 +1,383 @@
+﻿@model Pannet.Models.User
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "个人资料";
+    User LoginUser = ViewBag.LoginUser;
+    List<Tag> EducationTags = ViewBag.EducationTags;
+    List<Department> departments = ViewBag.Departments;
+}
+@section Style{
+    <style>
+        html { background: #fff!important; }
+        .pd_btn input {border:none; }
+    </style>
+}
+@section Js{
+    <script charset="utf-8" src="/editor/kindeditor-min.js"></script>
+    <script charset="utf-8" src="/editor/lang/zh_CN.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      @*  var editor;
+        KindEditor.options.filterMode = false;
+        KindEditor.ready(function (K) {
+            var uploadbutton = K.uploadbutton({
+                button: K('#btnImg')[0],
+                fieldName: 'imgFile',
+                url: '/editor/asp.net/upload_json.ashx?FileUrl=@(LoginUser.ID)/thumb/',
+                afterUpload: function (data) {
+                    if (data.error === 0) {
+                        var url = K.formatUrl(data.url, 'absolute');
+                        //K('#txtImg').val(url);
+                        $("#imgView").attr("src", url);
+                        saveThumb(url);
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                afterError: function (str) {
+                    alert('自定义错误信息: ' + str);
+                }
+            });
+            uploadbutton.fileBox.change(function (e) {
+                uploadbutton.submit();
+            });
+         
+        });
+
+        $(function () {
+            $("#l_changeThumb").click(function () {
+                $(".user_img").find("[name='imgFile']").trigger("click");
+            });
+        });
+        function saveThumb(url) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("InfoThumb", "Member")',
+                data: { "url": url },
+                dataType: "json",
+                async: false,
+                cache: false,
+                success: function (data) {
+                    var json_rs = data;
+                    if (json_rs == null || json_rs.status == null) {//返回错误
+                        alert("系统错误！");
+                    }
+                    else if (json_rs.status == "1") {
+                        //成功
+
+                    }
+                    else {
+                        alert(json_rs.msg);
+                    }
+                }
+            });
+        }*@
+    </script>
+}
+@using (Html.BeginForm("Info", "Member", FormMethod.Post, new { @class = "form-horizontal" }))
+{ 
+    @Html.ValidationSummary(true)
+    <input type="hidden" name="ID" value="@Model.ID" />
+    <div class="box">
+        <div class="pd_content">
+            <dl class="pd_user">
+                <dt>
+                    <span>昵称</span>
+                </dt>
+                <dd>
+                    <input type="text" placeholder="请输入您的昵称" value="@Model.U_NickName" name="U_NickName" id="U_NickName"></dd>
+            </dl>
+            <dl>
+                <dt>
+                    <span>姓名</span>
+                </dt>
+                <dd>
+                    <input type="text" placeholder="请输入您的真实姓名"  value="@Model.U_RealName" name="U_RealName" id="U_RealName"></dd>
+            </dl>
+            <dl>
+                <dt>
+                    <span>性别</span>
+                </dt>
+                <dd>
+                    <select name="U_Gender" id="U_Gender">
+                        <option value="0" @(Model.U_Gender == 0 ? "selected='selected'" : "")>未设置</option>
+                        <option value="1" @(Model.U_Gender == 1 ? "selected='selected'" : "")>男</option>
+                        <option value="2" @(Model.U_Gender == 2 ? "selected='selected'" : "")>女</option>
+                    </select>
+                </dd>
+            </dl>
+            <dl style="display: none;">
+                <dt>
+                    <span>学历</span>
+                </dt>
+                <dd>
+                    <select name="U_Education" id="U_Education">
+                        @foreach (var item in EducationTags)
+                        {
+                            <option value="@item.ID" @Html.Raw(Model.U_Education == item.ID.ToString() ? " selected='selected'" : "")>@(item.T_Name)</option>
+                        }
+                    </select>
+                </dd>
+            </dl>
+
+            <dl>
+                <dt>
+                    <span>所在地</span>
+                </dt>
+                <dd>
+
+                    <div class="pd_department">
+                        @if (ViewBag.Provinces != null)
+                        {
+                            Area provinceModel = (ViewBag.Provinces as List<Area>).Find(m => m.ID == Model.U_Province);
+                            if (provinceModel != null)
+                            { 
+                            <span>@provinceModel.Area_Name</span>
+                            }
+                            else
+                            {
+                            <span>未设置</span>
+                            }
+                            if (ViewBag.Citys != null)
+                            {
+                                Area cityModel = (ViewBag.Citys as List<Area>).Find(m => m.ID == Model.U_City);
+                                if (cityModel != null)
+                                { 
+                            <span>@cityModel.Area_Name</span>
+                                }
+                                else
+                                {
+                                }
+                            }
+
+                            if (ViewBag.Regions != null)
+                            {
+                                Area regionModel = (ViewBag.Regions as List<Area>).Find(m => m.ID == Model.U_Region);
+                                if (regionModel != null)
+                                { 
+                            <span>@regionModel.Area_Name</span>
+                                }
+                                else
+                                {
+                                }
+                            }
+                        }
+                    </div>
+
+                </dd>
+            </dl>
+            <dl>
+                <dt>
+                    <span>手机号码</span>
+                </dt>
+                <dd>
+                    <input type="text" placeholder="请输入您的手机号码" value="@Model.U_Phone" name="U_Phone" id="U_Phone"></dd>
+            </dl>
+            @if (Model.UserRoleID == Convert.ToInt16(DataConfig.RoleEnum.医生))
+            {
+                <dl>
+                    <dt>
+                        <span>科室</span>
+                    </dt>
+                    <dd>
+                        @* @if (Model.U_DepartmentID == 0 || departments.Find(m => m.ID == Model.U_DepartmentID) == null)
+                        {
+                            *@<select name="U_DepartmentID" id="U_DepartmentID">
+                                <option value="0">未设置</option>
+                                @if (departments != null)
+                                {
+                                    foreach (Department item in departments.Where(m => m.Dep_FollowID == 0))
+                                    {
+                                    <option @(Model.U_DepartmentID == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Dep_Name</option>
+                                        foreach (Department itemSub in departments.Where(m => m.Dep_FollowID == item.ID))
+                                        {
+                                    <option @(Model.U_DepartmentID == itemSub.ID ? "selected='selected'" : "") value="@itemSub.ID">|----@itemSub.Dep_Name</option>
+                                        }
+                                    }
+                                }
+                            </select>@*
+                        }
+                        else
+                        {
+                            <span class="">@(departments.Find(m => m.ID == Model.U_DepartmentID).Dep_Name)</span>
+                            <input name="U_DepartmentID" id="U_DepartmentID" type="hidden" value="@(Model.U_DepartmentID)" />
+                        }*@
+                    </dd>
+                </dl>
+                <dl>
+                    <dt>
+                        <span>医院</span>
+                    </dt>
+                    <dd>
+                        <input type="text" placeholder="请输入您工作医院"  value="@Model.U_Company" name="U_Company" id="U_Company"></dd>
+                </dl>
+            }
+
+
+
+            <dl style="display: none;">
+                <dt>
+                    <span>邮箱</span>
+                </dt>
+                <dd>
+                    <input type="text" placeholder="用于找回密码" value="@Model.U_Email" name="U_Email" id="U_Email"></dd>
+            </dl>
+            <dl>
+                <dt>
+                    <span>密码</span>
+                </dt>
+                <dd style="text-align: right;">
+                    <a href="@Url.Action("InfoPassword")" style="color: #17aee6;">管理密码>></a></dd>
+            </dl>
+        </div>
+        <div class="tac red">
+            @Html.Raw(ViewBag.MessageInfo)
+        </div>
+        <div class="pd_btn">
+            <input type="submit" value=" 保存 ">
+            <input type="button" value=" 退出 " onclick="javascript: location.href = '/mobile/login/logout';" />
+        </div>
+        <div class="pd_otherWrap">
+            <div class="pd_other">
+                <div class="pd_oHeader">
+                    <span class="pd_oClose">关闭</span><span class="pd_oFinish">完成</span>
+                </div>
+                <div class="pd_oBox">
+                    <div class="pd_oB_radio" style="display: none;">
+                        <dl>
+                            <dd>
+                                <input type="radio" name="type" class="pd_personnel" @(Model.UserRoleID == Convert.ToInt16(DataConfig.RoleEnum.医生) ? "" : "checked='checked'") value="1"><span>集团总部</span></dd>
+                            <dd>
+                                <input type="radio" name="type" class="pd_distributor"  @(Model.UserRoleID == Convert.ToInt16(DataConfig.RoleEnum.医生)) ? "checked='checked'" : "")  value="2"><span>全国经销商</span></dd>
+                        </dl>
+                    </div>
+                    <div class="pd_oB_th">
+                       @* <div class="pd_oB_thPerson" style="@(Model.UserRoleID == Convert.ToInt16(DataConfig.RoleEnum.医生) ? "display:none;" : "display:block")">
+                            <ul>
+                                <li>
+                                    <span id="select_department">请选择部门</span>
+
+                                </li>
+                            </ul>
+                        </div>*@
+                        <div class="pd_oB_thDistr">
+                            <ul>
+                                <li>
+                                    <span id="select_province">请选择省份</span>
+                                    <select name="U_Province" id="Province">
+                                        <option value="0">-请选择省份-</option>
+                                        @if (ViewBag.Provinces != null)
+                                        {
+                                            foreach (var item in ViewBag.Provinces)
+                                            {
+                                            <option @(Model.U_Province == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                            }
+                                        }
+                                    </select>
+                                </li>
+                                <li>
+                                    <span id="select_city">请选择地级市</span>
+                                    <select name="U_City" id="City">
+                                        <option value="0">-请选择城市-</option>
+                                        @if (ViewBag.Citys != null)
+                                        {
+                                            foreach (var item in ViewBag.Citys)
+                                            {
+                                            <option @(Model.U_City == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                            }
+                                        }
+                                    </select>
+                                </li>
+                                <li>
+                                    <span id="select_area">请选择区县</span>
+                                    <select name="U_Region" id="Region">
+                                        <option value="0">-请选择地区-</option>
+                                        @if (ViewBag.Regions != null)
+                                        {
+                                            foreach (var item in ViewBag.Regions)
+                                            {
+                                            <option @(Model.U_Region == item.ID ? "selected='selected'" : "") value="@item.ID">@item.Area_Name</option>
+                                            }
+                                        }
+                                    </select>
+                                </li>
+                            </ul>
+                            <script>
+                                var department_id = parseInt("@(Model.U_DepartmentID)");//已设置部门
+
+                                $(function () {
+                                    $("#Province").change(function () {
+                                        var provinceid = $("#Province").val();
+                                        if (parseInt(provinceid) != 0) {
+                                            GetCityData();
+                                            GetRegionData();
+                                        }
+                                    });
+                                    $("#City").change(function () {
+                                        var cityid = $("#City").val();
+                                        if (parseInt(cityid) != 0) {
+                                            GetRegionData();
+                                        }
+                                    });
+                                });
+
+                                function ShowCityHtml(cityJson) {
+                                    var cityHtml = "<option value='0'>-请选择城市-</option>";
+                                    //alert(cityJson);
+                                    $.each(cityJson, function (index, data) {
+                                        cityHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                    });
+                                    $("#City").html(cityHtml);
+                                }
+                                function ShowRegionHtml(regionJson) {
+                                    var regionHtml = "<option value='0'>-请选择地区-</option>";
+                                    //alert(regionJson);
+                                    $.each(regionJson, function (index, data) {
+                                        regionHtml += "<option value='" + data.ID + "'>" + data.Area_Name + "</option>";
+                                    });
+                                    $("#Region").html(regionHtml);
+                                }
+                                function GetCityData() {
+                                    var provinceid = $("#Province").val();
+                                    if (parseInt(provinceid) == 0)
+                                        return null;
+
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '@Url.Action("GetAreaJson", "Area")',
+                                        data: { "parentid": provinceid },
+                                        dataType: "json",
+                                        async: false,
+                                        success: function (data) {
+                                            ShowCityHtml(data);
+                                        }
+                                    });
+                                }
+                                function GetRegionData() {
+                                    var cityid = $("#City").val();
+                                    if (parseInt(cityid) == 0)
+                                        return null;
+
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '@Url.Action("GetAreaJson", "Area")',
+                                        data: { "parentid": cityid },
+                                        dataType: "json",
+                                        async: false,
+                                        success: function (data) {
+                                            ShowRegionHtml(data);
+                                        }
+                                    });
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

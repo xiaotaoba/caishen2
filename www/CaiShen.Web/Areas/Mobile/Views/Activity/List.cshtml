@@ -1,0 +1,56 @@
+﻿@model PagedList.PagedList<Pannet.Models.Advertisement>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "培训活动";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <style>
+        /*#footer, .footer_block { display: block; }*/
+    </style>
+}
+<div class="box">
+    @{
+        ViewBag.TopAction = "list";
+        Html.RenderPartial("_TopNavHD");
+    }
+    <div class="abs_box">
+        <div class="ta_content">
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (Advertisement item in Model)
+                {
+                <dl>
+                    <a href="@Url.Action("Detail", new { item.ID })">
+                        <dt>
+                            <div class="ta_bg">
+                                <img src="@item.AD_Image" alt="@item.AD_Title" />
+                            </div>
+                            <div class="ta_text">
+                                <p>@item.AD_Title</p>
+                            </div>
+                            <div class="ta_state">@(AdvertisementService.GetState(item))</div>
+                        </dt>
+                        <dd>
+                            <span>@item.AD_CreateTime.ToString("yyyy-MM-dd")</span>
+                            <span>截止时间：@item.AD_EndTime.ToString("yyyy-MM-dd")</span>
+                        </dd>
+                    </a>
+                </dl>
+                }
+            }
+            else
+            {
+                <div class="nothing">暂无数据.</div>
+            }
+        </div>
+    </div>
+
+
+</div>

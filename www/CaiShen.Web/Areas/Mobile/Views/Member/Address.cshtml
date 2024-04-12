@@ -1,0 +1,73 @@
+﻿@using Pannet.Models
+@using Pannet.DAL.Repository
+@using Pannet.DAL
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "收货地址";
+
+    List<UserAddress> addressList = ViewBag.Address;
+    
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css?v=1008.3" rel="stylesheet" />
+    <style>
+        .mc_content { background: none; }
+    </style>
+}
+
+<!--主区域-->
+<div id="container">
+    <div class="mc_content">
+        <div class="user_address">
+            <ul class="user_address_list">
+                @if (addressList != null)
+                {
+                    if (addressList.Count > 0)
+                    {
+                        int i = 1;
+                        foreach (var item in addressList)
+                        {
+                    <li class="@Html.Raw(item.Is_Default == 1 ? "default" : "")" data-aid="@item.ID">
+                        <div class="add_info">
+                            <span class="add_username fl">@item.UserName</span>
+                            <span class="add_phone fr">@item.Mobile</span>
+                            <div class="clear"></div>
+                            <span class="add_address">@item.Address</span>
+                        </div>
+                        <div class="add_operate">
+                            <span class="add_default fl" data-aid="@item.ID">
+                                <i class="iconfont icon-circle"></i><i class="iconfont icon-gouxuan"></i>默认地址
+                            </span>
+                            <a href="@Url.Action("AddressAdd", new { aid = item.ID })"><i class="iconfont icon-bianji"></i>编辑</a>
+                            <a href="@Url.Action("AddressDelete", new { aid = item.ID })"><i class="iconfont icon-iconfontshanchu"></i>删除</a>
+                        </div>
+                    </li>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                    <li class="nothing">暂无收货地址</li>
+                    }
+                }
+            </ul>
+        </div>
+        <a href="@Url.Action("AddressAdd")" class="btn-save">添加新地址</a>
+        <input type="hidden" name="aid" value="0" />
+    </div>
+</div>
+
+<!--/container-->
+<script>
+    //$(function () {
+    //    $(".user_address_list .add_default").each(function () {
+    //        var $default = $(this);
+    //        var $li = $(this).parent().parent();
+    //        $default.click(function () {
+    //            $("[name='aid']").val($li.data("aid"));
+    //            $li.addClass("default").siblings("li").removeClass("default");
+    //        });
+    //    });
+    //});
+</script>

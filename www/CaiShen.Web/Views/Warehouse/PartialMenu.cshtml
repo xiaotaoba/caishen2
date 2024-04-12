@@ -1,0 +1,29 @@
+﻿@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using Pannet.Models
+
+@{
+    Warehouse WarehouseModel = ViewBag.Warehouse;  
+}
+
+<ul class="nav nav-tabs padding-18 tab-size-bigger">
+    <li class="@(ViewBag.Action == "Edit" ? "active" : "")">
+        <a href="@Url.Action("Edit", new { ID = ViewBag.WarehouseID })">
+            <i class="blue icon-info bigger-120"></i>
+            仓库信息
+        </a>
+    </li>
+    <li class="@(ViewBag.Action == "WarehouseGoods" ? "active" : "")">
+        <a href="@Url.Action("WarehouseGoods", new { WarehouseID = ViewBag.WarehouseID })">
+            <i class="green icon-dropbox bigger-120"></i>
+            仓库商品列表（@(WarehouseGoodsService.GetCount(WarehouseModel.ID))）
+        </a>
+    </li>
+    <li class="@(ViewBag.Action == "WarehouseGoodsOffSaleList" ? "active" : "")">
+        <a href="@Url.Action("WarehouseGoodsOffSaleList", new { WarehouseID = ViewBag.WarehouseID })">
+            <i class="red icon-plus bigger-120"></i>
+            加入其他商品
+        </a>
+    </li>
+</ul>
+<p></p>

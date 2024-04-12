@@ -1,0 +1,215 @@
+﻿@model PagedList.PagedList<Pannet.Models.QuestionAnswerVModel>
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "测试";
+    User LoginUser = ViewBag.LoginUser;
+    Goods goodsModel = ViewBag.Goods;
+    GoodsArticle articleModel = ViewBag.ArticleModel;
+    string title = goodsModel.G_Name;
+    int showTimes = goodsModel.G_ShowTimes;
+    int article_id = 0;
+    if (articleModel != null)
+    {
+        showTimes = articleModel.GA_ShowTimes;
+        title = articleModel.GA_Title;
+        article_id = articleModel.ID;
+    }
+    ViewBag.Title = title + "测试";
+}
+<style>
+    .red { color: red; }
+    .nothing { background-color: #fff; }
+</style>
+<div class="box">
+    @{
+        ViewBag.TopAction = "video";
+        Html.RenderPartial("_TopNavKC");
+    }
+    <div class="bsd_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle">@title</div>
+            <div class="bsd_hText">
+                <span>@goodsModel.G_CreateTime.ToString("yyyy-MM-dd")</span>
+                <span>浏览：@showTimes</span>
+                <span>发布：@goodsModel.G_Author</span>
+            </div>
+        </div>
+        <div class="vt_content">
+            @if (ViewBag.Test != null)
+            {
+                <div class="vt_conBox">
+                    <div class="nothing red">当前课程已完成培训！</div>
+                </div>                 
+            }
+            else
+            {
+                using (Html.BeginForm("TestSave", "Course", FormMethod.Post, new { @class = "form-horizontal", id = "myForm" }))
+                { 
+                <div class="vt_conBox">
+                    <ul>
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            int i = 1;
+                            foreach (var item in Model)
+                            {
+                            <li class="question_li" data-type="@item.Question.Q_Type" data-id="@item.Question.ID">
+                                <div class="vt_conB_header">
+                                    <span>@(i)、@item.Question.Q_Title</span>
+                                    <span style="display: none;">（@(DataConfig.QuestionType.Find(m => m.Value == item.Question.Q_Type.ToString()).Name)）</span>
+                                </div>
+                                <div class="vt_conB_th">
+                                    @if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.判断题))
+                                    {
+                                        <dl>
+                                            <dd>
+                                                <input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="1" id="a_@(item.Question.ID)_1">
+                                            </dd>
+                                            <dd>
+                                                <label for="a_@(item.Question.ID)_1">对</label></dd>
+                                        </dl>
+                                        <dl>
+                                            <dd>
+                                                <input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="0" id="a_@(item.Question.ID)_0">
+                                            </dd>
+                                            <dd>
+                                                <label for="a_@(item.Question.ID)_0">错</label></dd>
+                                        </dl>
+                                    }
+                                    else if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.问答题))
+                                    {
+                                        <dl>
+                                            <dd>
+                                                <input type="text" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" />
+                                            </dd>
+                                        </dl>
+                                    }
+                                    else
+                                    {
+                                        foreach (var itemA in item.AnswerList.OrderByDescending(m => m.A_Sort).ThenBy(m => m.ID))
+                                        {
+                                        <dl class="a_@itemA.ID">
+                                            <dd>
+                                                @if (item.Question.Q_Type == Convert.ToInt16(DataConfig.QuestionTypeEnum.单选题))
+                                                {
+                                                    <input type="radio" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="@itemA.ID" id="a_@itemA.ID">
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" name="a_@(item.Question.ID)_@(item.Question.Q_Type)" value="@itemA.ID" id="a_@itemA.ID">
+                                                }
+                                            </dd>
+                                            <dd> <label for="a_@itemA.ID">@itemA.A_Answer</label></dd>
+                                        </dl>
+                                        }
+                                    }
+                                </div>
+                            </li>
+                                    i++;
+                            }
+                        }
+                        else
+                        {
+                            <li>
+                                <div class="nothing">暂无相关测试题.</div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="vt_submit">
+                    <input type="button" value="确认提交" id="btnSubmit" onclick="javascript: return checkSave();">
+                </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+<script>
+    var questions = [];
+    $(function () {
+
+    });
+    function checkSave() {
+
+        var isSelectAll = true;
+        $(".question_li").each(function () {
+            var $li = $(this);
+            var question = { Type: 0, ID: 0, Answer: "" };
+            var answerSelected = "";
+
+            question.Type = $li.data("type");
+            question.ID = $li.data("id");
+
+            $li.find("[name='a_" + question.ID + "_" + question.Type + "']:checked").each(function () {
+                answerSelected = answerSelected + $(this).val() + ",";
+            });
+
+            if (answerSelected == "") {
+                isSelectAll = false;
+                return false;
+            }
+            question.Answer = answerSelected;
+            questions.push(question);
+        });
+
+        if (!isSelectAll) {
+            tips("请选择所有试题!");
+            return;
+        }
+        $(".vt_submit").hide();
+        $.ajax({
+            type: 'POST',
+            url: '/Mobile/Course/TestSave',
+            data: { jsonData: JSON.stringify(questions), "goods_id": "@goodsModel.ID", "article_id": "@article_id" },
+            dataType: "json",
+            async: false,
+            cache: false,
+            success: function (data) {
+                if (data == null || data.status == null) {//返回错误
+                    alert("操作失败！");
+                }
+                else if (data.status == "success") {
+                    var content = '答对：<span style="color:#5cb85c;">' + data.rightCount + ' </span>题，答错：<span style="color:#d9534f;">' + data.wrongCount + '</span>题';
+
+                    if (data.wrongCount == 0) {
+                        layer.open({
+                            title: ['考试合格', 'background-color:#5cb85c; color:#fff;']
+      , anim: 'up'
+      , content: content
+      , btn: ['好的']
+                        });
+                    }
+                    else {
+                        layer.open({
+                            title: ['考试不合格', 'background-color:#d9534f; color:#fff;']
+      , anim: 'up'
+      , content: content
+      , btn: ['再试一次', '取消'],
+                            yes: function () {
+                                location.reload();
+                            }
+                        });
+                    }
+
+                    $.each(data.json, function (index, question) {
+                        if (question.IsTrue == 1) {
+                            $("[data-id='" + question.ID + "']").addClass("right");
+                        }
+                        else {
+                            $("[data-id='" + question.ID + "']").addClass("wrong");
+                        }
+                    });
+                }
+                else {
+                    alert(data.msg);
+                }
+            }
+        });
+    }
+</script>

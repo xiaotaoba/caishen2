@@ -1,0 +1,75 @@
+﻿@model PagedList.PagedList<Pannet.Models.GoodsArticle>
+
+@using Pannet.DAL.Repository;
+@using Pannet.DAL;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "课程目录管理";    
+}
+
+<div class="page-content">
+    <div class="page-header">
+
+        <h1>
+            <span id="lblTitle">课程目录管理</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                列表
+            </small>
+        </h1>
+    </div>
+    @{
+        ViewBag.Action = "GoodsArticle";
+        Html.RenderPartial("_PartialMenu");
+    }
+    <p></p>
+    <div class="form-inline">
+        <a href="@Url.Action("GoodsArticleAdd", new { ViewBag.GoodsID })" class="btn btn-sm btn-success"><i class="glyphicon glyphicon-plus"></i>新增课程目录</a>
+    </div>
+    <p></p>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th width="20" align="right"></th>
+                @*<th width="40">ID</th>*@
+                <th>课程目录名称</th>
+                <th>是否视频</th>
+                <th>时长</th>
+                <th>排序号</th>
+                <th>浏览次数</th>
+                <th>发布时间</th>
+                <th>是否显示</th>
+                <th width="120" align="left" class="dr_option">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+            }
+            @foreach (var item in Model)
+            {
+                <tr id="dr_row_@i">
+                    <td align="right">
+                        <input name="ids[]" type="checkbox" class="dr_select toggle md-check" value="1" disabled=""></td>
+                    @*<td>@item.ID</td>*@
+                    <td>@item.GA_Title</td>
+                    <td>@Html.Raw(item.GA_IsVideo == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>
+                    <td>@item.GA_TimeLength</td>
+                    <td>@item.GA_Sort</td>
+                    <td>@item.GA_ShowTimes</td>
+                    <td>@item.GA_CreateTime</td>
+                    <td>@Html.Raw(item.GA_IsEnable == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>
+                    <td align="left" class="dr_option">
+                        <a class="aedit" href="@Url.Action("GoodsArticleAdd", "Goods", new { ID = item.ID, GoodsID = ViewBag.GoodsID })"><i class="icon-edit"></i>编辑</a>
+                        <a class="adel" href="@Url.Action("GoodsArticleDelete", "Goods", new { ID = item.ID, GoodsID = ViewBag.GoodsID })"  data-confirm="delete"><i class="icon-trash"></i>删除</a></td>
+                </tr>
+                i++;
+            }
+            <tr>
+                <td colspan="20" align="right">@Html.PagedListPager(Model, page => Url.Action("GoodsArticle", new { page }))</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+

@@ -1,0 +1,70 @@
+﻿@model PagedList.PagedList<Pannet.Models.Questionnaire>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "问卷调查";
+    User LoginUser = ViewBag.LoginUser;
+    List<int> exist_IDS = ViewBag.ExistRecordQuest_IDS;//已参与问卷记录
+    
+}
+<div class="box">
+    @{
+        ViewBag.TopAction = "questionnaire";
+        Html.RenderPartial("_TopNavSQ");
+    }
+    <div class="bsb_content">
+        <div class="qi_conBox bsb_conBox">
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var item in Model)
+                {
+                    string url = Url.Action("Detail", new { ID = item.ID });
+                    if (!string.IsNullOrEmpty(item.Quest_URL))
+                    {
+                        url = item.Quest_URL;
+                    }
+                <dl>
+                    <a href="@url" target="_blank">
+                        <dt>
+                            <img src="@item.Quest_Image" alt="@item.Quest_Title" /></dt>
+                        <dd>
+                            <div class="bsb_conBHeader">@item.Quest_Title</div>
+                            <div class="bsb_conBTh">
+                                <span>问卷概况：@(item.Quest_Count)个问题</span>
+                                @if (item.Quest_EndTime != null && item.Quest_EndTime < DateTime.Now)
+                                {
+                                    <span style="background-color: #ddd;">已结束</span>
+                                }
+                                else if (exist_IDS != null && exist_IDS.Contains(item.ID))
+                                {
+                                    <span class="done">已参与</span>
+                                }
+                                else
+                                {
+                                    <span>参与</span>
+                                }
+                                <span>@item.Quest_CreateTime.ToString("yyyy-MM-dd")</span>
+                            </div>
+                        </dd>
+                    </a>
+                </dl>
+                }
+            }
+            else
+            {
+                <div class="nothing">暂无数据.</div>
+            }
+        </div>
+        @*  <div class="bsb_conMore">
+            <a href="#">
+                <p>加载更多活动</p>
+                <i class="icon iconfont icon-xiala"></i>
+            </a>
+        </div>*@
+    </div>
+</div>

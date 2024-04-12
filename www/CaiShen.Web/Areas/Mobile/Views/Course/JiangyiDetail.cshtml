@@ -1,0 +1,35 @@
+﻿@model Pannet.Models.Goods
+
+@using Pannet.Models
+@using Pannet.Utility
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    //ViewBag.Title = Model.G_Name;
+    User LoginUser = ViewBag.LoginUser;
+    ViewBag.GoodsID = Model.ID;
+}
+
+<div class="box">
+    @{
+        ViewBag.TopAction = "jiangyi";
+        Html.RenderPartial("_TopNavKC");
+    }
+
+    <div class="bsd_box">
+        <div class="bsd_header">
+            <div class="bsd_hTitle">@Model.G_Name</div>
+            <div class="bsd_hText">
+                <span>发布时间：@Model.G_CreateTime.ToString("yyyy-MM-dd")</span>
+                <span>浏览：@Model.G_ShowTimes</span>
+                @*<span>：@Model.G_Author</span>*@
+            </div>
+        </div>
+        <div class="bsd_content">@Html.Raw(Model.G_Desc)</div>
+        @{
+            Html.RenderPartial("_PartialComment");
+        }
+    </div>
+</div>

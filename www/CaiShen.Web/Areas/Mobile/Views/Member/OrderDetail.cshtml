@@ -1,0 +1,259 @@
+﻿@using PagedList.Mvc;
+@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository;
+@using Pannet.Utility;
+
+@model PagedList.PagedList<Pannet.Models.UserOrderShippingVModel>
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "订单详情";
+    Order orderModel = ViewBag.Order;
+    UserShop userShopModel = ViewBag.UserShop;
+    
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css?v=0901" rel="stylesheet" />
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_right_menu">
+        <ul>
+            <li class="active"><a href="javascript:void(0);">订单详情</a></li>
+        </ul>
+        @if (orderModel.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.待付款) || orderModel.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.已支付定金))
+        { 
+            <a class="btn btn-sm btn-danger fr" target="_blank" href="@Url.Action("Index", "Pay", new { ID = orderModel.ID })">现在付款</a>
+        }
+    </div>
+    <div class="mc_content">
+        @if (orderModel != null)
+        {
+            <dl class="order_detail">
+                <dt>&nbsp;</dt>
+                <dd>
+                    <ul>
+                        <li class="col_tit">收货地址：
+                        </li>
+                        <li>@orderModel.O_Address
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="col_tit">买家留言：
+                        </li>
+                        <li>@(orderModel.O_Remark == "" ? "-" : orderModel.O_Remark)
+                        </li>
+                    </ul>
+
+
+                    <ul>
+                        <li class="col_tit">订单编号：
+                        </li>
+                        <li>
+                            <span>@orderModel.O_OrderNo</span>
+                            <span>成交时间：@orderModel.O_CreateTime</span>
+                            @*<span>发货时间：@orderModel.shi</span>*@
+                            @if (orderModel.O_Status != 0)
+                            { 
+                                <span>付款时间：@orderModel.O_PayTime</span>
+                            }
+                        </li>
+                    </ul>
+
+                    <ul>
+                        <li class="col_tit">门店：
+                        </li>
+                        <li>@if (userShopModel != null)
+                            {
+                            <span>@userShopModel.Shop_Name</span>
+                            }
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="col_tit">配送时间：
+                        </li>
+                        <li>@(orderModel.O_ShippingTime == "" ? "-" : DataConfig.OrderShippingTime.Find(m => m.Value == orderModel.O_ShippingTime).Name)
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="col_tit">发票信息：
+                        </li>
+                        <li>@(DataConfig.OrderInvoice.Find(m => m.Value == orderModel.O_IsInvoice.ToString()).Name)
+                            @if (orderModel.O_IsInvoice == Convert.ToInt16(DataConfig.OrderInvoiceEnum.企业))
+                            {
+                                <span>&nbsp; 发票抬头：@orderModel.O_InvoiceTitle  &nbsp; 企业税号：@orderModel.O_BusinessTax</span>
+                            }
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="col_tit">付款方式：
+                        </li>
+                        <li>@(DataConfig.OrderPayWay.Find(m => m.Value == orderModel.O_PayWay.ToString()).Name)
+                        </li>
+                    </ul>
+                </dd>
+            </dl>
+        }
+
+        <div class="order_shipping_product">
+
+
+            @if (Model.Count > 0)
+            {
+                int i = 1;
+                foreach (var item in Model)
+                {
+                <table class="table table-bordered">
+                    <tr>
+                        <td colspan="6" class="order_shipping_tit">
+                            
+                            <span class="order_shipping_index">包裹 @i</span>
+                            <span class="order_shipping_name">@item.OrderShipping.ShippingCompany</span><span class="order_shipping_num">运单号：<em>@item.OrderShipping.ShippingNo</em></span><br />
+                            <span class="order_shipping_time">发货时间：<em>@item.OrderShipping.OS_CreateTime</em></span>
+                            
+                             @if (OrderDetailService.ExistShippingStatus(item.OrderShipping.OrderDetailIds, Convert.ToInt32(DataConfig.OrderShippingStatusEnum.已发货)))
+                            {
+                                <a href="@Url.Action("OrderDetailReceipt", new { orderID = item.OrderShipping.OrderID, orderShippingId = item.OrderShipping.ID })" class="fr btn btn-xs btn-danger order_shipping_operate" title="确认收货">确认收货</a>
+                            }
+                        </td>
+                    </tr>
+                    @foreach (OrderDetailVModel orderDetail in item.OrderDetailVList)
+                    {
+                        string firstImage = GoodsPhotoService.GetFirstPhoto(orderDetail.OrderDetail.GoodsID);
+                        if (string.IsNullOrEmpty(firstImage))
+                        {
+                            firstImage = orderDetail.PhotoUrl;
+                        }
+                        <tr>
+                            <td width="120">
+                                <img src="@(SiteService.GetImgUrl(firstImage))" width="80" />
+                            </td>
+                            <td class="td_goodsname">
+                                <a href="@Url.Action("Index", "Goods", new { ID = orderDetail.OrderDetail.GoodsID })" target="_blank">
+                                    @orderDetail.OrderDetail.OD_GoodsName
+                                    <div class="order_property">@orderDetail.OrderDetail.OD_PropertiesName</div>
+                                    <div class="order_item_price"><i>@(SiteService.GetPriceWithUnit(orderDetail.OrderDetail.OD_TotalAmount / orderDetail.OrderDetail.OD_Count))</i> * @(orderDetail.OrderDetail.OD_Count)</div>
+                                </a>
+                            </td>
+                            <td width="120" align="center" class="td_operator">
+                                <span>@(DataConfig.OrderShippingStatus.Find(m => m.Value == orderDetail.OrderDetail.OD_ShippingStatus.ToString()).Name)</span>
+                                @*@if (orderDetail.OrderDetail.OD_ShippingStatus == Convert.ToInt32(DataConfig.OrderShippingStatusEnum.已发货) && orderDetail.OrderDetail.OD_ShippingStatus != Convert.ToInt32(DataConfig.OrderShippingStatusEnum.已退货))
+                                {
+                                    ReturnOrder existReturnOrder = null;
+                                    if (ReturnOrderService.ExistStatus(orderDetail.OrderDetail.ID, Convert.ToInt16(DataConfig.ReturnOrderStatusEnum.已申请待商家确认)))
+                                    {
+                                    <span class="error">退货已申请，待商家确认</span>
+                                    }
+                                    else if (ReturnOrderService.ExistStatus(orderDetail.OrderDetail.ID, Convert.ToInt16(DataConfig.ReturnOrderStatusEnum.商家已同意退货), out existReturnOrder) && existReturnOrder.RO_Type == Convert.ToInt16(DataConfig.ReturnOrderTypeEnum.退货退款))
+                                    {
+                                    <span class="error">商家已同意退货</span>
+                                    <span><a class="btn btn-xs btn-success" href="@Url.Action("ReturnOrderShipping", "Member", new { returnOrderID = existReturnOrder.ID })">退货</a></span>
+                                    }
+                                    else if (ReturnOrderService.ExistStatus(orderDetail.OrderDetail.ID, Convert.ToInt16(DataConfig.ReturnOrderStatusEnum.商家已同意退货), out existReturnOrder) && existReturnOrder.RO_Type == Convert.ToInt16(DataConfig.ReturnOrderTypeEnum.仅退款))
+                                    {
+                                    <span class="error">已退款</span>
+                                    }
+                                    //不存在已退货记录
+                                    else if (!ReturnOrderService.ExistStatus(orderDetail.OrderDetail.ID, Convert.ToInt16(DataConfig.ReturnOrderStatusEnum.退货完成)))
+                                    {
+                                        //确认收货7天内可以申请退货,2018-12-05，改成确认收货就不允许退货。只要已发货15天内都可以申请退货
+                                        //if (item.OrderShipping.OS_DeliveryTime != null && Convert.ToDateTime(item.OrderShipping.OS_DeliveryTime).AddDays(7) > DateTime.Now)
+                                        ProfitPercentConfig sysConfig = SystemInfoService.GetPercentConfig();
+                                        if (item.OrderShipping.OS_CreateTime != null && Convert.ToDateTime(item.OrderShipping.OS_CreateTime).AddDays(sysConfig.Order_TuiHuo_Days) > DateTime.Now)
+                                        {
+                                    <span><a href="@Url.Action("ReturnOrderApply", new { orderDetailID = orderDetail.OrderDetail.ID })" class="btn-sm btn-danger" title="申请退货">申请退货</a></span>
+                                        }
+                                    }
+                                }*@
+                            </td>
+                        </tr>
+                    }
+                </table>
+                    i++;
+                }
+            }
+            @if (ViewBag.OrderDetailNoShipping != null && (ViewBag.OrderDetailNoShipping as List<OrderDetailVModel>).Count() > 0)
+            {
+                <table class="table table-bordered">
+                    <tr>
+                        <td colspan="6" class="order_shipping_tit">
+                            <span class="order_shipping_index">待发货</span>
+                        </td>
+                    </tr>
+                    @foreach (OrderDetailVModel order_detail in ViewBag.OrderDetailNoShipping)
+                    {
+                        string firstImage = GoodsPhotoService.GetFirstPhoto(order_detail.OrderDetail.GoodsID);
+                        if (string.IsNullOrEmpty(firstImage))
+                        {
+                            firstImage = order_detail.PhotoUrl;
+                        }
+                        <tr>
+                            <td width="120">
+                                <a href="@Url.Action("Index", "Goods", new { ID = order_detail.OrderDetail.GoodsID })" target="_blank">
+                                    <img src="@(SiteService.GetImgUrl(firstImage))" width="80" />
+                                </a>
+                            </td>
+                            <td class="td_goodsname">
+                                <a href="@Url.Action("Index", "Goods", new { ID = order_detail.OrderDetail.GoodsID })" target="_blank">
+                                    @order_detail.OrderDetail.OD_GoodsName
+                                    <div class="order_property">@order_detail.OrderDetail.OD_PropertiesName</div>
+                                    <div class="order_item_price"><i>@(SiteService.GetPriceWithUnit(order_detail.OrderDetail.OD_TotalAmount / order_detail.OrderDetail.OD_Count))</i> * @(order_detail.OrderDetail.OD_Count)</div>
+                                </a>
+                            </td>
+                            <td width="120" align="center" class="td_operator">
+                                <!--订单状态-->
+                                <span>@(DataConfig.OrderStatus.Find(m => m.Value == orderModel.O_Status.ToString()).Name)</span>
+                                @if (orderModel.O_Status != Convert.ToInt32(DataConfig.OrderStatusEnum.待付款))
+                                { 
+                                    <!--发货状态-->
+                                    <span>@(DataConfig.OrderShippingStatus.Find(m => m.Value == order_detail.OrderDetail.OD_ShippingStatus.ToString()).Name)</span>
+                                }
+                                 @if (orderModel.O_Status == Convert.ToInt32(DataConfig.OrderStatusEnum.已付款))
+                                { 
+                                    @*<span><a href="@Url.Action("ReturnOrderApply", new { orderDetailID = order_detail.OrderDetail.ID, type = 1 })" class="btn btn-danger" title="退款">退款</a></span>*@
+                                }
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+        </div>
+        <div class="order_pay_line">
+            <div class="order_pay_price">
+                <ul class="total_price">
+                    <li>商品总金额：
+                    </li>
+                    <li>
+                        <span class="">￥<i class="money">@(SiteService.GetPrice(orderModel.O_TotalAmount - orderModel.O_PostFee - orderModel.O_AdditionAmount))</i> </span>
+                    </li>
+                </ul>
+                <ul class="total_price_quan">
+                    <li>优惠：
+                    </li>
+                    <li>-<span class="">￥<i class="money">@(SiteService.GetPrice(orderModel.O_DiscountAmount))</i> </span>
+                    </li>
+                </ul>
+                <ul class="total_price_shipping">
+                    <li>运费：
+                    </li>
+                    <li>
+                        <span class="">￥<i class="money">@(SiteService.GetPrice(orderModel.O_PostFee))</i> </span>
+                    </li>
+                </ul>
+                <ul class="total_price_pay">
+                    <li>实付金额：
+                    </li>
+                    <li>
+                        <span class="red">￥<i class="money">@(SiteService.GetPrice(orderModel.O_PayAmount))</i> </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!--/container-->

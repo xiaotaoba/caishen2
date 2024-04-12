@@ -1,0 +1,63 @@
+﻿@model Pannet.Models.User
+
+@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改性别";
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_content">
+        <div class="user_info_items gender_list">
+            @using (Html.BeginForm("InfoGender", "Member", FormMethod.Post, new { @class = "form-horizontal" }))
+            { 
+                <ul>
+                    <li class="@(Model.U_Gender == 1 ? "on" : "")" data-gender="1">
+                        <span class="item_name">男</span>
+                        <a href="javascript:void(0);" class="item_r">
+                            <i class="iconfont icon-gouxuan"></i>
+                        </a>
+                    </li>
+                    <li class="@(Model.U_Gender == 2 ? "on" : "")" data-gender="2">
+                        <span class="item_name">女</span>
+                        <span class="item_r">
+                            <i class="iconfont icon-gouxuan"></i>
+                        </span>
+                    </li>
+                    <li class="@(Model.U_Gender == 3 ? "on" : "")"  data-gender="3">
+                        <span class="item_name">保密</span>
+                        <a href="javascript:void(0);" class="item_r">
+                            <i class="iconfont icon-gouxuan"></i>
+                        </a>
+                    </li>
+                </ul>
+                <input name="gender" type="text" value="@Model.U_Gender" style="display:none;" />
+                <div class="block"></div>
+                <button type="submit" id="btn_save" class="btn-save">保存</button>
+            }
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+<!--/container-->
+<script>
+    $(function () {
+        $(".gender_list li").each(function () {
+            var $li = $(this);
+            $li.click(function () {
+                //console.log("111" + $li.data("gender"));
+                $("[name='gender']").val($li.data("gender"));
+                $li.addClass("on").siblings("li").removeClass("on");
+
+            });
+        });
+    });
+</script>

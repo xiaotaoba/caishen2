@@ -1,0 +1,29 @@
+﻿<div class="op_wrap">
+    <ul>
+        <li  class="@(ViewBag.TopAction == "video" ? "op_liSel" : "")"><a href="/Mobile/Course/">
+            <dl>
+                <dt><i class="icon iconfont icon-shipin"></i></dt>
+                <dd>视频类</dd>
+            </dl>
+        </a></li>
+        <li  class="@(ViewBag.TopAction == "ppt" ? "op_liSel" : "")"><a href="/Mobile/Course/PPT">
+            <dl>
+                <dt><i class="icon iconfont icon-ppt"></i></dt>
+                <dd>资料类</dd>
+            </dl>
+        </a></li>
+        @*<li  class="@(ViewBag.TopAction == "jiangyi" ? "op_liSel" : "")"><a href="/Mobile/Course/Jiangyi">
+            <dl>
+                <dt><i class="icon iconfont icon-gaizhang"></i></dt>
+                <dd>讲议类</dd>
+            </dl>
+        </a></li>*@
+        <li  class="@(ViewBag.TopAction == "jiangyi" ? "op_liSel" : "")"><a href="/Mobile/Article/List">
+            <dl>
+                <dt><i class="icon iconfont icon-gaizhang"></i></dt>
+                <dd>试题库</dd>
+            </dl>
+        </a></li>
+        
+    </ul>
+</div>

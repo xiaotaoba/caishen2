@@ -1,0 +1,83 @@
+﻿@model IEnumerable<Pannet.Models.UserLevel>
+@{
+    ViewBag.Title = "用户等级列表";    
+}
+
+<div class="page-content">
+    <div class="page-header">
+
+        <h1>
+            <span id="lblTitle">用户等级</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                等级列表
+            </small>
+        </h1>
+    </div>
+    <div class="form-inline">
+        <div class="dropdown pull-right">
+            <a class="btn btn-sm btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="icon-cog"></i>操作菜单<i class="icon-caret-down"></i>
+            </a>
+            <ul class="dropdown-menu pull-right" role="menu">
+                <li>
+                    <a href="@Url.Action("Index")"><i class="icon-group"></i>用户等级管理</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="@Url.Action("UserLevelAdd")"><i class="icon-plus"></i>新增用户等级</a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="javascript:window.location.reload();">
+                        <i class="icon-refresh"></i>刷新页面</a>
+                </li>
+            </ul>
+        </div>
+        <a href="@Url.Action("UserLevelAdd")" class="btn btn-sm btn-success"><i class="glyphicon glyphicon-plus"></i>新增用户等级</a>
+    </div>
+    <p></p>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th width="20" align="right"></th>
+                <th width="40" align="left">Id</th>
+                <th width="200" align="left">用户等级</th>
+               @* <th width="200" align="left">折扣(%)</th>
+                <th width="120" align="left">是否特殊等级</th>
+                <th align="left">上限(元)</th>
+                <th align="left">下限(元)</th>*@
+              @*  <th align="left">门店返利比(%)</th>
+                <th align="left">合伙人返利比(%)</th>*@
+                <th width="100" align="left">是否启用</th>
+                <th align="left" class="dr_option">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+            }
+            @foreach (var item in Model)
+            {
+                <tr id="dr_row_@i">
+                    <td align="right">
+                        <input name="ids[]" type="checkbox" class="dr_select toggle md-check" value="1" disabled=""></td>
+                    <td align="left">@Html.DisplayFor(modelItem => item.ID)</td>
+                    <td align="left">@Html.DisplayFor(modelItem => item.Level_Name)</td>
+            @*        <td align="left">@Html.DisplayFor(modelItem => item.Level_Discount_Percent)</td>
+                    <td align="left">@Html.Raw(item.Level_Is_Special == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>
+                    <td align="left">@Html.DisplayFor(modelItem => item.Level_Money_Begin)</td>
+                    <td align="left">@Html.DisplayFor(modelItem => item.Level_Money_End)</td>
+                    <td align="left">@Html.DisplayFor(modelItem => item.Level_Partner_Rebate_Percent)</td>
+                    <td align="left">@Html.DisplayFor(modelItem => item.Level_Shop_Rebate_Percent)</td>*@
+                    <td align="left">@Html.Raw(item.Level_Is_Enable == 1 ? "<i class='icon-ok green' title='是'></i>" : "<i class='icon-remove red' title='否'></i>")</td>
+                    <td align="left" class="dr_option">
+                        @*<a class="aadd" href="javascript:;"><i class="icon-cogs"></i>系统权限</a>
+                        <a class="alist" href="@Url.Action("AdminList", "Manager", new { GroupID = item.ID })"><i class="icon-user"></i>成员管理</a>*@
+                        <a class="aedit" href="@Url.Action("UserLevelAdd", "UserLevel", new { ID = item.ID })"><i class="icon-edit"></i>编辑</a>
+                        <a class="adel" href="@Url.Action("UserLevelDelete", "UserLevel", new { ID = item.ID })" style="@(item.ID == 1 || item.ID == 2 || item.ID == 3 || item.ID == 4 || item.ID == 5 ? "display:none" : "") " data-confirm="delete"><i class="icon-trash"></i>删除</a></td>
+                </tr>
+                i++;
+            }
+        </tbody>
+    </table>
+</div>

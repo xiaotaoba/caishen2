@@ -1,0 +1,320 @@
+﻿@model Pannet.Models.TiXian
+
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using Pannet.Models
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "申请提现";
+    User LoginUser = ViewBag.User;
+    List<TiXianUserVModel> txUsers = ViewBag.TiXianUsers;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+
+    <style>
+        .table hr { border: none; border-bottom: 1px solid #bbb; height: 10px; margin: 0 auto 10px; }
+        .TiXian_box { margin-left: 10px; }
+        .TiXian_box .table td { margin-left: 10px; }
+        .TiXian_box .tbox { min-width: 400px; line-height: 60px; }
+        .TiXian_box .tbox_code { width: 150px; line-height: 60px; }
+        .TiXian_box #btnSendCode {line-height: 60px;height:60px; }
+        .TiXian_box .red_taxz { display: none; }
+        .TiXian_box .tr_taxamount { display: none; }
+        .txt_blue { color: #17AEE6; }
+        .history_user_list input {width:40px;height:40px; }
+    </style>
+}
+<!--主区域-->
+<div id="container">
+    <div class="mc_right_body">
+        <div class="mc_right_menu">
+            <ul>
+                <li class="active"><a href="javascript:void(0)">申请提现</a></li>
+                <li><a href="@Url.Action("TiXian", "Member")">提现记录</a></li>
+            </ul>
+        </div>
+        <div class="mc_content">
+            <ul class="home_user">
+                <li class="account" style="border: none;">
+                    <div>
+                        <i class="iconfont icon-yue"></i>余额：<span class="red">￥<em class="money">@(SiteService.GetPrice(LoginUser.U_Amount))</em></span> &nbsp;
+                        可提现额度：<span class="red">￥<em class="money">@(SiteService.GetPrice(LoginUser.U_TiXianAmount))</em></span>
+                    </div>
+                </li>
+            </ul>
+            <div class="TiXian_box">
+                @using (Html.BeginForm("TiXianApply", "Member", FormMethod.Post))
+                { 
+                    @Html.ValidationSummary(true)
+                    @Html.Raw(ViewBag.MessageInfo)
+                    <input type="hidden" id="ID" name="ID" value="@ViewBag.ID" />
+
+                    <table class="table table-noborder form-inline">
+                        <tbody>
+                            @if (ViewBag.ShowApplyBtn == 1)
+                            {
+                                <tr>
+                                    <td width="180">@Html.LabelFor(m => m.TX_UserName)： </td>
+                                    <td>
+                                        @Html.TextBoxFor(m => m.TX_UserName, new { @class = "tbox", placeholder = "请输入真实姓名", maxlength = "20" }) <span class="red">*</span><br />
+                                        <a href="javascript:void(0)" class="green show_history"><u>历史收款信息</u></a>
+                                        @Html.ValidationMessageFor(m => m.TX_UserName)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>@Html.LabelFor(m => m.TX_BankName)： </td>
+                                    <td>
+                                        @Html.TextBoxFor(m => m.TX_BankName, new { @class = "tbox", placeholder = "银行名称、支付宝、微信", maxlength = "20" }) <span class="red">*</span>
+                                        @Html.ValidationMessageFor(m => m.TX_BankName)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>@Html.LabelFor(m => m.TX_BankNumber)： </td>
+                                    <td>
+                                        @Html.TextBoxFor(m => m.TX_BankNumber, new { @class = "tbox", placeholder = "银行卡号、支付宝、微信账号", maxlength = "20" }) <span class="red">*</span>
+                                        @Html.ValidationMessageFor(m => m.TX_BankNumber)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>@Html.LabelFor(m => m.TX_Amount)： </td>
+                                    <td>
+                                        @Html.TextBoxFor(m => m.TX_Amount, new { @class = "tbox", placeholder = "不少于100元", maxlength = "8" }) <span class="red">*</span>
+                                    </td>
+                                </tr>
+                                <tr style="display:none;">
+                                    <td>验证码： </td>
+                                    <td>
+                                        <input type="number" name="TX_Code" id="TX_Code" class="tbox_code" />
+                                        <input type="button" value="发送验证码" class="tcbox" id="btnSendCode" /><span class="red">*</span><br />
+                                        （验证码接收手机：@(LoginUser.U_Phone))
+                                        <input type="hidden" name="phone" value="@(LoginUser.U_Phone)" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>请仔细确认以上信息无误后提交申请</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td></td>
+                                <td>
+                                    @if (ViewBag.ShowApplyBtn == 1)
+                                    {
+                                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-info" onclick="javascript:return DoSubmit();"><i class="icon-ok"></i>提交申请</button> 
+                                    }
+                                    else
+                                    {
+                                        <a href="javascript:void(0)" class="btn btn-danger">提现申请处理中...</a>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+            </div>
+            <div id="history_user_list" style="display: none;">
+                <table class="history_user_list table">
+                    <tr>
+                        <th width="40">&nbsp;</th>
+                        <th>收款人</th>
+                        <th>收款银行</th>
+                        <th>收款账号</th>
+                    </tr>
+                    @if (txUsers != null && txUsers.Count() > 0)
+                    {
+                        foreach (var item in txUsers)
+                        {
+                        <tr>
+                            <td>
+                                <input type="radio" name="historyInfo" data-username="@(item.UserName)" data-bank="@(item.BankName)" data-number="@(item.BankNumber)" /></td>
+                            <td>@(item.UserName)</td>
+                            <td>@(item.BankName)</td>
+                            <td>@(item.BankNumber)</td>
+                        </tr>
+                        }
+                    }
+                </table>
+            </div>
+            <div class="alert alert-warning">
+                <div class="tips">
+                    说明：<br />
+                    1.同一时间只能申请一次提现，待上一次提现处理完成之后才能发起第二次申请。<br />
+                    2.请认真填写收款人信息，以免影响提现金额时间延误，处理时间1~3工作日。<br />
+                    3.提现需支付5%服务费，从实际到账金额中扣除。<br />
+                    4.已开光用户不受提现额度限制。<br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/container-->
+
+
+@section FootJs{
+    <script>
+        var $Amount = $("#TX_Amount");
+        var $UserName = $("#TX_UserName");
+        var $BankName = $("#TX_BankName");
+        var $BankNumber = $("#TX_BankNumber");
+        var maxAmount = parseFloat('@LoginUser.U_Amount');
+        var maxtxAmount = parseFloat('@LoginUser.U_TiXianAmount');
+        var $tcode = $("#TX_Code");
+        var $btnGetTCode = $("#btnSendCode");
+        var $phone = $("[name='phone']");
+        var leftSecond = 60;
+        var timeout = null;
+        var is_kaiguang = parseInt("@(LoginUser!=null && LoginUser.U_Is_Check==1?"1":"0")");
+
+        var amount = 0;
+
+        $(function () {
+            $Amount.blur(function () {
+                amount = $Amount.val();
+                if (isRealNum(amount)) {
+                    amount = toDecimal(amount);
+                }
+                else {
+                    amount = 0;
+                }
+                //console.log(amount);
+                if (amount > maxAmount) {
+                    amount = maxAmount;
+                }
+                $Amount.val(amount);
+            });
+            $(".show_history").click(function () {
+                layerIndex = layer.open({
+                    type: 1,
+                    title: "选择收款人信息",
+                    content: $('#history_user_list').html() //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                    //, anim: 'up'
+                    , style: 'position:fixed; bottom:0; left:0; width: 100%; min-height: 200px; padding:10px 0; border:none;'
+                });
+            });
+            $("body").delegate(".history_user_list [name='historyInfo']", "click", function () {
+                var $item = $(this);
+                if ($item.prop("checked")) {
+                    $UserName.val($item.data("username"));
+                    $BankName.val($item.data("bank"));
+                    $BankNumber.val($item.data("number"));
+                    layer.close(layerIndex);
+                }
+            });
+
+            ////发送验证码
+            //$btnGetTCode.click(function () {
+
+            //    SendMobileCode();
+            //});
+        });
+        function DoSubmit() {
+            if (amount < 100) {
+                alert("请填写申请提现金额，且不小于100！");
+                return false;
+            }
+            if (is_kaiguang==0 && amount > maxtxAmount) {
+                alert("提现金额不能大于可提现额度！");
+                return false;
+            }
+            if ($("#TX_UserName").val() == "") {
+                alert("请输入真实姓名！");
+                return false;
+            }
+            if ($("#TX_BankName").val() == "") {
+                alert("请输入银行名称、支付宝或微信！");
+                return false;
+            }
+            if ($("#TX_BankNumber").val() == "") {
+                alert("请输入银行卡号、支付宝或微信账号！");
+                return false;
+            }
+            //if ($tcode.val() == "") {
+            //    alert("请输入手机验证码！");
+            //    return false;
+            //}
+            //if (!CheckMobileCode()) {
+            //    alert("验证码错误！");
+            //    return false;
+            //}
+
+            return true;
+        }
+
+        //一致true,不一致false
+        function CheckMobileCode() {
+
+            var return_flag = false;
+
+            if ($tcode.val() == "") {
+                return false;
+            }
+            $.ajax({
+                url: "@Url.Action("CheckMobileCode", "Member")",
+                type: "GET",
+                async: false,
+                cache: false,
+                data: { mobile: $phone.val(), code: $tcode.val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")"); //JSON.parse(result);
+                    if (json_rs == null || json_rs.status == "-1") {//返回错误
+                        return_flag = false;
+                    }
+                    else if (json_rs.status == "success") {
+                        return_flag = true;
+                    }
+                },
+                error: function (xmlhttp) {
+                    alert(xmlhttp.responseText);
+                }
+            });
+
+            return return_flag;
+        }
+        function SendMobileCode() {
+            $.ajax({
+                url: "@Url.Action("SendMobileCode", "Member")",
+                type: "GET",
+                async: false,
+                cache: false,
+                data: { mobile: $phone.val() },
+                success: function (result) {
+                    var json_rs = result;//eval("(" + result + ")"); //JSON.parse(result);
+                    if (json_rs == null || json_rs.status == "-1") {//返回错误
+                        alert(json_rs.msg);
+                    }
+                    else if (json_rs.status == "success") {
+                        ResetTime();
+                        if (json_rs.msg != "") {
+                            alert(json_rs.msg);
+                        }
+                    }
+                    //location.href = "regTwo.aspx?username=" + encodeURI($("#username").val());
+
+                },
+                error: function (xmlhttp) {
+                    alert(xmlhttp.responseText);
+                }
+            });
+        }
+        function ResetTime() {
+            if (leftSecond == 0) {
+                clearTimeout(timeout);
+                $btnGetTCode.val("发送验证码");
+                $btnGetTCode.removeAttr("disabled");
+                $btnGetTCode.removeClass("hui");
+                $btnGetTCode.addClass("orange");
+                leftSecond = 60;
+            }
+            else {
+                $btnGetTCode.attr("disabled", "disabled");
+                $btnGetTCode.removeClass("orange");
+                $btnGetTCode.addClass("hui")
+                $btnGetTCode.val("重新获取(" + leftSecond + "s)");
+                leftSecond--;
+                timeout = setTimeout("ResetTime()", 1000);
+            }
+        }
+    </script>
+}

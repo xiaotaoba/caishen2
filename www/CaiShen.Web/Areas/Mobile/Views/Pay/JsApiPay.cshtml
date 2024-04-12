@@ -1,0 +1,135 @@
+﻿@model Pannet.Models.Order
+
+@using Pannet.Models
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "支付页面";
+}
+<!--主区域-->
+<div id="container">
+    <div id="pay" class="base">
+        <dl class="pay_order_success">
+            <dt>订单支付</dt>
+            <dd>
+                @if (ViewBag.total_fee == null || string.IsNullOrEmpty(ViewBag.trade_no))
+                {
+                    <div class="tips">
+                        <div class="red">参数错误!</div>
+                    </div>
+                }
+                else
+                {
+                    bool IsPay = OrderService.IsPay(ViewBag.trade_no);
+                     
+                    <div class="tips">
+                        <i class="iconfont icon-dizhiguanliyigouxuan"></i>
+                        @if (IsPay)
+                        { 
+                            <span>支付成功！</span>
+                        }
+                        else
+                        {
+                            <span>请尽快完成支付！</span>
+                        }
+                    </div>
+                    <table border="1">
+                        <tr class="tr_th">
+                            <td>交易单号</td>
+                            <td>交易金额</td>
+                        </tr>
+                        <tr>
+                            <td>@ViewBag.trade_no</td>
+                            <td align="center"><span class="red">@(SiteService.GetPrice(ViewBag.total_fee))</span>元</td>
+                        </tr>
+                    </table>
+
+                    <div class="center-block" style="text-align: center;">
+                        <div class="err_message">
+                            @Html.Raw(ViewBag.MessageInfo)
+                        </div>
+                        @if (IsPay)
+                        { 
+                            <div class="center-block" style="text-align: center;">
+                                <a href="/Mobile/Member/Order" class="btn btn-success btn-lg">查看记录</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <button class="btn_pay" onclick="javascript:callpay();return false;">立即支付</button>
+                        }
+                    </div>
+                }
+            </dd>
+        </dl>
+
+    </div>
+
+</div>
+<!--/container-->
+
+
+@section FootJs{
+
+    <script>
+        $(function () {
+            //$(".pay_item").click(function () {
+            //    $(this).addClass("active");
+            //    $(this).siblings().removeClass("active");
+            //});
+            // $(".btn_pay ").click(function () {
+            //      location.href = "@Url.Action("Success", "Pay")";
+            //  });
+        });
+    </script>
+    <script type="text/javascript">
+        var host = "@ViewBag.host";
+
+        //调用微信JS api 支付
+        function jsApiCall() {
+
+            WeixinJSBridge.invoke(
+            'getBrandWCPayRequest',
+            $.parseJSON('@Html.Raw(ViewBag.wxJsApiParam)'),//josn串
+                         function (res) {
+                             WeixinJSBridge.log(res.err_msg);
+                             //alert(res.err_code + res.err_desc + res.err_msg);
+                             if (res.err_msg == "get_brand_wcpay_request:ok") {
+                                 //alert("微信支付成功!");
+                                 if (host != "") {
+                                     location.href = "http://" + host + "/Mobile/Pay/Success?trade_no=@(ViewBag.trade_no)&total_fee=@(ViewBag.total_fee)";
+                                 }
+                                 else {
+                                     location.href = "/Mobile/Pay/Success?trade_no=@(ViewBag.trade_no)&total_fee=@(ViewBag.total_fee)";
+                                 }
+                             } else if (res.err_msg == "get_brand_wcpay_request:cancel") {
+                                 //alert("用户取消支付!");
+                             } else {
+                                 //alert(res.err_msg);
+                                 alert(JSON.stringify(res));
+                                 //alert("支付失败!");
+                             }
+
+                         }
+                        );
+                     }
+
+                     function callpay() {
+                         if (typeof ('WeixinJSBridge') == "undefined") {
+                             if (document.addEventListener) {
+                                 document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
+                             }
+                             else if (document.attachEvent) {
+                                 document.attachEvent('WeixinJSBridgeReady', jsApiCall);
+                                 document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
+                             }
+                         }
+                         else {
+                             jsApiCall();
+                         }
+                     }
+
+    </script>
+}

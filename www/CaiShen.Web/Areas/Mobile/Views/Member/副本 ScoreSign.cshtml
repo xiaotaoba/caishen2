@@ -1,0 +1,104 @@
+﻿@model Pannet.Models.TiXian
+
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using Pannet.Models
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "签到";
+    User LoginUser = ViewBag.User;
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+}
+<!--主区域-->
+<div id="container">
+    <div class="signin">
+			<ul>
+		        <li>
+		        	<div class="user_box">
+		                <span class="user_img">
+		                    <img src="content/images/member/pic_01-04.jpg" />
+		                </span>
+		                <div class="user_info">
+		                    <span class="user_name">积分</span>
+		                    <span class="user_role">15000</span>
+		                </div>
+	                </div>
+                    <a href="@Url.Action("Info", "Member")" class="signin_rule">挑战规则</a>
+		        </li>
+		        <li class="signin_line">
+					<a href="#" class="signin_circle">
+						签到
+						<em>快点我签到吧~</em>
+					</a>
+					<div class="signin_tj">本月已连续签到<span class="sign_days">2</span>天 累计签到<span class="sign_totaldays">2</span>天</div>
+		        </li>
+		    </ul>
+	    </div>
+	    <div class="sign_date_box">
+	    	<div class="sign_date">2018年5月</div>
+	    	<div class="sign_week">
+	    		<span class="on">日</span>
+	    		<span>一</span>
+	    		<span>二</span>
+	    		<span>三</span>
+	    		<span>四</span>
+	    		<span>五</span>
+	    		<span>六</span>
+	    	</div>
+	    	<div class="sign_days">
+	    		<span></span>
+	    		<span></span>
+	    		<span><em></em>1</span>
+	    		<span class="on"><em></em>2</span>
+	    		<span class="on"><em></em>3</span>
+	    		<span><em></em>4</span>
+	    		<span><em></em>5</span>
+	    		<span><em></em>6</span>
+	    		<span><em></em>7</span>
+	    		<span><em></em>8</span>
+	    		<span class="on"><em></em>9</span>
+	    		<span><em></em>10</span>
+	    		<span class="on"><em></em>11</span>
+	    		<span><em></em>12</span>
+	    		<span><em></em>13</span>
+	    		<span><em></em>14</span>
+	    		<span><em></em>15</span>
+	    		<span><em></em>16</span>
+	    		<span><em></em>17</span>
+	    		<span><em></em>18</span>
+	    		<span><em></em>19</span>
+	    		<span><em></em>20</span>
+				<span><em></em>21</span>
+	    		<span><em></em>22</span>
+	    		<span><em></em>23</span>
+	    		<span><em></em>24</span>
+	    		<span><em></em>25</span>
+	    		<span><em></em>26</span>
+	    		<span><em></em>27</span>
+	    		<span><em></em>28</span>
+	    		<span><em></em>29</span>
+	    		<span><em></em>30</span>
+	    		<span><em></em>31</span>
+	    	</div>
+	    </div>
+	    <div class="score_list">
+	    	<div class="score_tit">积分记录</div>
+		    <ul class="score_item">
+		        <li class="item_time">2018-05-03 10:25:20</li>
+		        <li class="item_thing">签到</li>
+		        <li class="item_score jia">+30</li>
+		    </ul>
+		     <ul class="score_item">
+		        <li class="item_time">2018-05-03 07:25:20</li>
+		        <li class="item_thing">兑换</li>
+		        <li class="item_score jian">-1000</li>
+		    </ul>
+	    </div>
+</div>
+<!--/container-->
+
+@section FootJs{
+}

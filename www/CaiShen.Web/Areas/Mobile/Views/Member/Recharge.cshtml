@@ -1,0 +1,85 @@
+﻿@using Pannet.Models;
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "充值-会员中心";
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css" rel="stylesheet" />
+    <style>
+        .pay_amount {line-height:50px;border-radius:5px;border:1px solid #bbb; }
+    </style>
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_right_body">
+        <div class="mc_right_menu">
+            <ul>
+                <li class="active"><a href="#">充值</a></li>
+                <li><a href="@Url.Action("AmountList")">资金记录</a></li>
+            </ul>
+        </div>
+        <div class="mc_content">
+            <div class="user_chongzhi">
+                @using (Html.BeginForm("Pay", "Pay", FormMethod.Post))
+                {
+                    <table>
+                        <tr>
+                            <td>支付方式：</td>
+                            <td>
+                                <div class="pay_item pay_alipay" style="display:none;">
+                                    <label>
+                                        <input type="radio" name="payway"  value="alipay" /><i class="iconfont icon-zhifubao"></i> 支付宝
+                                    </label>
+                                </div>
+                                <div class="pay_item pay_weixin active">
+                                    <label>
+                                        <input type="radio" name="payway" checked="checked" value="wxpay" /><i class="iconfont icon-weixinzhifu"></i> 微信支付
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>充值金额：</td>
+                            <td>
+                                <input type="text" name="pay_amount" class="pay_amount" />
+                                元
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>
+                                <button class="btn_pay btn btn-danger">立即充值</button>
+                            </td>
+                        </tr>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="clear"></div>
+
+</div>
+<!--/container-->
+@section FootJs{
+
+    <script>
+        $(function () {
+            $(".pay_item").click(function () {
+                $(this).addClass("active");
+                $(this).siblings().removeClass("active");
+            });
+            $(".btn_pay ").click(function () {
+                var money = $("[name='pay_amount']").val();
+                if (money == "") {
+                    alert("请输入充值金额！");
+                    $("[name='pay_amount']").focus();
+                    return false;
+                }
+            });
+        });
+    </script>
+}

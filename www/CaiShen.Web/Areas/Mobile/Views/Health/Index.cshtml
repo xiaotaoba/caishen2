@@ -1,0 +1,76 @@
+﻿@model PagedList.PagedList<Pannet.Models.Goods>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "康复项目";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <style>
+        body { background-color: #eee; }
+    </style>
+}
+
+<div class="box">
+
+    <div class="kangfu_nav" style="display: block;">
+        <ul>
+            @if (ViewBag.Catagorys != null)
+            {
+                foreach (GoodsCategory item in ViewBag.Catagorys)
+                {
+                <li>
+                    <a href="@Url.Action("Index", new { cat = item.ID })" class="@(ViewBag.cat==item.ID?"on":"")">
+                        <i class="syioc_cssimg">
+                            <img src="@(item.GC_Image)"></i>
+                        <span>@(item.GC_Name)</span>
+                    </a>
+                </li>
+                }
+            }
+        </ul>
+    </div>
+
+    <div class="car_nav">
+        <a href="@Url.Action("Index", "Health", new { ViewBag.ID, ViewBag.keyword, order = "tj" })" class="carnav_sel">康复项目</a>
+        <a href="@Url.Action("Doctor", "Team", new { ViewBag.ID, ViewBag.keyword, order = "new" })">康复医师</a>
+    </div>
+    <div class="car_content kangfu_list page">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (Goods item in Model)
+            {
+            <dl>
+                <a href="@Url.Action("Detail", new { item.ID })">
+                    <dt>
+                        <img src="@item.G_Image" alt="@item.G_Name" /></dt>
+                    <dd>
+                        <h3>@item.G_Name
+                        </h3>
+                        <p class="time"><i class="iconfont icon-time1"></i>@(item.G_ServiceTime)</p>
+                        <p class="intro">
+                            @(item.G_Abstract)
+                        </p>
+                        <i class="price">￥@(item.G_Price)</i>
+                        <span><i class="iconfont icon-gouxuan"></i>@item.G_SaleCount 人浏览</span>
+                    </dd>
+                </a>
+            </dl>
+            }
+        }
+        else
+        {
+            <div class="nothing">暂无数据.</div>
+        }
+
+        <div class="clear"></div>
+        <div id="page_nav" style="display:none;">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { page, ID = ViewBag.ID, sort = ViewBag.sort, asc = ViewBag.asc }))
+        </div>
+    </div>
+</div>

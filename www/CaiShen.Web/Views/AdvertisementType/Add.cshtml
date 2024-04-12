@@ -1,0 +1,128 @@
+﻿@model Pannet.Models.AdvertisementType
+@using Pannet.DAL
+@using Pannet.Utility
+
+@{
+    ViewBag.Title = "培训活动类型 ";
+}
+
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">培训活动类型 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                @if (Model != null && Request.RequestContext.RouteData.Values["ID"] != null)
+                {
+                    <span>编辑 </span>
+                }
+                else
+                {
+                    <span>新增</span>
+                }
+            </small>
+        </h1>
+    </div>
+
+
+    @using (Html.BeginForm("Add", "AdvertisementType", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        //@Html.HiddenFor(m => m.ID, new { @value = ViewBag.ID })
+
+        <table class="table table-striped table-hover">
+            <tbody>
+                <tr>
+                    <td width="120"><font color="red">*</font>@Html.LabelFor(m => m.ADT_Name)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.ADT_Name, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.ADT_Name)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.ADT_Desc)： </td>
+                    <td>
+                        @Html.TextAreaFor(m => m.ADT_Desc, new { @class = "input-text", style = "width:500px;height:100px;" })
+                        @Html.ValidationMessageFor(m => m.ADT_Desc)
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td>@Html.LabelFor(m => m.ADT_Class)： </td>
+                    <td>
+                        <select name="ADT_Class" id="ADT_Class">
+                            @foreach (var item in DataConfig.AdShowWay)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.ADT_Class.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.ADT_Class)
+
+                        <script>
+                            /* 培训活动展示形式 */
+                            $(function () {
+                                $("#ADT_Class").change(function () {
+                                    var isphoto = $("#ADT_Class").val();
+                                    if (parseInt(isphoto) == 1) {
+                                        $(".tr_width").show();
+                                        $(".tr_height").show();
+                                    }
+                                    else {
+                                        $(".tr_width").hide();
+                                        $(".tr_height").hide();
+                                    }
+                                });
+                            });
+                        </script>
+
+                    </td>
+                </tr>
+
+                @*<tr class="tr_width" style="@(Model != null && Model.ADT_Class == 1 ? "" : "display:none;")">*@
+                <tr class="tr_width" style="display:none;">
+                    <td>@Html.LabelFor(m => m.ADT_Width)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.ADT_Width, new { @class = "input-text" }) 像素
+                        @Html.ValidationMessageFor(m => m.ADT_Width)
+                    </td>
+                </tr>
+                @*<tr class="tr_height" style="@(Model != null && Model.ADT_Class == 1 ? "" : "display:none;")">*@
+                <tr class="tr_height" style="display:none;">
+                    <td>@Html.LabelFor(m => m.ADT_Height)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.ADT_Height, new { @class = "input-text" }) 像素
+                        @Html.ValidationMessageFor(m => m.ADT_Height)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.ADT_IsEnable)： </td>
+                    <td>
+                        <select name="ADT_IsEnable" id="ADT_IsEnable">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.ADT_IsEnable.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.ADT_IsEnable)
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td>@Html.LabelFor(m => m.ADT_Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.ADT_Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.ADT_Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+</div>

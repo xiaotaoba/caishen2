@@ -1,0 +1,57 @@
+﻿@model PagedList.PagedList<Pannet.Models.Article>
+
+@using Pannet.Models
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "市场动态";
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <style>
+        /*#footer, .footer_block { display: block; }*/
+    </style>
+}
+<div class="box">
+    @{
+        ViewBag.TopAction = "news";
+        Html.RenderPartial("_TopNavHD");
+    }
+    <div class="bsb_content">
+        <div class="bsb_conBox">
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (Article item in Model)
+                {
+                <dl>
+                    <a href="@Url.Action("NewsDetail", new { item.ID })">
+                        <dt>
+                            <img src="@item.Art_Image" alt="@item.Art_Title" /></dt>
+                        <dd>
+                            <div class="bsb_conBHeader">@item.Art_Title</div>
+                            <div class="bsb_conBTh">
+                                <span>@item.Art_CreateTime.ToString("yyyy-MM-dd")</span>
+                                <span>阅读：@item.Art_ShowTimes</span>
+                            </div>
+                        </dd>
+                    </a>
+                </dl>
+                }
+            }
+            else
+            {
+                <div class="nothing">暂无数据.</div>
+            }
+        </div>
+        @*<div class="bsb_conMore">
+            <a href="#">
+                <p>加载更多活动</p>
+                <i class="icon iconfont icon-xiala"></i>
+            </a>
+        </div>*@
+    </div>
+
+</div>

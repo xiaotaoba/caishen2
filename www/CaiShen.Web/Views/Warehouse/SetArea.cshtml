@@ -1,0 +1,334 @@
+﻿@model Pannet.Models.WarehouseArea
+
+@using Pannet.Models
+@using PagedList.Mvc
+@using Pannet.DAL
+
+@{
+    //Layout = null;
+    ViewBag.Title = "仓库配送区域管理";
+    Warehouse warehouseModel = ViewBag.Warehouse;
+}
+@section Style{
+    <style>
+        .table ul { list-style: none; width: 100%; margin: 0; padding: 10px 0; }
+        .table ul li { padding: 0; text-align: left; font-size: 13px; margin-bottom: 5px; }
+        .table ul li span { display: inline-block; padding: 4px 8px; margin: 0 5px 5px 0; border: 1px solid #ddd; cursor: pointer; position: relative; }
+        .table ul li span:hover { border: 1px solid #ff6a00; }
+        .table ul li span.active { border: 1px solid #ff6a00; background-color: #ff6a00; color: #fff; }
+        .table ul li.city { padding-left: 80px; }
+        .table ul li span:first-child { background-color: #ddd; }
+        .table ul li span.active:first-child { border: 1px solid #ff6a00; background-color: #ff6a00; color: #fff; }
+        .table ul li span i { position: absolute; right: -10px; top: -8px; background-color: #f00;border:1px solid #f00; color: #fff; border-radius: 16px; width: 16px; height: 16px;line-height:16px;text-align:center; font-weight:bold; font-size: 12px;font-style:normal;display:inline-block; display:none;}
+        .table ul li span:hover i{display:block; }
+        .table ul#SelectArea {padding:0; }
+        .table ul#SelectArea span:first-child { background-color: transparent; }
+    </style>
+}
+
+<div class="page-content">
+    <div class="page-header">
+
+        <h1>
+            <span id="lblTitle">仓库<span class="red">@warehouseModel.Name</span>配送区域</span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                设置
+            </small>
+        </h1>
+    </div>
+    <p></p>
+    @using (Html.BeginForm("SetArea", "Warehouse", FormMethod.Post))
+    { 
+        @Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)
+        @Html.HiddenFor(m => m.WarehouseID, new { @value = warehouseModel.ID }) 
+
+        <table class="table table-striped ">
+            <tbody>
+                <tr>
+                    <td width="120">@Html.LabelFor(m => m.Title)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Title, new { @class = "input-text" })
+                        @Html.ValidationMessageFor(m => m.Title)
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.AreaIds)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.AreaIds, new { @class = "input-text", style = "width:300px;display:none;", @readonly = "true" })
+                        @if (ViewBag.Areas != null)
+                        {
+                            <ul id="SelectArea">
+                                <li>
+                                    @foreach (Area item in ViewBag.Areas)
+                                    {
+                                        <span data-id="@item.ID">@item.Area_Name
+                                            <i class="delete">×</i>
+                                        </span>
+                                    }
+                                </li>
+                            </ul>
+                        }
+                        @Html.ValidationMessageFor(m => m.AreaIds)
+                    </td>
+                </tr>
+                <tr>
+                    <td>选择配送： </td>
+                    <td id="tr_area">
+                        <ul id="Province">
+                            <li>
+                                <span data-type="province" data-all="yes" data-parent="0" data-id="1">全国
+                                </span>
+                                @if (ViewBag.Provinces != null)
+                                {
+                                    foreach (Area item in ViewBag.Provinces)
+                                    {
+                                    <span data-type="province"  data-all=""  data-parent="@item.Area_ParentID" data-id="@item.ID" data-name="@item.Area_Name">@item.Area_Name
+                                    </span>
+                                    }
+                                }
+                            </li>
+                        </ul>
+                        <ul id="City">
+                        </ul>
+
+                        <script>
+
+                            var $province = $("#Province");
+                            var $city = $("#City");
+                            var $AreaIds = $("#AreaIds");
+                            var $SelectedArea = $("#SelectArea");
+                            //var $region = $("#Region");
+                            $(function () {
+
+                                //选中省份
+                                $province.find("li>span").each(function () {
+                                    var $curSpan = $(this);
+                                    $curSpan.click(function () {
+                                        //所有
+                                        if ($curSpan.data("all") == "yes") {
+                                            $curSpan.addClass("active");
+                                            $province.find("li>span").not($curSpan).removeClass("active");
+                                            //ClearMediaType();
+                                            RemoveAllHtml();
+                                        }
+                                        else {
+                                            $province.find("[data-all='yes']").removeClass("active");
+                                            //DelMediaType("0");
+                                            if ($curSpan.hasClass("active")) {
+                                                $curSpan.removeClass("active")
+                                                //DelMediaType($curSpan.data("id"));
+                                                RemoveCityAllHtml($curSpan);
+
+                                                //如果都取消，默认选择全部
+                                                if ($curSpan.siblings(".active").size() < 1) {
+                                                    $curSpan.siblings("[data-all='yes']").addClass("active");
+                                                }
+                                            }
+                                            else {
+                                                $curSpan.addClass("active")
+                                                GetCityData($curSpan);
+                                                //AddMediaType($curSpan.data("id"));
+                                            }
+                                        }
+                                    });
+                                });
+
+                                //选中城市
+                                $city.delegate("li>span", "click", function () {
+                                    var $curSpan = $(this);
+                                    //所有
+                                    if ($curSpan.data("all") == "yes") {
+                                        $curSpan.addClass("active");
+                                        $curSpan.siblings("span").not($curSpan).removeClass("active");
+                                        RemoveCityHtmlItem($curSpan);
+                                    }
+                                    else {
+                                        $curSpan.siblings("[data-all='yes']").removeClass("active");
+                                        //DelMediaType("0");
+                                        if ($curSpan.hasClass("active")) {
+                                            $curSpan.removeClass("active")
+                                            //DelMediaType($curSpan.data("id"));
+                                            RemoveRegionHtmlItem($curSpan);
+                                            //如果都取消，默认选择全部
+                                            if ($curSpan.siblings(".active").size() < 1) {
+                                                $curSpan.siblings("[data-all='yes']").addClass("active");
+                                            }
+                                        }
+                                        else {
+                                            $curSpan.addClass("active")
+                                            if ($curSpan.data("type") != "region")//市区步骤展示下级
+                                            {
+                                                GetRegionData($curSpan);
+                                            }
+                                            //AddMediaType($curSpan.data("id"));
+                                        }
+                                    }
+                                });
+
+                                //绑定删除已选事件
+                                $SelectedArea.delegate("li>span .delete", "click", function () {
+                                    DeleteSelectedAreaID($(this).parent());
+                                });
+
+                            });
+
+                            //选择全国，时清除
+                            function RemoveAllHtml() {
+                                $city.html("");
+                                //$region.html("");
+                            }
+
+                            //选择全省时，清除所选市
+                            function RemoveCityHtmlItem($provinceItem) {
+                                //$city.find("li[data-id='" + $provinceItem.data("id") + "']").remove();
+                                $city.find("li[data-parent='" + $provinceItem.data("id") + "']").remove();
+                            }
+                            //取消选中省时，清除所选省 + 所选市
+                            function RemoveCityAllHtml($provinceItem) {
+                                $city.find("li[data-id='" + $provinceItem.data("id") + "']").remove();
+                                $city.find("li[data-parent='" + $provinceItem.data("id") + "']").remove();
+                            }
+
+                            //取消选中市时清除区
+                            function RemoveRegionHtmlItem($cityItem) {
+                                $city.find("li[data-id='" + $cityItem.data("id") + "']").remove();
+                                //$city.find("li[data-parent='" + $provinceItem.data("id") + "']").remove();
+                            }
+
+                            function ShowCityHtml(cityJson, $provinceItem) {
+                                var cityHtml = '<li  class="province"  data-parent="' + $provinceItem.data("parent") + '"  data-id="' + $provinceItem.data("id") + '" >';
+                                cityHtml += '<span data-type="city" data-all="yes" data-parent="' + $provinceItem.data("parent") + '" data-id="' + $provinceItem.data("id") + '" data-name="' + $provinceItem.data("name") + '" class="active">' + $provinceItem.data("name") + '全省</span>';
+                                //alert(cityJson);
+                                $.each(cityJson, function (index, data) {
+                                    cityHtml += '<span data-type="city"  data-all=""  data-parent="' + $provinceItem.data("id") + '" data-id="' + data.ID + '" data-name="' + data.Area_Name + '">' + data.Area_Name + '</span>'
+                                });
+                                cityHtml += "</li>";
+
+                                $city.append(cityHtml);
+                            }
+                            function ShowRegionHtml(regionJson, $cityItem) {
+                                var regionHtml = '<li class="city" data-parent="' + $cityItem.data("parent") + '"  data-id="' + $cityItem.data("id") + '">';
+                                regionHtml += '<span data-type="region" data-all="yes" data-parent="' + $cityItem.data("parent") + '" data-id="' + $cityItem.data("id") + '" data-name="' + $cityItem.data("name") + '" class="active">' + $cityItem.data("name") + '全市</span>';
+                                //alert(cityJson);
+                                $.each(regionJson, function (index, data) {
+                                    regionHtml += '<span data-type="region"  data-all=""  data-parent="' + $cityItem.data("id") + '" data-id="' + data.ID + '"  data-name="' + data.Area_Name + '">' + data.Area_Name + '</span>'
+                                });
+                                regionHtml += "</li>";
+
+                                $cityItem.parent().after(regionHtml);
+                            }
+
+                            function GetCityData($curProvince) {
+                                var provinceid = $curProvince.data("id");
+                                if (parseInt(provinceid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": provinceid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowCityHtml(data, $curProvince);
+                                    }
+                                });
+                            }
+                            function GetRegionData($curCity) {
+                                var cityid = $curCity.data("id");
+                                if (parseInt(cityid) == 0)
+                                    return null;
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '@Url.Action("GetAreaJson", "Area")',
+                                    data: { "parentid": cityid },
+                                    dataType: "json",
+                                    async: false,
+                                    success: function (data) {
+                                        ShowRegionHtml(data, $curCity);
+                                    }
+                                });
+                            }
+
+                            //删除已选ID
+                            function DeleteSelectedAreaID($item) {
+                                var ids = $AreaIds.val();
+                                ids = ids.replace("," + $item.data("id") + ",", ",")//去除
+                                $item.remove();
+                                $AreaIds.val(ids);
+                            }
+
+
+                            function SetSelectArea() {
+                                var ids = $AreaIds.val();
+                                if (ids == "") {
+                                    ids = ",";
+                                }
+                                $("#tr_area li span.active").each(function () {
+                                    var $item = $(this);
+                                    ids = ids.replace("," + $item.data("id") + ",", ",")//去除重复
+                                    ids += $item.data("id") + ",";//累加已选中
+                                    ids = ids.replace("," + $item.data("parent") + ",", ",")//删除父级
+                                });
+                                $AreaIds.val(ids);
+                            }
+                        </script>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.IsSameArea)： </td>
+                    <td>
+                        <select name="IsSameArea" id="IsSameArea">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.IsSameArea.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.IsFreeShipping)： </td>
+                    <td>
+                        <select name="IsFreeShipping" id="IsFreeShipping">
+                            @foreach (var item in DataConfig.YesOrNo)
+                            {
+                                <option value="@item.Value" @(Model != null && item.Value == Model.IsFreeShipping.ToString() ? " selected='selected'" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>@Html.LabelFor(m => m.Sort)： </td>
+                    <td>
+                        @Html.TextBoxFor(m => m.Sort, new { @class = "input-text" }) (大->小排序)
+                        @Html.ValidationMessageFor(m => m.Sort)
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-success" onclick="javascript:return CheckSubmit();"><i class="icon-ok"></i>保存</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+    <script>
+
+        function CheckSubmit() {
+
+            SetSelectArea();
+
+            if ($.trim($AreaIds.val()) == "" || $.trim($AreaIds.val()) == ",") {
+                alert("请选择配送区域");
+                return false;
+            }
+            //return false;
+        }
+
+    </script>
+</div>

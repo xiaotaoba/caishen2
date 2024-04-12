@@ -1,0 +1,170 @@
+﻿@model Pannet.Models.OrderComment
+@using Pannet.DAL
+@using Pannet.DAL.Repository
+@using Pannet.Models
+
+@{
+    ViewBag.Title = "评论管理 ";
+    OrderDetailVModel orderDetail = ViewBag.OrderDetail;
+}
+<style>
+    .photo_box img { height: 60px; width: 60px; margin-right: 6px; border: 1px solid #aaa; vertical-align: top; }
+</style>
+<div class="page-content">
+    <div class="page-header">
+        <h1>
+            <span id="lblTitle">评论管理 </span>
+            <small>
+                <i class="icon-double-angle-right"></i>
+                <span>详情</span>
+            </small>
+        </h1>
+    </div>
+
+    @*@Html.ValidationSummary(true)
+        @Html.Raw(ViewBag.MessageInfo)*@
+
+    @if (orderDetail != null)
+    { 
+        <table class="table table_list">
+            <tbody>
+                <tr>
+                    <td width="120">商品</td>
+                    <td>&nbsp;</td>
+                    <td width="120" align="center">单价</td>
+                    <td width="120" align="center">数量</td>
+                </tr>
+                <tr>
+                    <td width="120">
+                        <img src="@(SiteService.GetImgUrl(orderDetail.PhotoUrl))" width="80" />
+                    </td>
+                    <td class="td_goodsname">
+                        @orderDetail.OrderDetail.OD_GoodsName
+                        <div class="order_property">@orderDetail.OrderDetail.OD_PropertiesName</div>
+                    </td>
+                    <td width="120" align="center">@(SiteService.GetPriceWithUnit(orderDetail.OrderDetail.OD_TotalAmount / orderDetail.OrderDetail.OD_Count))</td>
+                    <td width="120" align="center">@(orderDetail.OrderDetail.OD_Count)</td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+    @if (Model != null)
+    {
+                       
+        <table class="table table-noborder form-inline">
+            <tbody>
+                <tr>
+                    <td width="120" align="right">评价时间：</td>
+                    <td>
+                        @Model.OC_CreateTime
+                    </td>
+                </tr>
+                <tr>
+                    <td width="120" align="right">评价内容：</td>
+                    <td>
+                        @Model.OC_Content
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">评分： </td>
+                    <td>
+                        @Model.OC_ScoreGoods
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">晒图片：</td>
+                    <td class="photo_box">
+                        @{
+        string[] photos = Model.OC_Images.Split('|');
+        foreach (var item in photos)
+        {
+            if (!string.IsNullOrEmpty(item))
+            {
+                            <img src="@(SiteService.GetImgUrl(item))" height="100" />
+            }
+        }
+                        }
+                    </td>
+                </tr>
+                @if (!string.IsNullOrEmpty(Model.OC_ReplyContent))
+                {
+                    <tr>
+                        <td>官方回复：</td>
+                        <td>@Model.OC_ReplyContent</td>
+                    </tr> 
+                }
+            </tbody>
+        </table>
+    }
+
+
+
+</div>
+
+
+@section FootJs{
+    <script>
+        $(".btn_design_file").each(function () {
+            var $item = $(this);
+            $item.click(function () {
+                var currentIndex = layer.open({
+                    type: 2,
+                    title: '上传设计稿源文件',
+                    maxmin: true,
+                    shadeClose: true, //点击遮罩关闭层
+                    area: ['700px', '300px'],
+                    content: '/Order/DesignFile?orderDetailID=' + $item.data("detailid"),
+                    cancel: function () {
+                    },
+                    close: function () {
+                    },
+                    end: function () {
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+
+        $(".btn_change_amount").each(function () {
+            var $item = $(this);
+            $item.click(function () {
+                var currentIndex = layer.open({
+                    type: 2,
+                    title: '订单价格修改',
+                    maxmin: true,
+                    shadeClose: true, //点击遮罩关闭层
+                    area: ['800px', '400px'],
+                    content: '/Order/OrderChangeAmount?orderID=' + $item.data("orderid") + "&payAmount=" + $item.data("payamount"),
+                    cancel: function () {
+                    },
+                    close: function () {
+                    },
+                    end: function () {
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+        $(".btn_change_amount_list").each(function () {
+            var $item = $(this);
+            $item.click(function () {
+                var currentIndex = layer.open({
+                    type: 2,
+                    title: '订单价格调整记录',
+                    maxmin: true,
+                    shadeClose: true, //点击遮罩关闭层
+                    area: ['800px', '400px'],
+                    content: '/Order/OrderChangeAmountList?orderID=' + $item.data("orderid"),
+                    cancel: function () {
+                    },
+                    close: function () {
+                    },
+                    end: function () {
+                        //window.location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+}

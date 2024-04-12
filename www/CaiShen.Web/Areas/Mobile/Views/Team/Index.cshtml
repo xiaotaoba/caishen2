@@ -1,0 +1,92 @@
+﻿@model PagedList.PagedList<Pannet.Models.DesignWork>
+
+@using Pannet.Models
+@using Pannet.DAL 
+@using Pannet.DAL.Repository
+@using PagedList.Mvc
+@using Pannet.Utility
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "康复团队";
+    List<Tag> tagJingyan = ViewBag.DesignStyles;
+    List<Tag> tagTags = ViewBag.DesignTags;
+    User LoginUser = ViewBag.LoginUser;
+}
+@section Style{
+    <style>
+        .dn_conhoose dl { margin-bottom: 2px; }
+        .dn_conhoose dl.nomargin dd { margin-top: 0; }
+        .dn_conhoose .dn_conC_th { float: none; width: 90%; }
+        .dn_conhoose .dn_conC_th select { padding: 0 10px; border-radius: 6px; height: 65px; line-height: 65px; }
+        .dn_conhoose .dn_conC_th select:last-child { margin-right: 0; }
+        .dn_conhoose dd:first-child { line-height: 40px; font-size: 24px; }
+        .car_content {background-color: #eee;}
+    </style>
+}
+<div class="box">
+
+    <div class="car_nav">
+        <a href="@Url.Action("Index", "Team", new { ViewBag.ID, ViewBag.keyword, type = Convert.ToInt16(DataConfig.TeamTypesEnum.专家团队) })" class="@(ViewBag.type== Convert.ToInt16(DataConfig.TeamTypesEnum.专家团队) ?"carnav_sel":"")">专家团队</a>
+        <a href="@Url.Action("Index", "Team", new { ViewBag.ID, ViewBag.keyword, type = Convert.ToInt16(DataConfig.TeamTypesEnum.医护团队) })" class="@(ViewBag.type== Convert.ToInt16(DataConfig.TeamTypesEnum.医护团队) ?"carnav_sel":"")">医护团队</a>
+    </div>
+    <div class="car_content">
+
+        <div class="doctor_list">
+
+
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (DesignWork item in Model)
+                {
+                <a href="@Url.Action("Detail", new { item.ID })">
+                    <dl>
+                        <dt>
+                            <img src="@(item.DW_Image)"></dt>
+                        <dd>
+                            <ul>
+                                <li class="ayi_name">
+                                    <span class="">@(item.DW_Name)</span>
+                                </li>
+                                <li class="ayi_status">
+                                     <span> @(tagJingyan.Find(m => m.ID == item.DW_Style).T_Name)</span>
+                                </li>
+                                <li class="ayi_tags">标签：
+                            @{
+                    string tags = item.DW_TypeTags;
+                    List<string> tagIds = new List<string>();
+                    if (!string.IsNullOrEmpty(tags))
+                    {
+                        tagIds = tags.Split(',').ToList();
+                    }
+                    tagTags = tagTags.Where(m => tagIds.Contains(m.ID.ToString())).ToList();
+                    foreach (var item_tag in tagTags)
+                    {
+                                <span>@(item_tag.T_Name)</span>
+                    }
+                            }
+
+
+                                </li>
+                                <li class="ayi_status">
+                                    @* <span>明星月嫂</span>
+                                    <span>3年经验</span>*@
+                                    @*<em class="status_0">康复师</em>*@
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
+                </a>
+                }
+            }
+            else
+            {
+                <div class="nothing">暂无数据.</div>
+            }
+        </div>
+
+        <div class="clear"></div>
+        <div id="page_nav">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new { page, ID = ViewBag.ID, sort = ViewBag.sort, asc = ViewBag.asc }))
+        </div>
+    </div>
+</div>

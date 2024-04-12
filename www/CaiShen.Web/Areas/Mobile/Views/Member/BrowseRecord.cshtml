@@ -1,0 +1,56 @@
+﻿@using Pannet.Models;
+@using Pannet.DAL;
+@using Pannet.DAL.Repository;
+@using PagedList.Mvc;
+
+@model PagedList.PagedList<Pannet.Models.BrowseRecordGoodsVModel>
+
+@{
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "浏览记录";
+}
+@section Style{
+    <link href="~/Areas/Mobile/css/member.css?v=0509.2" rel="stylesheet" />
+}
+
+<!--主区域-->
+<div id="container">
+
+    <div class="mc_content">
+        <div class="user_browse_record">
+            <ul>
+                @if (Model.Count() > 0)
+                {
+                    var timeList = Model.Select(m => m.BrowseRecord.BR_CreateTime.ToString("yyyy-MM-dd")).Distinct().ToList();
+                    foreach (var itemTime in timeList)
+                    {
+                    <li class="browse_time">@itemTime</li>
+                        foreach (var item in Model.Where(m => m.BrowseRecord.BR_CreateTime.ToString("yyyy-MM-dd") == itemTime))
+                        {
+                    <li>
+                        <a href="@Url.Action("Index", "Goods", new { ID = item.BrowseRecord.BR_ItemID })" target="_blank">
+                            <div class="browse_photo">
+                                <img src="@(SiteService.GetImgUrl(item.PhotoUrl))" width="120" />
+                            </div>
+                            <div class="browse_info">
+                                <span class="browse_title">@item.Title</span>
+                                <span class="browse_price">@(SiteService.GetPriceWithUnit(item.Price))</span>
+                                <i class="iconfont icon-jiantou"></i>
+                            </div>
+                        </a>
+                    </li>
+                        }
+                    }
+                    <li style="display: none;">
+                        @Html.PagedListPager(Model, page => Url.Action("BrowseRecord", new { page }))
+                    </li>
+                }
+                else
+                {
+                <li class="nothing">暂无数据</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+<!--/container-->

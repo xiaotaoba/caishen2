@@ -1,0 +1,167 @@
+﻿@using Pannet.Models
+@using Pannet.DAL.Repository
+
+@{
+    ViewBag.Title = "招商加盟";
+    Layout = "~/Areas/Mobile/Views/Shared/_Layout.cshtml";
+}
+@section Style
+{
+    	<link href="~/Areas/Mobile/css/animate.css" rel="stylesheet" />
+}
+@section Js{
+   <script src="~/Areas/Mobile/js/wow.js"></script>
+}
+
+<div id="container">
+    <div class="join">
+        <div class="page page_1">
+            <img src="/Areas/Mobile/images/join/logo.png" class="logo wow bounceInLeft" data-wow-delay="0.1s" />
+            <span class="words wow bounceInLeft" data-wow-delay="0.2s">
+                <img src="/Areas/Mobile/images/join/tit_join.png" /></span>
+            <span class="board wow bounceInRight" data-wow-delay="0.3s">
+                <img src="/Areas/Mobile/images/join/ico_top.png" /></span>
+            <span class="words2 wow fadeInUp" data-wow-delay="0.6s">享受智能健康云服务</span>
+        </div>
+
+        <div class="page page_2">
+            <div class="brand_ys">
+                <div class="brand_ys_tit wow bounceInDown" data-wow-delay="0.1s">核心产品及优势</div>
+                <div class="brand_ys_co brand_left">
+                    <div class="brand_ys_co_bg">
+                        <div class="brand_ys_co_tit wow fadeInRight" data-wow-delay="0.1s">
+                            跑步机
+                        </div>
+                        <div class="brand_ys_co_co wow fadeInRight" data-wow-delay="0.2s">
+                            1.由美国和国内顶尖技术研发团队研发，生产工艺、材质、品
+							质全部按照欧美标准，智能、物联、互动是公司跑步机领先同行
+							的基础保证。<br>
+                            2.由厦门钢宇集团——全亚洲最大的跑步机生产基地（占地100
+							0多亩工业园区）生产制造，产能超过目前亚洲所有健身器材厂家。
+							<br>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+                <div class="brand_ys_co brand_right">
+
+                    <div class="brand_ys_co_bg">
+                        <div class="brand_ys_co_tit wow fadeInLeft" data-wow-delay="0.3s">
+                            单车系列
+                        </div>
+                        <div class="clear"></div>
+                        <div class="brand_ys_co_co wow fadeInLeft" data-wow-delay="0.4s">
+                            动感单车、椭圆机、磁控车、登山车等系列健身车类，产品销
+往美国、大陆地区。
+                        </div>
+                    </div>
+                </div>
+                <div class="brand_ys_co brand_left">
+                    <div class="brand_ys_co_bg">
+                        <div class="brand_ys_co_tit wow fadeInRight" data-wow-delay="0.5s">
+                            健身小件
+                        </div>
+                        <div class="brand_ys_co_co wow fadeInRight" data-wow-delay="0.6s">
+                            哑铃、跳绳、握力器、哑铃凳、手环、体重秤、瑜伽垫、瑜伽砖、
+瑜伽巾、瑜伽带等，畅销国内市场。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="page page_3">
+            <div class="join_sl">
+                <div class="join_sl_tit wow bounceInDown" data-wow-delay="0.1s">公司实力</div>
+                <div class="join_sl_co">
+                    <div class="join_sl_co_tit wow fadeInUp" data-wow-delay="0.1s">
+                        经营实力
+                    </div>
+                    <div class="join_sl_co_co wow fadeInUp" data-wow-delay="0.2s">
+                        厦门钢宇集团可生产跑步机200万台/年，产品销售到美国、
+英国、加拿大、澳大利亚、法国、德国、意大利、日本等二
+十几个国家，客户包括Wal—mart（沃尔玛）、Kmart（凯
+马特）、Sears（西尔斯）、Costco（好市多）等世界著名
+零售巨头，形成了庞大的国际性销售网络。
+						<br>
+                    </div>
+                    <div class="join_sl_co_tit wow fadeInUp" data-wow-delay="0.3s">
+                        公司实力
+                    </div>
+                    <div class="join_sl_co_co wow fadeInUp" data-wow-delay="0.4s">
+                        集团注册资本30亿美元，拥有员工近2000名，其中高级研
+发人员300多名。工业园区占地面积32万平方米，总建筑面
+积12万平方米，其中包括研发模具厂、注塑厂、焊接厂、制
+造厂、涂装厂、装配厂等9栋全新生产厂房。拥有领先当今世
+界水平的多项设备，包括螺杆式空压机送气系统、集烘干、
+计量于一体的全自动供料系统、机械手焊机、4条长达1千米
+的涂装自动生产线等。
+						<br>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page page_4">
+            <div class="join_lc">
+                <div class="join_lc_tit wow fadeInDown" data-wow-delay="0.1s">加盟流程</div>
+                <div class="join_lc_co">
+                    <ul>
+                        <li class="one wow fadeInUp" data-wow-delay="0.1s">了解公司情况和市场前景
+                        </li>
+                        <li class="two wow fadeInUp" data-wow-delay="0.2s">填写并提交加盟申请信息
+                        </li>
+                        <li class="three wow fadeInUp" data-wow-delay="0.3s">公司专员与您联系，商谈具体事宜
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="page page_5">
+            <div class="join_ly">
+                <div class="join_ly_tit wow fadeInUp" data-wow-delay="0.1s">加盟申请</div>
+                <div class="tobx_items">
+                    <ul>
+                        <li>
+                            <span class="item_name">联系人：</span>
+                            <span class="item_value">
+                                <input type="text" class="tbox" name="height" />
+                            </span>
+                        </li>
+                        <li>
+                            <span class="item_name">性别：</span>
+                            <span class="item_value">
+                                <input type="text" class="tbox" name="height" />
+                            </span>
+                        </li>
+                        <li>
+                            <span class="item_name">所在城市：</span>
+                            <span class="item_value">
+                                <input type="text" class="tbox" name="height" />
+                            </span>
+                        </li>
+                        <li>
+                            <span class="item_name">手机号码：</span>
+                            <span class="item_value">
+                                <input type="text" class="tbox" name="height" />
+                            </span>
+                        </li>
+                    </ul>
+                    <div>
+                        <div class="block"></div>
+                        <button type="submit" name="btnSubmit" id="btnSubmit" class="btn_save">提交申请</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+<script type="text/javascript">
+    new WOW().init();
+
+</script>
